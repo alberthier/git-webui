@@ -1,0 +1,165 @@
+html, body {
+    height: 100%;
+    width: 100%;
+    font: 10pt sans-serif;
+    color: #2e3436;
+}
+
+h1 {
+    font-size: 1.15em;
+}
+
+h2 {
+    font-size: 1.1em;
+}
+
+h3 {
+    font-size: 1.05em;
+}
+
+body {
+    display: flex;
+    flex-align: stretch;
+    margin: 0;
+}
+
+#sidebar {
+    display: flex;
+    flex-direction: column;
+    flex-align: stretch;
+    height: 100%;
+    width: 20em;
+    background-color: #eeeeec;
+    border: solid #d3d7cf;
+    border-width: 0 1px 0 0;
+}
+
+#sidebar-logo {
+    display: block;
+    margin: 8px auto 8px auto;
+    height: 2em;
+    text-align: center;
+}
+
+#sidebar-content {
+    height: 100%;
+    width: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+#sidebar-content > * {
+    margin: 4px;
+}
+
+#sidebar-content li {
+    cursor: pointer;
+}
+
+.sidebar-ref-selected {
+    color: #3465a4;
+}
+
+#main {
+    height: 100%;
+    width: 100%;
+}
+
+.branch-current {
+    font-weight: bold;
+}
+
+#history-view {
+    display: flex;
+    flex-align: stretch;
+    height: 100%;
+    width: 100%;
+}
+
+#log-view {
+    height: 100%;
+    width: 100%;
+    overflow-y: auto;
+    border-width: 0 1px 0 0;
+    border-style: solid;
+    border-color: #d3d7cf;
+}
+
+.log-entry {
+    border-width: 1px 0 0 0;
+    border-style: solid;
+    border-color: #d3d7cf;
+    padding: 3px 6px 3px 6px;
+}
+
+.log-entry:last-child {
+    border-bottom-width: 1px;
+}
+
+.log-entry-header {
+    font-size: 9pt;
+    color: #555753;
+    padding-bottom: 3px;
+}
+
+.log-entry-hash {
+    display: inline;
+    font-weight: bold;
+}
+
+.log-entry-name {
+    margin-left: 0.5em;
+}
+
+.log-entry-date {
+    float: right;
+}
+
+.log-entry-message {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#commit-view {
+    height: 100%;
+    width: 100%;
+}
+
+.diff-view {
+    height: 100%;
+    width: 100%;
+    overflow: auto;
+}
+
+.diff-view-line {
+    margin: 0;
+}
+
+.diff-line-header {
+    font-weight: bold;
+    background-color: #eeeeec;
+}
+
+.diff-line-header.diff-line-add {
+    background-color: #eeeeec;
+    color: #4e9a06;
+}
+
+.diff-line-header.diff-line-del {
+    background-color: #eeeeec;
+    color: #a40000;
+}
+
+.diff-line-header.diff-line-offset {
+    background-color: #eeeeec;
+    color: #5c3566;
+}
+
+.diff-line-add {
+    background-color: #8ae234;
+}
+
+.diff-line-del {
+    background-color: #ef2929;
+}
