@@ -19,14 +19,14 @@ h3 {
 
 body {
     display: flex;
-    flex-align: stretch;
+    align-items: stretch;
     margin: 0;
 }
 
 #sidebar {
     display: flex;
     flex-direction: column;
-    flex-align: stretch;
+    align-items: stretch;
     height: 100%;
     width: 20em;
     background-color: #eeeeec;
@@ -71,7 +71,7 @@ body {
 
 #history-view {
     display: flex;
-    flex-align: stretch;
+    align-items: stretch;
     height: 100%;
     width: 100%;
 }
@@ -92,30 +92,42 @@ body {
     padding: 3px 6px 3px 6px;
 }
 
+.log-entry-selected {
+    background-color: #729fcf;
+}
+
 .log-entry:last-child {
     border-bottom-width: 1px;
 }
 
 .log-entry-header {
+    display: flex;
+    align-items: baseline;
     font-size: 9pt;
     color: #555753;
     padding-bottom: 3px;
 }
 
-.log-entry-hash {
-    display: inline;
-    font-weight: bold;
-}
-
 .log-entry-name {
-    margin-left: 0.5em;
+    color: inherit;
+    font-weight: bold;
+    font-style: italic;
+    text-decoration: initial;
 }
 
 .log-entry-date {
-    float: right;
+    margin-left: auto;
+}
+
+.log-entry-hash {
+    padding-left: 0.5em;
+    display: inline;
+    font-weight: bold;
+    margin: 0 0 0 0;
 }
 
 .log-entry-message {
+    margin-left: 0.5em;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -124,12 +136,13 @@ body {
 #commit-view {
     height: 100%;
     width: 100%;
+    overflow: auto;
 }
 
 .diff-view {
     height: 100%;
     width: 100%;
-    overflow: auto;
+    display: table;
 }
 
 .diff-view-line {
@@ -162,4 +175,8 @@ body {
 
 .diff-line-del {
     background-color: #ef2929;
+}
+
+.diff-line-offset {
+    background-color: #ad7Fa8;
 }

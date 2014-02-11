@@ -75,6 +75,8 @@ webui.SideBar = function(rootElement) {
  */
 webui.LogView = function(rootElement, commitView) {
 
+    var currentSelection = null;
+
     this.update = function(ref) {
         $(rootElement).empty();
         webui.git("log --pretty=raw --decorate " + ref, function(data) {
@@ -88,6 +90,9 @@ webui.LogView = function(rootElement, commitView) {
                 }
                 var entry = new Entry(data.substr(start, len));
                 rootElement.appendChild(entry.createView());
+                if (!currentSelection) {
+                    entry.select();
+                }
                 if (len == undefined) {
                     break;
                 }
@@ -152,17 +157,32 @@ webui.LogView = function(rootElement, commitView) {
         }
 
         this.createView = function() {
-            var view = $('<div class="log-entry">' +
+            this.view = $('<div class="log-entry">' +
                             '<div class="log-entry-header">' +
-                                '<pre class="log-entry-hash">' + this.abbrevCommitHash() + '</pre> ' +
-                                '<span class="log-entry-name">' + this.author.name + '</span> ' +
-                                '<span  class="log-entry-date">' + this.author.date.toLocaleString() + '</span>' +
+                                '<a class="log-entry-name" target="_blank" href="mailto:' + this.author.email + '">' + this.author.name + '</a> ' +
+                                '<span  class="log-entry-date">' + this.author.date.toLocaleString() + '</span> ' +
+                                '<pre class="log-entry-hash">' + this.abbrevCommitHash() + '</pre>' +
                             '</div>' +
-                            '<div class="log-entry-message">' + this.abbrevMessage() + '</div>' +
+                            '<div class="log-entry-message"></div>' +
                         '</div>')[0];
-            view.model = this;
-            $(view).click(function (event) { commitView.update(view.model); });
-            return view;
+            $(".log-entry-message", this.view)[0].appendChild(document.createTextNode(this.abbrevMessage()));
+            this.view.model = this;
+            var model = this;
+            $(this.view).click(function (event) {
+                model.select();
+            });
+            return this.view;
+        }
+
+        this.select = function() {
+            if (currentSelection != this) {
+                if (currentSelection) {
+                    $(currentSelection.view).removeClass("log-entry-selected");
+                }
+                $(this.view).addClass("log-entry-selected");
+                currentSelection = this;
+                commitView.update(this);
+            }
         }
     };
 }
@@ -172,18 +192,25 @@ webui.LogView = function(rootElement, commitView) {
  */
 webui.CommitView = function(rootElement) {
 
+    var currentObject = null;
+
     this.update = function(entry) {
+        if (currentObject == entry.commit) {
+            // We already display the right data. No need to update.
+            return;
+        }
+        currentObject = entry.commit;
         $(rootElement).empty();
 
         var diffView = $('<div class="diff-view">').appendTo(rootElement)[0];
         var inHeader = true;
-        webui.git("diff " + entry.commit, function(data) {
-            data.split("\n").forEach(function (line) {
-                var pre = $('<pre class="diff-view-line">' + line + '</pre>').appendTo(diffView)[0];
+        webui.git("show " + entry.commit, function(data) {
+            var diffLines = data.split("\n");
+            for (var i = 0; i < diffLines.length; ++i) {
+                var line = diffLines[i];
+                var pre = $('<pre class="diff-view-line">').appendTo(diffView)[0];
+                pre.appendChild(document.createTextNode(line));
                 var c = line[0];
-                if (inHeader) {
-                    $(pre).addClass("diff-line-header");
-                }
                 if (c == '+') {
                     $(pre).addClass("diff-line-add");
                 } else if (c == '-') {
@@ -193,9 +220,11 @@ webui.CommitView = function(rootElement) {
                     inHeader = false;
                 } else if (c == 'd') {
                     inHeader = true;
+                }
+                if (inHeader) {
                     $(pre).addClass("diff-line-header");
                 }
-            });
+            }
         });
     }
 }
