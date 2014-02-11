@@ -18,8 +18,9 @@ webui.git = function(cmd, callback) {
 /*
  * == SideBar =================================================================
  */
-webui.SideBar = function(rootElement) {
+webui.SideBar = function(parent, rootElement) {
 
+    this.mainUi = parent;
     var sideBar = this;
 
     webui.git("branch", function(data) {
@@ -65,7 +66,7 @@ webui.SideBar = function(rootElement) {
                 $(selected).toggleClass("sidebar-ref-selected");
             }
             $(li).toggleClass("sidebar-ref-selected");
-            window.historyView.update(li.name);
+            this.mainUi.historyView.update(li.name);
         }
     };
 };
@@ -73,8 +74,10 @@ webui.SideBar = function(rootElement) {
 /*
  * == LogView =================================================================
  */
-webui.LogView = function(rootElement, commitView) {
+webui.LogView = function(parent, rootElement) {
 
+    var logView = this;
+    this.historyView = parent;
     var currentSelection = null;
 
     this.update = function(ref) {
@@ -145,7 +148,7 @@ webui.LogView = function(rootElement, commitView) {
 
         this.abbrevCommitHash = function() {
             return this.commit.substr(0, 7);
-        }
+        };
 
         this.abbrevMessage = function() {
             var end = this.message.indexOf("\n");
@@ -154,7 +157,7 @@ webui.LogView = function(rootElement, commitView) {
             } else {
                 return this.message.substr(0, end);
             }
-        }
+        };
 
         this.createView = function() {
             this.view = $('<div class="log-entry">' +
@@ -172,7 +175,7 @@ webui.LogView = function(rootElement, commitView) {
                 model.select();
             });
             return this.view;
-        }
+        };
 
         this.select = function() {
             if (currentSelection != this) {
@@ -181,17 +184,18 @@ webui.LogView = function(rootElement, commitView) {
                 }
                 $(this.view).addClass("log-entry-selected");
                 currentSelection = this;
-                commitView.update(this);
+                logView.historyView.commitView.update(this);
             }
-        }
+        };
     };
-}
+};
 
 /*
  * == CommitView ==============================================================
  */
-webui.CommitView = function(rootElement) {
+webui.CommitView = function(parent, rootElement) {
 
+    this.historyView = parent;
     var currentObject = null;
 
     this.update = function(entry) {
@@ -226,18 +230,19 @@ webui.CommitView = function(rootElement) {
                 }
             }
         });
-    }
-}
+    };
+};
 
 /*
  * == HistoryView =============================================================
  */
-webui.HistoryView = function(rootElement) {
+webui.HistoryView = function(parent, rootElement) {
 
+    this.mainUi = parent;
     var historyView = this;
     var mainView = $('<div id="history-view"><div id="log-view"></div><div id="commit-view"></div></div>')[0];
-    var commitView = new webui.CommitView($("#commit-view", mainView)[0]);
-    var logView = new webui.LogView($("#log-view", mainView)[0], commitView);
+    this.commitView = new webui.CommitView(this, $("#commit-view", mainView)[0]);
+    this.logView = new webui.LogView(this, $("#log-view", mainView)[0]);
 
     this.show = function() {
         $(rootElement).empty();
@@ -246,13 +251,18 @@ webui.HistoryView = function(rootElement) {
 
     this.update = function(ref) {
         this.show();
-        logView.update(ref);
-    }
+        this.logView.update(ref);
+    };
+};
 
-
+/*
+ *  == Initialization =========================================================
+ */
+function MainUi() {
+    this.sideBar = new webui.SideBar(this, $("#sidebar-content")[0]);
+    this.historyView = new webui.HistoryView(this, $("#main")[0]);
 }
 
 $(document).ready(function () {
-    window.sideBar = new webui.SideBar($("#sidebar-content")[0]);
-    window.historyView = new webui.HistoryView($("#main")[0]);
+    new MainUi()
 });
