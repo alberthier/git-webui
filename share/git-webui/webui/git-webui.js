@@ -269,7 +269,7 @@ webui.WorkspaceView = function(parent, rootElement) {
     this.mainUi = parent;
     var workspaceView = this;
     var mainView = $('<div id="workspace-view">' +
-                        '<div id="workspace-diff-view"></div>' +
+                        '<pre id="workspace-diff-view"></pre>' +
                         '<div id="workspace-editor"></div>' +
                     '</div>')[0];
     var workspaceEditor = $("#workspace-editor", mainView)[0];
@@ -309,7 +309,7 @@ webui.ChangedFilesView = function(workspaceView, rootElement, type, label) {
             data.split("\n").forEach(function(line) {
                 if (line[col] != " ") {
                     var li = $('<li>').appendTo(fileList)[0];
-                    li.appendChild(document.createTextNode(line.substr(2)));
+                    li.appendChild(document.createTextNode(line.substr(3)));
                     $(li).click(changedFilesView.select);
                 }
             });
@@ -326,9 +326,17 @@ webui.ChangedFilesView = function(workspaceView, rootElement, type, label) {
             currentSelection = clicked;
             if (type == "working-copy") {
                 workspaceView.stagingAreaView.unselect();
+                var gitCmd = "diff "
             } else {
                 workspaceView.workingCopyView.unselect();
+                var gitCmd = "diff --cached "
             }
+            var filename = clicked.childNodes[0].textContent;
+            webui.git(gitCmd + filename, function(data) {
+                var diffView = $("#workspace-diff-view", workspaceView.mainView)[0];
+                $(diffView).empty();
+                diffView.appendChild(document.createTextNode(data));
+            });
         }
     };
 
