@@ -328,7 +328,8 @@ webui.ChangedFilesView = function(workspaceView, rootElement, type, label) {
         var col = type == "working-copy" ? 1 : 0;
         webui.git("status --porcelain", function(data) {
             webui.splitLines(data).forEach(function(line) {
-                if (line[col] != " ") {
+                var status = line[col];
+                if (col == 0 && status != " " && status != "?" || col == 1 && status != " ") {
                     var li = $('<li>').appendTo(fileList)[0];
                     li.appendChild(document.createTextNode(line.substr(3)));
                     $(li).click(changedFilesView.select);
