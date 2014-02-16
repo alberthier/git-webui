@@ -92,7 +92,7 @@ body {
     padding: 3px 6px 3px 6px;
 }
 
-.log-entry-selected {
+.selected {
     background-color: #729fcf;
 }
 
@@ -248,4 +248,5 @@ body {
     list-style: none;
     margin: 0;
     padding: 0.2em;
+    cursor: default;
 }

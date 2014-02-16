@@ -186,9 +186,9 @@ webui.LogView = function(parent, rootElement) {
         this.select = function() {
             if (currentSelection != this) {
                 if (currentSelection) {
-                    $(currentSelection.view).removeClass("log-entry-selected");
+                    $(currentSelection.view).removeClass("selected");
                 }
-                $(this.view).addClass("log-entry-selected");
+                $(this.view).addClass("selected");
                 currentSelection = this;
                 logView.historyView.commitView.update(this);
             }
@@ -273,9 +273,9 @@ webui.WorkspaceView = function(parent, rootElement) {
                         '<div id="workspace-editor"></div>' +
                     '</div>')[0];
     var workspaceEditor = $("#workspace-editor", mainView)[0];
-    var workingCopyView = new webui.WorkingCopyView(this, workspaceEditor);
-    var commitMessageView = new webui.CommitMessageView(this, workspaceEditor);
-    var stagingAreaView = new webui.StagingAreaView(this, workspaceEditor);
+    this.workingCopyView = new webui.ChangedFilesView(this, workspaceEditor, "working-copy", "Working Copy");
+    this.commitMessageView = new webui.CommitMessageView(this, workspaceEditor);
+    this.stagingAreaView = new webui.ChangedFilesView(this, workspaceEditor, "staging-area", "Staging Area");
 
     this.show = function() {
         $(rootElement).empty();
@@ -284,34 +284,60 @@ webui.WorkspaceView = function(parent, rootElement) {
 
     this.update = function() {
         this.show();
-        workingCopyView.update()
-        stagingAreaView.update()
+        this.workingCopyView.update()
+        this.stagingAreaView.update()
     };
 };
 
 /*
- * == WorkingCopyView =========================================================
+ * == ChangedFilesView ========================================================
  */
-webui.WorkingCopyView = function(workspaceView, rootElement) {
+webui.ChangedFilesView = function(workspaceView, rootElement, type, label) {
 
-    var workingCopyView = this;
-    var mainView = $('<div id="working-copy-view" class="workspace-editor-box">' +
-                        '<p>Working copy</p>' +
-                        '<ul id="working-copy-file-list" class="file-list"></div>' +
+    var changedFilesView = this;
+    var mainView = $('<div id="' + type + '-view" class="workspace-editor-box">' +
+                        '<p>'+ label + '</p>' +
+                        '<ul id="' + type + '-file-list" class="file-list"></div>' +
                      '</div>').appendTo(rootElement)[0];
-    var fileList = $("#working-copy-file-list", mainView)[0];
+    var fileList = $("#" + type + "-file-list", mainView)[0];
+    var currentSelection = null;
 
     this.update = function() {
         $(fileList).empty()
+        var col = type == "working-copy" ? 1 : 0;
         webui.git("status --porcelain", function(data) {
             data.split("\n").forEach(function(line) {
-                if (line[1] != " ") {
-                    var p = $('<li>').appendTo(fileList)[0];
-                    p.appendChild(document.createTextNode(line.substr(2)));
+                if (line[col] != " ") {
+                    var li = $('<li>').appendTo(fileList)[0];
+                    li.appendChild(document.createTextNode(line.substr(2)));
+                    $(li).click(changedFilesView.select);
                 }
             });
         });
     };
+
+    this.select = function(event) {
+        var clicked = event.target;
+        if (currentSelection != clicked) {
+            if (currentSelection) {
+                $(currentSelection).removeClass("selected");
+            }
+            $(clicked).addClass("selected");
+            currentSelection = clicked;
+            if (type == "working-copy") {
+                workspaceView.stagingAreaView.unselect();
+            } else {
+                workspaceView.workingCopyView.unselect();
+            }
+        }
+    };
+
+    this.unselect = function() {
+        if (currentSelection) {
+            $(currentSelection).removeClass("selected");
+            currentSelection = null;
+        }
+    }
 };
 
 /*
@@ -333,30 +359,6 @@ webui.CommitMessageView = function(workspaceView, rootElement) {
     };
 };
 
-/*
- * == StagingAreaView =========================================================
- */
-webui.StagingAreaView = function(workspaceView, rootElement) {
-
-    var stagingAreaView = this;
-    var mainView = $('<div id="staging-area-view" class="workspace-editor-box">' +
-                        '<p>Staging area</p>' +
-                        '<ul id="staging-area-file-list" class="file-list"></div>' +
-                     '</div>').appendTo(rootElement)[0];
-    var fileList = $("#staging-area-file-list", mainView)[0];
-
-    this.update = function() {
-        $(fileList).empty()
-        webui.git("status --porcelain", function(data) {
-            data.split("\n").forEach(function(line) {
-                if (line[0] != " ") {
-                    var p = $('<li>').appendTo(fileList)[0];
-                    p.appendChild(document.createTextNode(line.substr(2)));
-                }
-            });
-        });
-    };
-};
 
 /*
  *  == Initialization =========================================================
