@@ -191,6 +191,7 @@ body {
 
 #workspace-diff-view {
     flex: 2 0 0;
+    overflow: auto;
 }
 
 #workspace-editor {
@@ -230,7 +231,7 @@ body {
     resize: none;
     margin: 0;
     border: 0;
-    padding: 0;
+    padding: 0.3em;
 }
 
 #staging-area-view {

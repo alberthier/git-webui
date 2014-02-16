@@ -15,6 +15,10 @@ webui.git = function(cmd, callback) {
     });
 };
 
+webui.splitLines = function(data) {
+    return data.split("\n").filter(function(s) { return s.length > 0; })
+}
+
 /*
  * == SideBar =================================================================
  */
@@ -30,7 +34,7 @@ webui.SideBar = function(parent, rootElement) {
     });
 
     webui.git("branch", function(data) {
-        var branches = data.split("\n").filter(function(s) { return s.length > 0; });
+        var branches = webui.splitLines(data);
         rootElement.appendChild($("<h1>Branches</h1>")[0]);
         var ul = $("<ul>").appendTo(rootElement)[0];
         branches.forEach(function (branch) {
@@ -46,7 +50,7 @@ webui.SideBar = function(parent, rootElement) {
     });
 
     webui.git("tag", function(data) {
-        var tags = data.split("\n").filter(function(s) { return s.length > 0; });
+        var tags = webui.splitLines(data);
         if (tags.length > 0) {
             rootElement.appendChild($("<h1>Tags</h1>")[0]);
             var ul = $("<ul>").appendTo(rootElement)[0];
@@ -197,6 +201,40 @@ webui.LogView = function(parent, rootElement) {
 };
 
 /*
+ * == DiffView ================================================================
+ */
+webui.DiffView = function(parent, rootElement) {
+
+    var mainView = $('<div class="diff-view">').appendTo(rootElement)[0];
+
+    this.update = function(diff) {
+        $(mainView).empty();
+
+        var inHeader = true;
+        var diffLines = diff.split("\n");
+        for (var i = 0; i < diffLines.length; ++i) {
+            var line = diffLines[i];
+            var pre = $('<pre class="diff-view-line">').appendTo(mainView)[0];
+            pre.appendChild(document.createTextNode(line));
+            var c = line[0];
+            if (c == '+') {
+                $(pre).addClass("diff-line-add");
+            } else if (c == '-') {
+                $(pre).addClass("diff-line-del");
+            } else if (c == '@') {
+                $(pre).addClass("diff-line-offset");
+                inHeader = false;
+            } else if (c == 'd') {
+                inHeader = true;
+            }
+            if (inHeader) {
+                $(pre).addClass("diff-line-header");
+            }
+        }
+    };
+};
+
+/*
  * == CommitView ==============================================================
  */
 webui.CommitView = function(parent, rootElement) {
@@ -212,29 +250,9 @@ webui.CommitView = function(parent, rootElement) {
         currentObject = entry.commit;
         $(rootElement).empty();
 
-        var diffView = $('<div class="diff-view">').appendTo(rootElement)[0];
-        var inHeader = true;
+        var diffView = new webui.DiffView(this, rootElement);
         webui.git("show " + entry.commit, function(data) {
-            var diffLines = data.split("\n");
-            for (var i = 0; i < diffLines.length; ++i) {
-                var line = diffLines[i];
-                var pre = $('<pre class="diff-view-line">').appendTo(diffView)[0];
-                pre.appendChild(document.createTextNode(line));
-                var c = line[0];
-                if (c == '+') {
-                    $(pre).addClass("diff-line-add");
-                } else if (c == '-') {
-                    $(pre).addClass("diff-line-del");
-                } else if (c == '@') {
-                    $(pre).addClass("diff-line-offset");
-                    inHeader = false;
-                } else if (c == 'd') {
-                    inHeader = true;
-                }
-                if (inHeader) {
-                    $(pre).addClass("diff-line-header");
-                }
-            }
+            diffView.update(data);
         });
     };
 };
@@ -269,9 +287,11 @@ webui.WorkspaceView = function(parent, rootElement) {
     this.mainUi = parent;
     var workspaceView = this;
     var mainView = $('<div id="workspace-view">' +
-                        '<pre id="workspace-diff-view"></pre>' +
+                        '<div id="workspace-diff-view"></div>' +
                         '<div id="workspace-editor"></div>' +
                     '</div>')[0];
+    var workspaceDiffView = $("#workspace-diff-view", mainView)[0];
+    this.diffView = new webui.DiffView(this, workspaceDiffView);
     var workspaceEditor = $("#workspace-editor", mainView)[0];
     this.workingCopyView = new webui.ChangedFilesView(this, workspaceEditor, "working-copy", "Working Copy");
     this.commitMessageView = new webui.CommitMessageView(this, workspaceEditor);
@@ -284,8 +304,9 @@ webui.WorkspaceView = function(parent, rootElement) {
 
     this.update = function() {
         this.show();
-        this.workingCopyView.update()
-        this.stagingAreaView.update()
+        this.diffView.update("");
+        this.workingCopyView.update();
+        this.stagingAreaView.update();
     };
 };
 
@@ -306,7 +327,7 @@ webui.ChangedFilesView = function(workspaceView, rootElement, type, label) {
         $(fileList).empty()
         var col = type == "working-copy" ? 1 : 0;
         webui.git("status --porcelain", function(data) {
-            data.split("\n").forEach(function(line) {
+            webui.splitLines(data).forEach(function(line) {
                 if (line[col] != " ") {
                     var li = $('<li>').appendTo(fileList)[0];
                     li.appendChild(document.createTextNode(line.substr(3)));
@@ -333,9 +354,7 @@ webui.ChangedFilesView = function(workspaceView, rootElement, type, label) {
             }
             var filename = clicked.childNodes[0].textContent;
             webui.git(gitCmd + filename, function(data) {
-                var diffView = $("#workspace-diff-view", workspaceView.mainView)[0];
-                $(diffView).empty();
-                diffView.appendChild(document.createTextNode(data));
+                workspaceView.diffView.update(data);
             });
         }
     };
