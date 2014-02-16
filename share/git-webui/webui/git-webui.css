@@ -28,7 +28,7 @@ body {
     flex-direction: column;
     align-items: stretch;
     height: 100%;
-    width: 20em;
+    width: 14em;
     background-color: #eeeeec;
     border: solid #d3d7cf;
     border-width: 0 1px 0 0;
@@ -42,7 +42,7 @@ body {
 }
 
 #sidebar-content {
-    height: 100%;
+    flex: 1 0 0;
     width: 100%;
     overflow-x: hidden;
     overflow-y: auto;
@@ -61,8 +61,8 @@ body {
 }
 
 #main {
+    flex: 1 0 0;
     height: 100%;
-    width: 100%;
 }
 
 .branch-current {
@@ -179,4 +179,73 @@ body {
 
 .diff-line-offset {
     background-color: #ad7Fa8;
+}
+
+#workspace-view {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    height: 100%;
+    width: 100%;
+}
+
+#workspace-diff-view {
+    flex: 2 0 0;
+}
+
+#workspace-editor {
+    flex: 1 0 0;
+    display: flex;
+    align-items: stretch;
+    border: solid #d3d7cf;
+    border-width: 1px 0 0 0;
+}
+
+.workspace-editor-box {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.workspace-editor-box p {
+    margin: 0;
+    padding: 0.5em;
+    background-color: #eeeeec;
+    border: solid #d3d7cf;
+    border-width: 0 0 1px 0;
+}
+
+#working-copy-view {
+    flex: 2 0 0;
+}
+
+#commit-message-view {
+    flex: 3 0 0;
+    border: solid #d3d7cf;
+    border-width: 0 1px 0 1px;
+}
+
+#commit-message-textarea {
+    flex: 1 0 0;
+    resize: none;
+    margin: 0;
+    border: 0;
+    padding: 0;
+}
+
+#staging-area-view {
+    flex: 2 0 0;
+}
+
+.file-list {
+    flex: 1 0 0;
+    overflow: auto;
+    margin: 0;
+    padding: 0;
+}
+
+.file-list li {
+    list-style: none;
+    margin: 0;
+    padding: 0.2em;
 }

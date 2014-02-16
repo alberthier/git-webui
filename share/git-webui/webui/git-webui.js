@@ -23,6 +23,12 @@ webui.SideBar = function(parent, rootElement) {
     this.mainUi = parent;
     var sideBar = this;
 
+    var workspace = $("<h1>Workspace</h1>")[0];
+    rootElement.appendChild(workspace);
+    $(workspace).click(function (event) {
+        sideBar.mainUi.workspaceView.update();
+    });
+
     webui.git("branch", function(data) {
         var branches = data.split("\n").filter(function(s) { return s.length > 0; });
         rootElement.appendChild($("<h1>Branches</h1>")[0]);
@@ -256,11 +262,109 @@ webui.HistoryView = function(parent, rootElement) {
 };
 
 /*
+ * == WorkspaceView ===========================================================
+ */
+webui.WorkspaceView = function(parent, rootElement) {
+
+    this.mainUi = parent;
+    var workspaceView = this;
+    var mainView = $('<div id="workspace-view">' +
+                        '<div id="workspace-diff-view"></div>' +
+                        '<div id="workspace-editor"></div>' +
+                    '</div>')[0];
+    var workspaceEditor = $("#workspace-editor", mainView)[0];
+    var workingCopyView = new webui.WorkingCopyView(this, workspaceEditor);
+    var commitMessageView = new webui.CommitMessageView(this, workspaceEditor);
+    var stagingAreaView = new webui.StagingAreaView(this, workspaceEditor);
+
+    this.show = function() {
+        $(rootElement).empty();
+        rootElement.appendChild(mainView);
+    };
+
+    this.update = function() {
+        this.show();
+        workingCopyView.update()
+        stagingAreaView.update()
+    };
+};
+
+/*
+ * == WorkingCopyView =========================================================
+ */
+webui.WorkingCopyView = function(workspaceView, rootElement) {
+
+    var workingCopyView = this;
+    var mainView = $('<div id="working-copy-view" class="workspace-editor-box">' +
+                        '<p>Working copy</p>' +
+                        '<ul id="working-copy-file-list" class="file-list"></div>' +
+                     '</div>').appendTo(rootElement)[0];
+    var fileList = $("#working-copy-file-list", mainView)[0];
+
+    this.update = function() {
+        $(fileList).empty()
+        webui.git("status --porcelain", function(data) {
+            data.split("\n").forEach(function(line) {
+                if (line[1] != " ") {
+                    var p = $('<li>').appendTo(fileList)[0];
+                    p.appendChild(document.createTextNode(line.substr(2)));
+                }
+            });
+        });
+    };
+};
+
+/*
+ * == CommitMessageView =======================================================
+ */
+webui.CommitMessageView = function(workspaceView, rootElement) {
+
+    var commitMessageView = this;
+
+    var mainView = $('<div id="commit-message-view" class="workspace-editor-box">' +
+                        '<p>Message</p>' +
+                        '<textarea id="commit-message-textarea"></textarea>' +
+                     '</div>').appendTo(rootElement)[0];
+    var textArea = $("#commit-message-textarea", mainView)[0];
+
+    var mainView = $().appendTo(rootElement)[0];
+
+    this.update = function() {
+    };
+};
+
+/*
+ * == StagingAreaView =========================================================
+ */
+webui.StagingAreaView = function(workspaceView, rootElement) {
+
+    var stagingAreaView = this;
+    var mainView = $('<div id="staging-area-view" class="workspace-editor-box">' +
+                        '<p>Staging area</p>' +
+                        '<ul id="staging-area-file-list" class="file-list"></div>' +
+                     '</div>').appendTo(rootElement)[0];
+    var fileList = $("#staging-area-file-list", mainView)[0];
+
+    this.update = function() {
+        $(fileList).empty()
+        webui.git("status --porcelain", function(data) {
+            data.split("\n").forEach(function(line) {
+                if (line[0] != " ") {
+                    var p = $('<li>').appendTo(fileList)[0];
+                    p.appendChild(document.createTextNode(line.substr(2)));
+                }
+            });
+        });
+    };
+};
+
+/*
  *  == Initialization =========================================================
  */
 function MainUi() {
     this.sideBar = new webui.SideBar(this, $("#sidebar-content")[0]);
     this.historyView = new webui.HistoryView(this, $("#main")[0]);
+    this.workspaceView = new webui.WorkspaceView(this, $("#main")[0]);
 }
 
 $(document).ready(function () {
