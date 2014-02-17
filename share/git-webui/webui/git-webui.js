@@ -32,6 +32,7 @@ webui.SideBar = function(parent, rootElement) {
     var workspace = $("<h1>Workspace</h1>")[0];
     rootElement.appendChild(workspace);
     $(workspace).click(function (event) {
+        sideBar.select(workspace);
         sideBar.mainUi.workspaceView.update();
     });
 
@@ -43,10 +44,10 @@ webui.SideBar = function(parent, rootElement) {
             var name = branch.substr(2);
             var li = $("<li>" + name + "</li>").appendTo(ul)[0];
             li.name = name;
-            $(li).click(function (event) { sideBar.selectRef(li); });
+            $(li).click(function (event) { sideBar.select(li); });
             if (branch.substr(0, 1) == "*") {
                 $(li).addClass("branch-current")
-                window.setTimeout(function() { sideBar.selectRef(li); }, 0);
+                window.setTimeout(function() { sideBar.select(li); }, 0);
             }
         });
     });
@@ -60,25 +61,27 @@ webui.SideBar = function(parent, rootElement) {
             tags.forEach(function (tag) {
                 var li = $("<li>" + tag + "</li>").appendTo(ul)[0];
                 li.name = tag;
-                $(li).click(function (event) { sideBar.selectRef(li); });
+                $(li).click(function (event) { sideBar.select(li); });
             });
         }
     });
 
-    this.selectRef = function(li) {
-        var ul = li.parentElement;
-        var selected = $(".sidebar-ref-selected", ul);
+    this.select = function(node) {
+        var selected = $(".selected", rootElement);
         if (selected.length > 0) {
             selected = selected[0];
         } else {
             selected = undefined;
         }
-        if (selected != li) {
+        if (selected != node) {
             if (selected != undefined) {
-                $(selected).toggleClass("sidebar-ref-selected");
+                $(selected).toggleClass("selected");
             }
-            $(li).toggleClass("sidebar-ref-selected");
-            this.mainUi.historyView.update(li.name);
+            $(node).toggleClass("selected");
+            if (node.tagName == "LI") {
+                // TODO: find a better way to distinguish history viewer and working copy nodes
+                this.mainUi.historyView.update(node.name);
+            }
         }
     };
 };
