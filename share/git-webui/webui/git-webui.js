@@ -5,7 +5,9 @@ var webui = webui || {};
 webui.git = function(cmd, callback) {
     $.post("git", cmd, function(data, status, xhr) {
         if (xhr.status == 200) {
-            callback(data);
+            if (callback) {
+                callback(data);
+            }
         } else {
             console.log(status + " " + data);
         }
