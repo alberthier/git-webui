@@ -312,6 +312,7 @@ webui.WorkspaceView = function(parent, rootElement) {
         this.diffView.update("");
         this.workingCopyView.update();
         this.stagingAreaView.update();
+        this.commitMessageView.update();
     };
 };
 
@@ -407,10 +408,43 @@ webui.CommitMessageView = function(workspaceView, rootElement) {
     var mainView = $('<div id="commit-message-view" class="workspace-editor-box">' +
                         '<p>Message</p>' +
                         '<textarea id="commit-message-textarea"></textarea>' +
+                        '<div id="commit-controls">' +
+                            '<input id="amend" type="checkbox"><label for="amend">Amend</label>' +
+                            '<button type="button">Commit</button>' +
+                        '</div>' +
                      '</div>').appendTo(rootElement)[0];
     var textArea = $("#commit-message-textarea", mainView)[0];
+    var amend = $("input", mainView)[0];
+    var commitButton = $("button", mainView)[0];
 
     var mainView = $().appendTo(rootElement)[0];
+
+    $(amend).change(function() {
+        if (amend.checked && textArea.value.length == 0) {
+            webui.git("log --pretty=format:%s -n 1", function(data) {
+                textArea.value = data;
+            });
+        }
+    });
+
+    $(commitButton).click(function() {
+        if (workspaceView.stagingAreaView.filesCount == 0) {
+            console.log("No files staged for commit");
+        } else if (textArea.value.length == 0) {
+            console.log("Enter a commit message first");
+        } else {
+            var cmd = "commit ";
+            if (amend.checked) {
+                cmd += "--amend ";
+            }
+            cmd += '-m "' + textArea.value + '"'
+            webui.git(cmd, function(data) {
+                textArea.value = "";
+                amend.checked = false;
+                workspaceView.update();
+            });
+        }
+    });
 
     this.update = function() {
     };

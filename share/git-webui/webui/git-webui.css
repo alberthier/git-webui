@@ -235,6 +235,19 @@ body {
     padding: 0.3em;
 }
 
+#commit-controls {
+    display: flex;
+    align-items: center;
+    background-color: #eeeeec;
+    border: solid #d3d7cf;
+    border-width: 1px 0 0 0;
+    padding: 0.3em;
+}
+
+#commit-controls button {
+    margin-left: auto;
+}
+
 #staging-area-view {
     flex: 2 0 0;
 }
