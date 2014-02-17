@@ -447,15 +447,15 @@ webui.CommitMessageView = function(workspaceView) {
     var amend = $("input", this.element)[0];
     var commitButton = $("button", this.element)[0];
 
-    $(amend).change(function() {
+    amend.onchange = function() {
         if (amend.checked && textArea.value.length == 0) {
             webui.git("log --pretty=format:%s -n 1", function(data) {
                 textArea.value = data;
             });
         }
-    });
+    };
 
-    $(commitButton).click(function() {
+    commitButton.onclick = function() {
         if (workspaceView.stagingAreaView.filesCount == 0) {
             console.log("No files staged for commit");
         } else if (textArea.value.length == 0) {
@@ -472,7 +472,7 @@ webui.CommitMessageView = function(workspaceView) {
                 workspaceView.update();
             });
         }
-    });
+    }
 
     this.update = function() {
     };
