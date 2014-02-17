@@ -323,21 +323,33 @@ webui.ChangedFilesView = function(workspaceView, rootElement, type, label) {
     var changedFilesView = this;
     var mainView = $('<div id="' + type + '-view" class="workspace-editor-box">' +
                         '<p>'+ label + '</p>' +
-                        '<ul id="' + type + '-file-list" class="file-list"></div>' +
+                        '<div id="' + type + '-file-list" class="file-list">' +
+                            '<ul id="' + type + '-file-list-content" class="file-list"></ul>' +
+                        '</div>' +
                      '</div>').appendTo(rootElement)[0];
-    var fileList = $("#" + type + "-file-list", mainView)[0];
+    var fileList = $("#" + type + "-file-list-content", mainView)[0];
     var currentSelection = null;
+
+    this.filesCount = 0;
 
     this.update = function() {
         $(fileList).empty()
         var col = type == "working-copy" ? 1 : 0;
         webui.git("status --porcelain", function(data) {
+            changedFilesView.filesCount = 0;
             webui.splitLines(data).forEach(function(line) {
                 var status = line[col];
                 if (col == 0 && status != " " && status != "?" || col == 1 && status != " ") {
+                    ++changedFilesView.filesCount;
                     var li = $('<li>').appendTo(fileList)[0];
-                    li.appendChild(document.createTextNode(line.substr(3)));
+                    li.model = line.substr(3);
+                    li.appendChild(document.createTextNode(li.model));
                     $(li).click(changedFilesView.select);
+                    if (col == 0) {
+                        $(li).dblclick(changedFilesView.unstage);
+                    } else {
+                        $(li).dblclick(changedFilesView.stage);
+                    }
                 }
             });
         });
@@ -371,6 +383,18 @@ webui.ChangedFilesView = function(workspaceView, rootElement, type, label) {
             currentSelection = null;
         }
     }
+
+    this.stage = function(event) {
+        webui.git("add " + event.target.model, function(data) {
+            workspaceView.update();
+        });
+    };
+
+    this.unstage = function(event) {
+        webui.git("reset " + event.target.model, function(data) {
+            workspaceView.update();
+        });
+    };
 };
 
 /*
