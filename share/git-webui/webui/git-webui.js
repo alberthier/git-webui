@@ -22,52 +22,72 @@ webui.splitLines = function(data) {
 }
 
 /*
- * == SideBar =================================================================
+ * == SideBarView =============================================================
  */
-webui.SideBar = function(parent, rootElement) {
+webui.SideBarView = function(mainView) {
 
-    this.mainUi = parent;
-    var sideBar = this;
+    this.mainView = mainView;
+    var sideBarView = this;
+    this.element = $(   '<div id="sidebar">' +
+                            '<img id="sidebar-logo" src="git-logo.svg">' +
+                            '<div id="sidebar-content">' +
+                                '<h1 id="sidebar-workspace">Workspace</h1>' +
+                                '<div id="sidebar-branches" style="display: none;">' +
+                                    '<h1>Branches</h1>' +
+                                    '<ul></ul>' +
+                                '</div>' +
+                                '<div id="sidebar-tags" style="display: none;">' +
+                                    '<h1>Tags</h1>' +
+                                    '<ul></ul>' +
+                                '</div>' +
+                            '</div>' +
+                        '</div>')[0];
+    var contentElement = $("#sidebar-content", this.element)[0];
+    var workspaceElement = $("#sidebar-workspace", this.element)[0];
 
-    var workspace = $("<h1>Workspace</h1>")[0];
-    rootElement.appendChild(workspace);
-    $(workspace).click(function (event) {
-        sideBar.select(workspace);
-        sideBar.mainUi.workspaceView.update();
+    $(workspaceElement).click(function (event) {
+        sideBarView.select(workspaceElement);
+        sideBarView.mainView.workspaceView.update();
     });
 
     webui.git("branch", function(data) {
         var branches = webui.splitLines(data);
-        rootElement.appendChild($("<h1>Branches</h1>")[0]);
-        var ul = $("<ul>").appendTo(rootElement)[0];
-        branches.forEach(function (branch) {
-            var name = branch.substr(2);
-            var li = $("<li>" + name + "</li>").appendTo(ul)[0];
-            li.name = name;
-            $(li).click(function (event) { sideBar.select(li); });
-            if (branch.substr(0, 1) == "*") {
-                $(li).addClass("branch-current")
-                window.setTimeout(function() { sideBar.select(li); }, 0);
-            }
-        });
+        if (branches.length > 0) {
+            var branchesElement = $("#sidebar-branches", sideBarView.element)[0];
+            branchesElement.style.display = "block";
+            var ul = $("ul", branchesElement)[0];
+            branches.forEach(function (branch) {
+                var name = branch.substr(2);
+                var li = $("<li>" + name + "</li>").appendTo(ul)[0];
+                li.name = name;
+                $(li).click(function (event) { sideBarView.select(li); });
+                if (branch.substr(0, 1) == "*") {
+                    $(li).addClass("branch-current")
+                    window.setTimeout(function() {
+                        sideBarView.select(li);
+                    }, 0);
+                }
+            });
+        }
     });
 
     webui.git("tag", function(data) {
         var tags = webui.splitLines(data);
         if (tags.length > 0) {
-            rootElement.appendChild($("<h1>Tags</h1>")[0]);
-            var ul = $("<ul>").appendTo(rootElement)[0];
-            rootElement.appendChild(ul);
+            var tagsElement = $("#sidebar-tags", sideBarView.element)[0];
+            tagsElement.style.display = "block";
+            var ul = $("ul", tagsElement)[0];
+            content.appendChild(ul);
             tags.forEach(function (tag) {
                 var li = $("<li>" + tag + "</li>").appendTo(ul)[0];
                 li.name = tag;
-                $(li).click(function (event) { sideBar.select(li); });
+                $(li).click(function (event) { sideBarView.select(li); });
             });
         }
     });
 
     this.select = function(node) {
-        var selected = $(".selected", rootElement);
+        var selected = $(".selected", contentElement);
         if (selected.length > 0) {
             selected = selected[0];
         } else {
@@ -80,7 +100,7 @@ webui.SideBar = function(parent, rootElement) {
             $(node).toggleClass("selected");
             if (node.tagName == "LI") {
                 // TODO: find a better way to distinguish history viewer and working copy nodes
-                this.mainUi.historyView.update(node.name);
+                this.mainView.historyView.update(node.name);
             }
         }
     };
@@ -89,14 +109,15 @@ webui.SideBar = function(parent, rootElement) {
 /*
  * == LogView =================================================================
  */
-webui.LogView = function(parent, rootElement) {
+webui.LogView = function(historyView) {
 
     var logView = this;
-    this.historyView = parent;
+    this.historyView = historyView;
+    this.element = $('<div id="log-view">')[0];
     var currentSelection = null;
 
     this.update = function(ref) {
-        $(rootElement).empty();
+        $(this.element).empty();
         webui.git("log --pretty=raw --decorate " + ref, function(data) {
             var start = 0;
             while (true) {
@@ -107,7 +128,7 @@ webui.LogView = function(parent, rootElement) {
                     var len = undefined;
                 }
                 var entry = new Entry(data.substr(start, len));
-                rootElement.appendChild(entry.createView());
+                logView.element.appendChild(entry.element);
                 if (!currentSelection) {
                     entry.select();
                 }
@@ -174,52 +195,54 @@ webui.LogView = function(parent, rootElement) {
             }
         };
 
-        this.createView = function() {
-            this.view = $('<div class="log-entry">' +
-                            '<div class="log-entry-header">' +
-                                '<a class="log-entry-name" target="_blank" href="mailto:' + this.author.email + '">' + this.author.name + '</a> ' +
-                                '<span  class="log-entry-date">' + this.author.date.toLocaleString() + '</span> ' +
-                                '<pre class="log-entry-hash">' + this.abbrevCommitHash() + '</pre>' +
-                            '</div>' +
-                            '<div class="log-entry-message"></div>' +
-                        '</div>')[0];
-            $(".log-entry-message", this.view)[0].appendChild(document.createTextNode(this.abbrevMessage()));
-            this.view.model = this;
+        this.createElement = function() {
+            this.element = $('<div class="log-entry">' +
+                                 '<div class="log-entry-header">' +
+                                     '<a class="log-entry-name" target="_blank" href="mailto:' + this.author.email + '">' + this.author.name + '</a> ' +
+                                     '<span  class="log-entry-date">' + this.author.date.toLocaleString() + '</span> ' +
+                                     '<pre class="log-entry-hash">' + this.abbrevCommitHash() + '</pre>' +
+                                 '</div>' +
+                                 '<div class="log-entry-message"></div>' +
+                             '</div>')[0];
+            $(".log-entry-message", this.element)[0].appendChild(document.createTextNode(this.abbrevMessage()));
+            this.element.model = this;
             var model = this;
-            $(this.view).click(function (event) {
+            $(this.element).click(function (event) {
                 model.select();
             });
-            return this.view;
+            return this.element;
         };
 
         this.select = function() {
             if (currentSelection != this) {
                 if (currentSelection) {
-                    $(currentSelection.view).removeClass("selected");
+                    $(currentSelection.element).removeClass("selected");
                 }
-                $(this.view).addClass("selected");
+                $(this.element).addClass("selected");
                 currentSelection = this;
                 logView.historyView.commitView.update(this);
             }
         };
+
+        this.createElement();
     };
 };
 
 /*
  * == DiffView ================================================================
  */
-webui.DiffView = function(parent, rootElement) {
+webui.DiffView = function(parent) {
 
-    var mainView = $('<div class="diff-view">').appendTo(rootElement)[0];
+    this.element = $('<div class="diff-view">')[0];
 
     this.update = function(diff) {
-        $(mainView).empty();
+        $(this.element).empty();
 
         var inHeader = true;
         var diffLines = diff.split("\n");
         for (var i = 0; i < diffLines.length; ++i) {
             var line = diffLines[i];
-            var pre = $('<pre class="diff-view-line">').appendTo(mainView)[0];
+            var pre = $('<pre class="diff-view-line">').appendTo(this.element)[0];
             pre.appendChild(document.createTextNode(line));
             var c = line[0];
             if (c == '+') {
@@ -242,10 +265,11 @@ webui.DiffView = function(parent, rootElement) {
 /*
  * == CommitView ==============================================================
  */
-webui.CommitView = function(parent, rootElement) {
+webui.CommitView = function(historyView) {
 
-    this.historyView = parent;
+    this.historyView = historyView;
     var currentObject = null;
+    this.element = $('<div id="commit-view">')[0];
 
     this.update = function(entry) {
         if (currentObject == entry.commit) {
@@ -253,9 +277,10 @@ webui.CommitView = function(parent, rootElement) {
             return;
         }
         currentObject = entry.commit;
-        $(rootElement).empty();
+        $(this.element).empty();
 
-        var diffView = new webui.DiffView(this, rootElement);
+        var diffView = new webui.DiffView(this);
+        this.element.appendChild(diffView.element);
         webui.git("show " + entry.commit, function(data) {
             diffView.update(data);
         });
@@ -265,17 +290,19 @@ webui.CommitView = function(parent, rootElement) {
 /*
  * == HistoryView =============================================================
  */
-webui.HistoryView = function(parent, rootElement) {
+webui.HistoryView = function(mainView) {
 
-    this.mainUi = parent;
     var historyView = this;
-    var mainView = $('<div id="history-view"><div id="log-view"></div><div id="commit-view"></div></div>')[0];
-    this.commitView = new webui.CommitView(this, $("#commit-view", mainView)[0]);
-    this.logView = new webui.LogView(this, $("#log-view", mainView)[0]);
+    this.element = $('<div id="history-view">')[0];
+
+    this.logView = new webui.LogView(this);
+    this.element.appendChild(this.logView.element);
+    this.commitView = new webui.CommitView(this);
+    this.element.appendChild(this.commitView.element);
 
     this.show = function() {
-        $(rootElement).empty();
-        rootElement.appendChild(mainView);
+        $(mainView.element).empty();
+        mainView.element.appendChild(this.element);
     };
 
     this.update = function(ref) {
@@ -287,24 +314,27 @@ webui.HistoryView = function(parent, rootElement) {
 /*
  * == WorkspaceView ===========================================================
  */
-webui.WorkspaceView = function(parent, rootElement) {
+webui.WorkspaceView = function(mainView) {
 
-    this.mainUi = parent;
     var workspaceView = this;
-    var mainView = $('<div id="workspace-view">' +
-                        '<div id="workspace-diff-view"></div>' +
-                        '<div id="workspace-editor"></div>' +
-                    '</div>')[0];
-    var workspaceDiffView = $("#workspace-diff-view", mainView)[0];
-    this.diffView = new webui.DiffView(this, workspaceDiffView);
-    var workspaceEditor = $("#workspace-editor", mainView)[0];
-    this.workingCopyView = new webui.ChangedFilesView(this, workspaceEditor, "working-copy", "Working Copy");
-    this.commitMessageView = new webui.CommitMessageView(this, workspaceEditor);
-    this.stagingAreaView = new webui.ChangedFilesView(this, workspaceEditor, "staging-area", "Staging Area");
+    this.element = $(   '<div id="workspace-view">' +
+                            '<div id="workspace-diff-view"></div>' +
+                            '<div id="workspace-editor"></div>' +
+                        '</div>')[0];
+    var workspaceDiffView = $("#workspace-diff-view", this.element)[0];
+    this.diffView = new webui.DiffView(this);
+    workspaceDiffView.appendChild(this.diffView.element);
+    var workspaceEditor = $("#workspace-editor", this.element)[0];
+    this.workingCopyView = new webui.ChangedFilesView(this, "working-copy", "Working Copy");
+    workspaceEditor.appendChild(this.workingCopyView.element);
+    this.commitMessageView = new webui.CommitMessageView(this);
+    workspaceEditor.appendChild(this.commitMessageView.element);
+    this.stagingAreaView = new webui.ChangedFilesView(this, "staging-area", "Staging Area");
+    workspaceEditor.appendChild(this.stagingAreaView.element);
 
     this.show = function() {
-        $(rootElement).empty();
-        rootElement.appendChild(mainView);
+        $(mainView.element).empty();
+        mainView.element.appendChild(this.element);
     };
 
     this.update = function() {
@@ -319,16 +349,16 @@ webui.WorkspaceView = function(parent, rootElement) {
 /*
  * == ChangedFilesView ========================================================
  */
-webui.ChangedFilesView = function(workspaceView, rootElement, type, label) {
+webui.ChangedFilesView = function(workspaceView, type, label) {
 
     var changedFilesView = this;
-    var mainView = $('<div id="' + type + '-view" class="workspace-editor-box">' +
-                        '<p>'+ label + '</p>' +
-                        '<div id="' + type + '-file-list" class="file-list">' +
-                            '<ul id="' + type + '-file-list-content" class="file-list"></ul>' +
-                        '</div>' +
-                     '</div>').appendTo(rootElement)[0];
-    var fileList = $("#" + type + "-file-list-content", mainView)[0];
+    this.element = $(   '<div id="' + type + '-view" class="workspace-editor-box">' +
+                            '<p>'+ label + '</p>' +
+                            '<div id="' + type + '-file-list" class="file-list">' +
+                                '<ul id="' + type + '-file-list-content" class="file-list"></ul>' +
+                            '</div>' +
+                        '</div>')[0];
+    var fileList = $("#" + type + "-file-list-content", this.element)[0];
     var currentSelection = null;
 
     this.filesCount = 0;
@@ -401,23 +431,21 @@ webui.ChangedFilesView = function(workspaceView, rootElement, type, label) {
 /*
  * == CommitMessageView =======================================================
  */
-webui.CommitMessageView = function(workspaceView, rootElement) {
+webui.CommitMessageView = function(workspaceView) {
 
     var commitMessageView = this;
 
-    var mainView = $('<div id="commit-message-view" class="workspace-editor-box">' +
-                        '<p>Message</p>' +
-                        '<textarea id="commit-message-textarea"></textarea>' +
-                        '<div id="commit-controls">' +
-                            '<input id="amend" type="checkbox"><label for="amend">Amend</label>' +
-                            '<button type="button">Commit</button>' +
-                        '</div>' +
-                     '</div>').appendTo(rootElement)[0];
-    var textArea = $("#commit-message-textarea", mainView)[0];
-    var amend = $("input", mainView)[0];
-    var commitButton = $("button", mainView)[0];
-
-    var mainView = $().appendTo(rootElement)[0];
+    this.element = $(   '<div id="commit-message-view" class="workspace-editor-box">' +
+                            '<p>Message</p>' +
+                            '<textarea id="commit-message-textarea"></textarea>' +
+                            '<div id="commit-controls">' +
+                                '<input id="amend" type="checkbox"><label for="amend">Amend</label>' +
+                                '<button type="button">Commit</button>' +
+                            '</div>' +
+                        '</div>')[0];
+    var textArea = $("#commit-message-textarea", this.element)[0];
+    var amend = $("input", this.element)[0];
+    var commitButton = $("button", this.element)[0];
 
     $(amend).change(function() {
         if (amend.checked && textArea.value.length == 0) {
@@ -455,9 +483,14 @@ webui.CommitMessageView = function(workspaceView, rootElement) {
  *  == Initialization =========================================================
  */
 function MainUi() {
-    this.sideBar = new webui.SideBar(this, $("#sidebar-content")[0]);
-    this.historyView = new webui.HistoryView(this, $("#main")[0]);
-    this.workspaceView = new webui.WorkspaceView(this, $("#main")[0]);
+    var body = $("body")[0];
+    this.sideBarView = new webui.SideBarView(this);
+    body.appendChild(this.sideBarView.element);
+
+    this.element = $('<div id="main-view">')[0];
+    body.appendChild(this.element);
+    this.historyView = new webui.HistoryView(this);
+    this.workspaceView = new webui.WorkspaceView(this);
 }
 
 $(document).ready(function () {

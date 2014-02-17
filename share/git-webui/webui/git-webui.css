@@ -60,7 +60,7 @@ body {
     color: #3465a4;
 }
 
-#main {
+#main-view {
     flex: 1 0 0;
     height: 100%;
 }
