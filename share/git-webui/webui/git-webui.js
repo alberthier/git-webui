@@ -18,8 +18,40 @@ webui.git = function(cmd, callback) {
 };
 
 webui.splitLines = function(data) {
-    return data.split("\n").filter(function(s) { return s.length > 0; })
-}
+    return data.split("\n").filter(function(s) { return s.length > 0; });
+};
+
+webui.ButtonBox = function() {
+
+    var buttonBox = this;
+    this.element = $('<div class="button-box">')[0];
+    var current = null;
+
+    this.itemClicked = function(event) {
+        buttonBox.updateSelection(event.target);
+    }
+
+    this.select = function(index) {
+        buttonBox.updateSelection(this.element.children[index]);
+    }
+
+    this.updateSelection = function(elt) {
+        if (current) {
+            $(current).removeClass("button-box-current");
+        }
+        current = elt;
+        $(current).addClass("button-box-current");
+        current.callback();
+    }
+
+    for (var i = 0; i < arguments.length; ++i) {
+        var item = arguments[i];
+        var a = $('<a> ' + item[0] + ' </a>')[0];
+        this.element.appendChild(a);
+        a.callback = item[1];
+        $(a).click(this.itemClicked);
+    }
+};
 
 /*
  * == SideBarView =============================================================
@@ -268,23 +300,36 @@ webui.DiffView = function(parent) {
 webui.CommitView = function(historyView) {
 
     this.historyView = historyView;
-    var currentObject = null;
-    this.element = $('<div id="commit-view">')[0];
+    var currentCommit = null;
 
     this.update = function(entry) {
-        if (currentObject == entry.commit) {
+        if (currentCommit == entry.commit) {
             // We already display the right data. No need to update.
             return;
         }
-        currentObject = entry.commit;
-        $(this.element).empty();
-
-        var diffView = new webui.DiffView(this);
-        this.element.appendChild(diffView.element);
+        currentCommit = entry.commit;
+        this.showDiff();
+        buttonBox.select(0);
         webui.git("show " + entry.commit, function(data) {
             diffView.update(data);
         });
     };
+
+    this.showDiff = function() {
+        $(commitViewContent).empty();
+        commitViewContent.appendChild(diffView.element);
+    };
+
+    this.showTree = function() {
+        $(commitViewContent).empty();
+    };
+
+    this.element = $('<div id="commit-view">')[0];
+    var buttonBox = new webui.ButtonBox(["Commit", this.showDiff], ["Tree", this.showTree]);
+    this.element.appendChild(buttonBox.element);
+    var commitViewContent = $('<div id="commit-view-content">')[0];
+    this.element.appendChild(commitViewContent);
+    var diffView = new webui.DiffView(this);
 };
 
 /*

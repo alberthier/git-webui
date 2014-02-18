@@ -23,6 +23,27 @@ body {
     margin: 0;
 }
 
+.button-box {
+    display: flex;
+    text-align: center;
+    background-color: #eeeeec;
+    border: solid #d3d7cf;
+    border-width: 0 0 1px 0;
+}
+
+.button-box a {
+    flex: 1 0 0;
+    padding: 0.3em;
+}
+
+.button-box-current {
+    background-color: #729fcf;
+}
+
+.button-box a:hover:not(.button-box-current) {
+    background-color: #a5c2e0;
+}
+
 #sidebar {
     display: flex;
     flex-direction: column;
@@ -134,8 +155,14 @@ body {
 }
 
 #commit-view {
+    display: flex;
+    flex-direction: column;
     height: 100%;
     width: 100%;
+}
+
+#commit-view-content {
+    flex: 1 0 0;
     overflow: auto;
 }
 
