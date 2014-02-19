@@ -162,8 +162,9 @@ body {
 }
 
 #commit-view-content {
+    display: flex;
     flex: 1 0 0;
-    overflow: auto;
+    width: 100%;
 }
 
 .diff-view {
@@ -209,6 +210,25 @@ body {
     background-color: #ad7Fa8;
 }
 
+#tree-view {
+    display: flex;
+    width: 100%;
+    overflow: auto;
+}
+
+#tree-view-tree-content {
+    width: 100%;
+}
+
+#tree-view-blob-header:hover {
+}
+
+#tree-view-blob-content {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+}
+
 .tree-item {
     display: flex;
     padding: 0.3em;
@@ -238,6 +258,19 @@ body {
 
 .tree-item-symlink {
     font-style: italic;
+}
+
+#tree-view-blob-header {
+    background-color: #eeeeec;
+    padding: 0.3em;
+    border: solid #d3d7cf;
+    border-width: 0 0 1px 0;
+}
+background-color: #a5c2e0;
+#tree-view iframe {
+    flex: 1 0 0;
+    width: 100%;
+    border: 0;
 }
 
 #workspace-view {

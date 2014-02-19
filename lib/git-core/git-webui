@@ -59,27 +59,38 @@ class WebUiRequestHandler(SimpleHTTPRequestHandler):
         return path
 
 
+    def do_GET(self):
+        if self.path.startswith("/git/cat-file/"):
+            obj = self.path[14:]
+            self.process(["git", "cat-file", "-p", obj])
+        else:
+            SimpleHTTPRequestHandler.do_GET(self)
+
+
     def do_POST(self):
         if self.path == "/git":
-            os.chdir(WebUiRequestHandler.REPO_ROOT)
             content_length = int(self.headers["Content-Length"])
             args = codecs.decode(self.rfile.read(content_length), "utf-8")
             cmd = shlex.split("git " + args)
-            git = subprocess.Popen(cmd, stdout = subprocess.PIPE, stderr = subprocess.PIPE, cwd = WebUiRequestHandler.REPO_ROOT)
-            stdout, stderr = git.communicate()
-            if git.returncode == 0:
-                http_status = 200
-                result = stdout
-            else:
-                http_status = 500
-                result = stderr
-            self.send_response(http_status)
-            self.send_header("Content-type", "text/plain")
-            self.send_header("Content-Length", len(result))
-            self.end_headers()
-            self.wfile.write(result)
+            self.process(cmd)
         else:
             self.send_error(404)
+
+
+    def process(self, cmd):
+        git = subprocess.Popen(cmd, stdout = subprocess.PIPE, stderr = subprocess.PIPE, cwd = WebUiRequestHandler.REPO_ROOT)
+        stdout, stderr = git.communicate()
+        if git.returncode == 0:
+            http_status = 200
+            result = stdout
+        else:
+            http_status = 500
+            result = stderr
+        self.send_response(http_status)
+        self.send_header("Content-type", "text/plain")
+        self.send_header("Content-Length", len(result))
+        self.end_headers()
+        self.wfile.write(result)
 
 
 

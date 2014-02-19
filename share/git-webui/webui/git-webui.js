@@ -345,6 +345,7 @@ webui.TreeView = function(commitView) {
 
     this.showTree = function() {
         $(this.element).empty();
+        var content = $('<div id="tree-view-tree-content">').appendTo(this.element)[0];
         var treeRef = stack[stack.length - 1];
         var parentTreeRef = stack[stack.length - 2];
         webui.git("ls-tree -l " + treeRef, function(data) {
@@ -360,7 +361,7 @@ webui.TreeView = function(commitView) {
                     stack.pop();
                     treeView.showTree();
                 };
-                treeView.element.appendChild(elt);
+                content.appendChild(elt);
             }
             webui.splitLines(data).forEach(function(line) {
                 var entry = new Entry(line);
@@ -395,18 +396,19 @@ webui.TreeView = function(commitView) {
             blobs.sort(compare);
             trees.sort(compare);
             trees.forEach(function (elt) {
-                treeView.element.appendChild(elt);
+                content.appendChild(elt);
             });
             blobs.forEach(function (elt) {
-                treeView.element.appendChild(elt);
+                content.appendChild(elt);
             });
         });
     }
 
     this.showBlob = function(blobRef, parentTreeRef) {
         $(this.element).empty();
-        webui.git("cat-file -p " + blobRef, function(data) {
-        });
+        var content = $('<div id="tree-view-blob-content">').appendTo(this.element)[0];
+        $('<div id="tree-view-blob-header"><span>Back to folder</span></div>').appendTo(content);
+        $('<iframe src="/git/cat-file/' + blobRef + '">').appendTo(content);
     }
 }
 
