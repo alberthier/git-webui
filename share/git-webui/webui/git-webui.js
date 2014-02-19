@@ -49,7 +49,7 @@ webui.ButtonBox = function() {
         var a = $('<a> ' + item[0] + ' </a>')[0];
         this.element.appendChild(a);
         a.callback = item[1];
-        $(a).click(this.itemClicked);
+        a.onclick = this.itemClicked;
     }
 };
 
@@ -295,6 +295,45 @@ webui.DiffView = function(parent) {
 };
 
 /*
+ * == TreeView ================================================================
+ */
+webui.TreeView = function(commitView) {
+
+    var treeView = this;
+    this.element = $('<div id="tree-view">')[0];
+
+    this.update = function(treeRef) {
+        $(this.element).empty();
+        webui.git("ls-tree -l " + treeRef, function(data) {
+            webui.splitLines(data).forEach(function(line) {
+                var end = line.indexOf(" ");
+                var mode = line.substr(0, end);
+                var start = end + 1;
+                var end = line.indexOf(" ", start);
+                var type = line.substr(start, end - start);
+                start = end + 1;
+                var end = line.indexOf(" ", start);
+                var object = line.substr(start, end - start);
+                start = end + 1;
+                var end = line.indexOf("\t", start);
+                var size = line.substr(start, end - start).trim();
+                start = end + 1;
+                var name = line.substr(start);
+
+                var elt =   $('<div class="tree-item">' +
+                                '<span>' + mode + '</span> ' +
+                                '<span>' + type + '</span> ' +
+                                '<span>' + object + '</span> ' +
+                                '<span>' + size + '</span> ' +
+                                '<span>' + name + '</span> ' +
+                            '</div>')[0];
+                treeView.element.appendChild(elt);
+            });
+        });
+    }
+}
+
+/*
  * == CommitView ==============================================================
  */
 webui.CommitView = function(historyView) {
@@ -313,6 +352,7 @@ webui.CommitView = function(historyView) {
         webui.git("show " + entry.commit, function(data) {
             diffView.update(data);
         });
+        treeView.update(entry.tree);
     };
 
     this.showDiff = function() {
@@ -322,6 +362,7 @@ webui.CommitView = function(historyView) {
 
     this.showTree = function() {
         $(commitViewContent).empty();
+        commitViewContent.appendChild(treeView.element);
     };
 
     this.element = $('<div id="commit-view">')[0];
@@ -330,6 +371,7 @@ webui.CommitView = function(historyView) {
     var commitViewContent = $('<div id="commit-view-content">')[0];
     this.element.appendChild(commitViewContent);
     var diffView = new webui.DiffView(this);
+    var treeView = new webui.TreeView(this);
 };
 
 /*
