@@ -209,6 +209,37 @@ body {
     background-color: #ad7Fa8;
 }
 
+.tree-item {
+    display: flex;
+    padding: 0.3em;
+}
+
+.tree-item:hover {
+    background-color: #f8f8f8;
+}
+
+.tree-item>:first-child {
+    flex: 1 0 0;
+}
+
+.tree-item>:last-child {
+    width: 2em;
+}
+
+.tree-item-tree:before {
+    content: url(folder.svg);
+    margin: 0.3em;
+}
+
+.tree-item-blob:before {
+    content: url(file.svg);
+    margin: 0.3em;
+}
+
+.tree-item-symlink {
+    font-style: italic;
+}
+
 #workspace-view {
     display: flex;
     flex-direction: column;

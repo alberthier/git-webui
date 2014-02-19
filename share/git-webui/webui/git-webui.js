@@ -109,7 +109,6 @@ webui.SideBarView = function(mainView) {
             var tagsElement = $("#sidebar-tags", sideBarView.element)[0];
             tagsElement.style.display = "block";
             var ul = $("ul", tagsElement)[0];
-            content.appendChild(ul);
             tags.forEach(function (tag) {
                 var li = $("<li>" + tag + "</li>").appendTo(ul)[0];
                 li.name = tag;
@@ -301,34 +300,112 @@ webui.TreeView = function(commitView) {
 
     var treeView = this;
     this.element = $('<div id="tree-view">')[0];
+    var stack;
+
+    function Entry(line) {
+        var end = line.indexOf(" ");
+        this.mode = parseInt(line.substr(0, end));
+        var start = end + 1;
+        var end = line.indexOf(" ", start);
+        this.type = line.substr(start, end - start);
+        start = end + 1;
+        var end = line.indexOf(" ", start);
+        this.object = line.substr(start, end - start);
+        start = end + 1;
+        var end = line.indexOf("\t", start);
+        this.size = parseInt(line.substr(start, end - start).trim());
+        start = end + 1;
+        this.name = line.substr(start);
+
+        this.formatedSize = function(size) {
+            if (isNaN(this.size)) {
+                return ["", ""]
+            }
+            if (this.size < 1024) {
+                return [this.size.toString(), ""];
+            } else if (this.size < 1024 * 1024) {
+                return [(this.size / 1024).toFixed(2), "K"];
+            } else if (this.size < 1024 * 1024 * 1024) {
+                return [(this.size / 1024 * 1024).toFixed(2), "M"];
+            } else {
+                return [(this.size / 1024 * 1024 * 1024).toFixed(2), "G"];
+            }
+        };
+
+        this.isSymbolicLink = function() {
+            return (this.mode & 120000) == 120000; // S_IFLNK
+        }
+    }
+
 
     this.update = function(treeRef) {
-        $(this.element).empty();
-        webui.git("ls-tree -l " + treeRef, function(data) {
-            webui.splitLines(data).forEach(function(line) {
-                var end = line.indexOf(" ");
-                var mode = line.substr(0, end);
-                var start = end + 1;
-                var end = line.indexOf(" ", start);
-                var type = line.substr(start, end - start);
-                start = end + 1;
-                var end = line.indexOf(" ", start);
-                var object = line.substr(start, end - start);
-                start = end + 1;
-                var end = line.indexOf("\t", start);
-                var size = line.substr(start, end - start).trim();
-                start = end + 1;
-                var name = line.substr(start);
+        stack = [ treeRef ];
+        this.showTree();
+    }
 
+    this.showTree = function() {
+        $(this.element).empty();
+        var treeRef = stack[stack.length - 1];
+        var parentTreeRef = stack[stack.length - 2];
+        webui.git("ls-tree -l " + treeRef, function(data) {
+            var blobs = [];
+            var trees = [];
+            if (parentTreeRef) {
                 var elt =   $('<div class="tree-item">' +
-                                '<span>' + mode + '</span> ' +
-                                '<span>' + type + '</span> ' +
-                                '<span>' + object + '</span> ' +
-                                '<span>' + size + '</span> ' +
-                                '<span>' + name + '</span> ' +
+                                '<span class="tree-item-tree">..</span> ' +
+                                '<span></span> ' +
+                                '<span></span> ' +
                             '</div>')[0];
+                elt.onclick = function() {
+                    stack.pop();
+                    treeView.showTree();
+                };
+                treeView.element.appendChild(elt);
+            }
+            webui.splitLines(data).forEach(function(line) {
+                var entry = new Entry(line);
+                var size = entry.formatedSize()
+                var elt =   $('<div class="tree-item">' +
+                                '<span>' + entry.name + '</span> ' +
+                                '<span>' + size[0] + '</span>&nbsp;' +
+                                '<span>' + size[1] + '</span>' +
+                            '</div>')[0];
+                elt.model = entry;
+                var nameElt = $("span", elt)[0];
+                $(nameElt).addClass("tree-item-" + entry.type);
+                if (entry.isSymbolicLink()) {
+                    $(nameElt).addClass("tree-item-symlink");
+                }
+                if (entry.type == "tree") {
+                    trees.push(elt);
+                    elt.onclick = function() {
+                        stack.push(elt.model.object);
+                        treeView.showTree();
+                    };
+                } else {
+                    blobs.push(elt);
+                    elt.onclick = function() {
+                        treeView.showBlob(elt.model.object, treeRef);
+                    };
+                }
+            });
+            var compare = function(a, b) {
+                return a.model.name.toLowerCase().localeCompare(b.model.name.toLowerCase());
+            }
+            blobs.sort(compare);
+            trees.sort(compare);
+            trees.forEach(function (elt) {
                 treeView.element.appendChild(elt);
             });
+            blobs.forEach(function (elt) {
+                treeView.element.appendChild(elt);
+            });
+        });
+    }
+
+    this.showBlob = function(blobRef, parentTreeRef) {
+        $(this.element).empty();
+        webui.git("cat-file -p " + blobRef, function(data) {
         });
     }
 }
