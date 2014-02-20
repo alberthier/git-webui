@@ -386,7 +386,8 @@ webui.TreeView = function(commitView) {
                 } else {
                     blobs.push(elt);
                     elt.onclick = function() {
-                        treeView.showBlob(elt.model.object, treeRef);
+                        stack.push(elt.model.object);
+                        treeView.showBlob();
                     };
                 }
             });
@@ -404,11 +405,19 @@ webui.TreeView = function(commitView) {
         });
     }
 
-    this.showBlob = function(blobRef, parentTreeRef) {
-        $(this.element).empty();
-        var content = $('<div id="tree-view-blob-content">').appendTo(this.element)[0];
-        $('<div id="tree-view-blob-header"><span>Back to folder</span></div>').appendTo(content);
-        $('<iframe src="/git/cat-file/' + blobRef + '">').appendTo(content);
+    this.showBlob = function(blobRef) {
+        $(treeView.element).empty();
+        var content = $('<div id="tree-view-blob-content">' +
+                            '<div id="tree-view-blob-header">' +
+                                '<span>Back to folder</span>' +
+                            '</div>' +
+                            '<iframe src="/git/cat-file/' + stack[stack.length - 1] + '"></iframe>' +
+                        '</div>').appendTo(treeView.element)[0];
+        var button = $("span", content)[0];
+        button.onclick = function() {
+            stack.pop();
+            treeView.showTree();
+        };
     }
 }
 
