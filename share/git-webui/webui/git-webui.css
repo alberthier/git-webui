@@ -137,6 +137,33 @@ body {
     text-decoration: initial;
 }
 
+.log-entry-refs {
+    margin-left: 1em;
+}
+
+.log-entry-refs > span {
+    border: 1px solid;
+    border-radius: 1em;
+    padding: 0 0.5em;
+    margin: 0 0.3em;
+    font-size: 75%;
+}
+
+.log-entry-ref-remote {
+    border-color: #ce5c00;
+    background-color: #fcaf3e;
+}
+
+.log-entry-ref-head {
+    border-color: #4e9a06;
+    background-color: #8ae234;
+}
+
+.log-entry-ref-symbolic {
+    border-color: #c4a000;
+    background-color: #fce94f;
+}
+
 .log-entry-date {
     margin-left: auto;
 }

@@ -149,7 +149,7 @@ webui.LogView = function(historyView) {
 
     this.update = function(ref) {
         $(this.element).empty();
-        webui.git("log --pretty=raw --decorate " + ref, function(data) {
+        webui.git("log --pretty=raw --decorate=full " + ref, function(data) {
             var start = 0;
             while (true) {
                 var end = data.indexOf("\ncommit ", start);
@@ -236,6 +236,23 @@ webui.LogView = function(historyView) {
                                  '<div class="log-entry-message"></div>' +
                              '</div>')[0];
             $(".log-entry-message", this.element)[0].appendChild(document.createTextNode(this.abbrevMessage()));
+            if (this.refs) {
+                var entryName = $(".log-entry-name", this.element);
+                var container = $('<span class="log-entry-refs">').insertAfter(entryName);
+                console.log(entryName[0]);
+                this.refs.forEach(function (ref) {
+                    if (ref.indexOf("refs/remotes") == 0) {
+                        ref = ref.substr(13);
+                        var reftype = "remote"
+                    } else if (ref.indexOf("refs/heads") == 0) {
+                        ref = ref.substr(11);
+                        var reftype = "head"
+                    } else {
+                        var reftype = "symbolic"
+                    }
+                    $('<span class="log-entry-ref-' + reftype + '">' + ref + '</span>').appendTo(container);
+                });
+            }
             this.element.model = this;
             var model = this;
             $(this.element).click(function (event) {
