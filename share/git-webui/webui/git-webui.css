@@ -32,9 +32,6 @@ body {
 .button-box-current {
   background-color: #33b5e5; }
 
-.button-box a:hover:not(.button-box-current) {
-  background-color: #8ad5f0; }
-
 #sidebar {
   display: flex;
   flex-direction: column;
@@ -42,8 +39,6 @@ body {
   height: 100%;
   width: 14em;
   background-color: #313131;
-  border: solid #d0d0d0;
-  border-width: 0 1px 0 0;
   color: #f0f0f0; }
 
 #sidebar-logo {
@@ -211,10 +206,7 @@ body {
   border-width: 0 0 1px 0; }
 
 #tree-view-blob-header span {
-  padding: 0.3em; }
-
-#tree-view-blob-header span:hover {
-  background-color: #8ad5f0;
+  padding: 0.3em;
   cursor: pointer; }
 
 #tree-view-blob-content {
@@ -227,13 +219,13 @@ body {
   width: 100%;
   border: 0; }
 
+.tree-item:hover {
+  background-color: #8ad5f0; }
+
 .tree-item {
   display: flex;
   padding: 0.3em;
   cursor: pointer; }
-
-.tree-item:hover {
-  background-color: #8ad5f0; }
 
 .tree-item > :first-child {
   flex: 1 0 0; }
