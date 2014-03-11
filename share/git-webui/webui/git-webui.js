@@ -63,7 +63,9 @@ webui.SideBarView = function(mainView) {
     this.element = $(   '<div id="sidebar">' +
                             '<img id="sidebar-logo" src="git-logo.png">' +
                             '<div id="sidebar-content">' +
-                                '<h1 id="sidebar-workspace">Workspace</h1>' +
+                                '<div id="sidebar-workspace">' +
+                                    '<h1>Workspace</h1>' +
+                                '</div>' +
                                 '<div id="sidebar-branches" style="display: none;">' +
                                     '<h1>Branches</h1>' +
                                     '<ul></ul>' +
@@ -75,7 +77,7 @@ webui.SideBarView = function(mainView) {
                             '</div>' +
                         '</div>')[0];
     var contentElement = $("#sidebar-content", this.element)[0];
-    var workspaceElement = $("#sidebar-workspace", this.element)[0];
+    var workspaceElement = $("#sidebar-workspace h1", this.element)[0];
 
     $(workspaceElement).click(function (event) {
         sideBarView.select(workspaceElement);
