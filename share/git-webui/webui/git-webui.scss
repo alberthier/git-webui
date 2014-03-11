@@ -82,19 +82,52 @@ body {
     width: 100%;
     overflow-x: hidden;
     overflow-y: auto;
-}
+    cursor: default;
 
-#sidebar-content > * {
-    margin: 4px;
-}
+    h1:before {
+        vertical-align: middle;
+        margin: 0.3em;
+    }
 
-#sidebar-content li {
-    cursor: pointer;
-    padding: 0.1em 0;
-}
+    h1 {
+        margin: 1em 0 0 0;
+        text-shadow: 1px 1px darken($medium_gray, 33%);
+    }
 
-.sidebar-ref-selected {
-    color: $medium_blue;
+    #sidebar-workspace {
+        cursor: pointer;
+    }
+
+    #sidebar-workspace:before {
+        content: url(computer.svg);
+    }
+
+    #sidebar-branches h1:before {
+        content: url(branch.svg);
+    }
+
+    #sidebar-tags h1:before {
+        content: url(tag.svg);
+    }
+
+    ul {
+        margin: 0;
+        padding: 0;
+    }
+
+    li:before {
+        content: "\2022";
+        margin: 0.3em;
+    }
+
+    li {
+        cursor: pointer;
+        padding: 0.15em 0 0.15em 1em;
+    }
+
+    .sidebar-ref-selected {
+        color: $medium_blue;
+    }
 }
 
 #main-view {
@@ -126,15 +159,17 @@ body {
     border-width: 1px 0 0 0;
     border-style: solid;
     border-color: $medium_gray;
+    background-color: $light_gray;
     padding: 3px 6px 3px 6px;
+    text-shadow: 1px 1px $medium_gray;
 }
 
 .selected {
     background-color: $medium_blue;
 }
 
-.log-entry:last-child {
-    border-bottom-width: 1px;
+.log-entry:first-child {
+    border-top-width: 0;
 }
 
 .log-entry-header {
@@ -161,6 +196,7 @@ body {
     padding: 0 0.5em;
     margin: 0 0.3em;
     font-size: 75%;
+    text-shadow: none;
 }
 
 .log-entry-ref-remote {
@@ -171,6 +207,11 @@ body {
 .log-entry-ref-head {
     border: 1px solid $dark_green;
     background-color: $medium_green;
+}
+
+.log-entry-ref-tag {
+    border: 1px solid $dark_violet;
+    background-color: $medium_violet;
 }
 
 .log-entry-ref-symbolic {
@@ -293,7 +334,7 @@ body {
 
 .tree-item {
     display: flex;
-    padding: 0.3em;
+    padding: 0.15em;
     cursor: pointer;
 }
 
@@ -307,11 +348,13 @@ body {
 
 .tree-item-tree:before {
     content: url(folder.svg);
+    vertical-align: middle;
     margin: 0.3em;
 }
 
 .tree-item-blob:before {
     content: url(file.svg);
+    vertical-align: middle;
     margin: 0.3em;
 }
 

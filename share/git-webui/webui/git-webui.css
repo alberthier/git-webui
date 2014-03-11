@@ -51,17 +51,33 @@ body {
   flex: 1 0 0;
   width: 100%;
   overflow-x: hidden;
-  overflow-y: auto; }
-
-#sidebar-content > * {
-  margin: 4px; }
-
-#sidebar-content li {
-  cursor: pointer;
-  padding: 0.1em 0; }
-
-.sidebar-ref-selected {
-  color: #33b5e5; }
+  overflow-y: auto;
+  cursor: default; }
+  #sidebar-content h1:before {
+    vertical-align: middle;
+    margin: 0.3em; }
+  #sidebar-content h1 {
+    margin: 1em 0 0 0;
+    text-shadow: 1px 1px #7c7c7c; }
+  #sidebar-content #sidebar-workspace {
+    cursor: pointer; }
+  #sidebar-content #sidebar-workspace:before {
+    content: url(computer.svg); }
+  #sidebar-content #sidebar-branches h1:before {
+    content: url(branch.svg); }
+  #sidebar-content #sidebar-tags h1:before {
+    content: url(tag.svg); }
+  #sidebar-content ul {
+    margin: 0;
+    padding: 0; }
+  #sidebar-content li:before {
+    content: "\2022";
+    margin: 0.3em; }
+  #sidebar-content li {
+    cursor: pointer;
+    padding: 0.15em 0 0.15em 1em; }
+  #sidebar-content .sidebar-ref-selected {
+    color: #33b5e5; }
 
 #main-view {
   flex: 1 0 0;
@@ -88,13 +104,15 @@ body {
   border-width: 1px 0 0 0;
   border-style: solid;
   border-color: #d0d0d0;
-  padding: 3px 6px 3px 6px; }
+  background-color: #f0f0f0;
+  padding: 3px 6px 3px 6px;
+  text-shadow: 1px 1px #d0d0d0; }
 
 .selected {
   background-color: #33b5e5; }
 
-.log-entry:last-child {
-  border-bottom-width: 1px; }
+.log-entry:first-child {
+  border-top-width: 0; }
 
 .log-entry-header {
   display: flex;
@@ -116,7 +134,8 @@ body {
   border-radius: 1em;
   padding: 0 0.5em;
   margin: 0 0.3em;
-  font-size: 75%; }
+  font-size: 75%;
+  text-shadow: none; }
 
 .log-entry-ref-remote {
   border: 1px solid #ff8800;
@@ -125,6 +144,10 @@ body {
 .log-entry-ref-head {
   border: 1px solid #669900;
   background-color: #99cc00; }
+
+.log-entry-ref-tag {
+  border: 1px solid #9933cc;
+  background-color: #aa66cc; }
 
 .log-entry-ref-symbolic {
   border: 1px solid #cc0000;
@@ -224,7 +247,7 @@ body {
 
 .tree-item {
   display: flex;
-  padding: 0.3em;
+  padding: 0.15em;
   cursor: pointer; }
 
 .tree-item > :first-child {
@@ -235,10 +258,12 @@ body {
 
 .tree-item-tree:before {
   content: url(folder.svg);
+  vertical-align: middle;
   margin: 0.3em; }
 
 .tree-item-blob:before {
   content: url(file.svg);
+  vertical-align: middle;
   margin: 0.3em; }
 
 .tree-item-symlink {
