@@ -243,12 +243,15 @@ webui.LogView = function(historyView) {
                 this.refs.forEach(function (ref) {
                     if (ref.indexOf("refs/remotes") == 0) {
                         ref = ref.substr(13);
-                        var reftype = "remote"
+                        var reftype = "remote";
                     } else if (ref.indexOf("refs/heads") == 0) {
                         ref = ref.substr(11);
-                        var reftype = "head"
+                        var reftype = "head";
+                    } else if (ref.indexOf("tag: refs/tags") == 0) {
+                        ref = ref.substr(15);
+                        var reftype = "tag";
                     } else {
-                        var reftype = "symbolic"
+                        var reftype = "symbolic";
                     }
                     $('<span class="log-entry-ref-' + reftype + '">' + ref + '</span>').appendTo(container);
                 });
