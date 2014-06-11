@@ -19,16 +19,22 @@ body {
   margin: 0; }
 
 .button-box {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
   display: flex;
   text-align: center;
   background-color: #f0f0f0;
-  border: solid #d0d0d0;
-  border-width: 0 0 1px 0;
   cursor: default; }
   .button-box a {
     flex: 1 0 0;
     padding: 0.3em; }
-  .button-box .button-box-current {
+  .button-box a:hover {
+    background-color: #d0d0d0; }
+  .button-box a:active, .button-box .button-box-current {
     background-color: #33b5e5; }
 
 #sidebar {
@@ -158,12 +164,14 @@ body {
   flex-direction: column;
   height: 100%;
   width: 100%; }
-
-#commit-view-content {
-  display: flex;
-  flex: 1 0 0;
-  width: 100%;
-  overflow: auto; }
+  #commit-view #commit-view-header {
+    border: solid #d0d0d0;
+    border-width: 0 0 1px 0; }
+  #commit-view #commit-view-content {
+    display: flex;
+    flex: 1 0 0;
+    width: 100%;
+    overflow: auto; }
 
 .diff-view {
   height: 100%;
@@ -214,7 +222,7 @@ body {
     width: 100%;
     border: 0; }
   #tree-view .tree-item:hover {
-    background-color: #8ad5f0; }
+    background-color: #d0d0d0; }
   #tree-view .tree-item {
     display: flex;
     padding: 0.15em;
@@ -244,6 +252,12 @@ body {
     flex: 2 0 0;
     overflow: auto; }
   #workspace-view #workspace-editor {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
     flex: 1 0 0;
     display: flex;
     align-items: stretch;
@@ -254,12 +268,19 @@ body {
       display: flex;
       flex-direction: column;
       align-items: stretch; }
-      #workspace-view #workspace-editor .workspace-editor-box p {
+      #workspace-view #workspace-editor .workspace-editor-box div:first-child {
         margin: 0;
-        padding: 0.5em;
+        padding: 0.3em;
         background-color: #f0f0f0;
         border: solid #d0d0d0;
         border-width: 0 0 1px 0; }
+        #workspace-view #workspace-editor .workspace-editor-box div:first-child span:first-child {
+          padding: 0.3em; }
+    #workspace-view #workspace-editor .workspace-editor-box-header {
+      display: flex;
+      align-items: stretch; }
+      #workspace-view #workspace-editor .workspace-editor-box-header span:first-child {
+        flex: 1 0 0; }
     #workspace-view #workspace-editor #working-copy-view {
       flex: 2 0 0; }
     #workspace-view #workspace-editor #commit-message-view {
@@ -286,7 +307,13 @@ body {
 
 .file-list {
   flex: 1 0 0;
-  overflow: auto; }
+  overflow: auto;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none; }
   .file-list ul {
     display: table;
     margin: 0;
@@ -296,4 +323,5 @@ body {
     list-style: none;
     margin: 0;
     padding: 0.3em;
-    cursor: default; }
+    cursor: default;
+    white-space: nowrap; }
