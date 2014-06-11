@@ -67,7 +67,11 @@ body {
         padding: 0.3em;
     }
 
-    .button-box-current {
+    a:hover {
+        background-color: $medium_gray;
+    }
+
+    a:active, .button-box-current {
         background-color: $medium_blue;
     }
 }
@@ -345,7 +349,7 @@ body {
     }
 
     .tree-item:hover {
-        background-color: $light_blue;
+        background-color: $medium_gray;
     }
 
     .tree-item {
