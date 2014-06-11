@@ -18,6 +18,15 @@ $light_red:     #ff9494;
 $medium_red:    #ff4444;
 $dark_red:      #cc0000;
 
+@mixin no-select {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
 html, body {
     height: 100%;
     width: 100%;
@@ -44,6 +53,8 @@ body {
 }
 
 .button-box {
+    @include no-select;
+
     display: flex;
     text-align: center;
     background-color: $light_gray;
@@ -381,6 +392,8 @@ body {
     }
 
     #workspace-editor {
+        @include no-select;
+
         flex: 1 0 0;
         display: flex;
         align-items: stretch;
@@ -441,6 +454,7 @@ body {
 .file-list {
     flex: 1 0 0;
     overflow: auto;
+    @include no-select;
 
     ul {
         display: table;
