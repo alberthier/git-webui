@@ -169,7 +169,7 @@ webui.LogView = function(historyView) {
     var logView = this;
     this.historyView = historyView;
     this.element = $('<div id="log-view">')[0];
-    var currentSelection = null;
+    var currentSelection = -1;
 
     this.update = function(ref) {
         $(this.element).empty();
@@ -572,18 +572,6 @@ webui.WorkspaceView = function(mainView) {
  */
 webui.ChangedFilesView = function(workspaceView, type, label) {
 
-    var changedFilesView = this;
-    this.element = $(   '<div id="' + type + '-view" class="workspace-editor-box">' +
-                            '<p>'+ label + '</p>' +
-                            '<div id="' + type + '-file-list" class="file-list">' +
-                                '<ul id="' + type + '-file-list-content" class="file-list"></ul>' +
-                            '</div>' +
-                        '</div>')[0];
-    var fileList = $("#" + type + "-file-list-content", this.element)[0];
-    var currentSelection = null;
-
-    this.filesCount = 0;
-
     this.update = function() {
         $(fileList).empty()
         var col = type == "working-copy" ? 1 : 0;
@@ -604,49 +592,129 @@ webui.ChangedFilesView = function(workspaceView, type, label) {
                     }
                 }
             });
+            if (selectedIndex !== null && selectedIndex >= fileList.childElementCount) {
+                selectedIndex = fileList.childElementCount - 1;
+                if (selectedIndex == -1) {
+                    selectedIndex = null;
+                }
+            }
+            if (selectedIndex !== null) {
+                var selectedNode = fileList.children[selectedIndex];
+                $(selectedNode).addClass("selected");
+                changedFilesView.refreshDiff(selectedNode);
+            }
         });
     };
 
     this.select = function(event) {
         var clicked = event.target;
-        if (currentSelection != clicked) {
-            if (currentSelection) {
-                $(currentSelection).removeClass("selected");
+
+        if (event.shiftKey && selectedIndex !== null) {
+            var clickedIndex = webui.getNodeIndex(clicked);
+            if (clickedIndex < selectedIndex) {
+                var from = clickedIndex;
+                var to = selectedIndex;
+            } else {
+                var from = selectedIndex;
+                var to = clickedIndex;
+            }
+            console.log(from, to);
+            for (var i = from; i <= to; ++i) {
+                $(fileList.children[i]).addClass("selected");
+            }
+            selectedIndex = clickedIndex;
+        } else if (event.ctrlKey) {
+            $(clicked).toggleClass("selected");
+            selectedIndex = webui.getNodeIndex(clicked);
+        } else {
+            for (var i = 0; i < fileList.childElementCount; ++i) {
+                $(fileList.children[i]).removeClass("selected");
             }
             $(clicked).addClass("selected");
-            currentSelection = clicked;
-            if (type == "working-copy") {
-                workspaceView.stagingAreaView.unselect();
-                var gitCmd = "diff "
-            } else {
-                workspaceView.workingCopyView.unselect();
-                var gitCmd = "diff --cached "
+            selectedIndex = webui.getNodeIndex(clicked);
+        }
+        if (type == "working-copy") {
+            workspaceView.stagingAreaView.unselect();
+        } else {
+            workspaceView.workingCopyView.unselect();
+        }
+        changedFilesView.refreshDiff(clicked);
+    };
+
+    this.refreshDiff = function(element) {
+        var gitCmd = "diff "
+        if (type == "staging-area") {
+            gitCmd += " --cached "
+        }
+        var filename = element.textContent;
+        webui.git(gitCmd + filename, function(data) {
+            workspaceView.diffView.update(data);
+        });
+
+    };
+
+    this.unselect = function() {
+        if (selectedIndex !== null) {
+            $(fileList.children[selectedIndex]).removeClass("selected");
+            selectedIndex = null;
+        }
+    };
+
+    this.getFileList = function() {
+        var files = "";
+        for (var i = 0; i < fileList.childElementCount; ++i) {
+            var child = fileList.children[i];
+            if ($(child).hasClass("selected")) {
+                files += '"' + (child.textContent) + '" ';
             }
-            var filename = clicked.childNodes[0].textContent;
-            webui.git(gitCmd + filename, function(data) {
-                workspaceView.diffView.update(data);
+        }
+        return files;
+    }
+
+    this.stage = function() {
+        var files = changedFilesView.getFileList();
+        if (files.length != 0) {
+            webui.git("add -- " + files, function(data) {
+                workspaceView.update();
             });
         }
     };
 
-    this.unselect = function() {
-        if (currentSelection) {
-            $(currentSelection).removeClass("selected");
-            currentSelection = null;
+    this.unstage = function() {
+        var files = changedFilesView.getFileList();
+        if (files.length != 0) {
+            webui.git("reset -- " + files, function(data) {
+                workspaceView.update();
+            });
+        }
+    };
+
+    this.cancel = function() {
+        var files = changedFilesView.getFileList();
+        if (files.length != 0) {
+            webui.git("checkout -- " + files, function(data) {
+                workspaceView.update();
+            });
         }
     }
 
-    this.stage = function(event) {
-        webui.git("add " + event.target.model, function(data) {
-            workspaceView.update();
-        });
-    };
+    var changedFilesView = this;
+    if (type == "working-copy") {
+        var buttons = new webui.ButtonBox(["Stage", changedFilesView.stage], ["Cancel", changedFilesView.cancel]);
+    } else {
+        var buttons = new webui.ButtonBox(["Unstage", changedFilesView.unstage]);
+    }
+    this.element = $(   '<div id="' + type + '-view" class="workspace-editor-box">' +
+                            '<div class="workspace-editor-box-header"><span>'+ label + '</span></div>' +
+                            '<div id="' + type + '-file-list" class="file-list">' +
+                                '<ul id="' + type + '-file-list-content" class="file-list"></ul>' +
+                            '</div>' +
+                        '</div>')[0];
+    $(".workspace-editor-box-header", this.element)[0].appendChild(buttons.element);
+    var fileList = $("#" + type + "-file-list-content", this.element)[0];
+    var selectedIndex = null;
 
-    this.unstage = function(event) {
-        webui.git("reset " + event.target.model, function(data) {
-            workspaceView.update();
-        });
-    };
+    this.filesCount = 0;
 };
 
 /*
@@ -657,7 +725,7 @@ webui.CommitMessageView = function(workspaceView) {
     var commitMessageView = this;
 
     this.element = $(   '<div id="commit-message-view" class="workspace-editor-box">' +
-                            '<p>Message</p>' +
+                            '<div class="workspace-editor-box-header"><span>Message</span></div>' +
                             '<textarea id="commit-message-textarea"></textarea>' +
                             '<div id="commit-controls">' +
                                 '<input id="amend" type="checkbox"><label for="amend">Amend</label>' +

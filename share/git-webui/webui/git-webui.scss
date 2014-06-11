@@ -58,8 +58,6 @@ body {
     display: flex;
     text-align: center;
     background-color: $light_gray;
-    border: solid $medium_gray;
-    border-width: 0 0 1px 0;
     cursor: default;
 
     a {
@@ -263,13 +261,18 @@ body {
     flex-direction: column;
     height: 100%;
     width: 100%;
-}
 
-#commit-view-content {
-    display: flex;
-    flex: 1 0 0;
-    width: 100%;
-    overflow: auto;
+    #commit-view-header {
+        border: solid $medium_gray;
+        border-width: 0 0 1px 0;
+    }
+
+    #commit-view-content {
+        display: flex;
+        flex: 1 0 0;
+        width: 100%;
+        overflow: auto;
+    }
 }
 
 .diff-view {
@@ -409,12 +412,25 @@ body {
             display: flex;
             flex-direction: column;
             align-items: stretch;
-            p {
+            div:first-child {
                 margin: 0;
-                padding: 0.5em;
+                padding: 0.3em;
                 background-color: $light_gray;
                 border: solid $medium_gray;
                 border-width: 0 0 1px 0;
+
+                span:first-child {
+                    padding: 0.3em;
+                }
+            }
+        }
+
+        .workspace-editor-box-header {
+            display: flex;
+            align-items: stretch;
+
+            span:first-child {
+                flex: 1 0 0;
             }
         }
 
