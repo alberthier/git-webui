@@ -21,10 +21,19 @@ webui.splitLines = function(data) {
     return data.split("\n").filter(function(s) { return s.length > 0; });
 };
 
-webui.ButtonBox = function() {
+webui.getNodeIndex = function(element) {
+    var index = 0;
+    while (element.previousElementSibling) {
+        element = element.previousElementSibling;
+        ++index;
+    }
+    return index;
+}
+
+webui.RadioButtonBox = function() {
 
     var buttonBox = this;
-    this.element = $('<div class="button-box">')[0];
+    this.element = $('<span class="button-box">')[0];
     var current = null;
 
     this.itemClicked = function(event) {
@@ -52,6 +61,19 @@ webui.ButtonBox = function() {
         a.onclick = this.itemClicked;
     }
 };
+
+webui.ButtonBox = function() {
+    var self = this;
+
+    self.element = $('<span class="button-box">')[0];
+
+    for (var i = 0; i < arguments.length; ++i) {
+        var item = arguments[i];
+        var a = $('<a> ' + item[0] + ' </a>')[0];
+        self.element.appendChild(a);
+        a.onclick = item[1];
+    }
+}
 
 /*
  * == SideBarView =============================================================
@@ -476,8 +498,10 @@ webui.CommitView = function(historyView) {
     };
 
     this.element = $('<div id="commit-view">')[0];
-    var buttonBox = new webui.ButtonBox(["Commit", this.showDiff], ["Tree", this.showTree]);
-    this.element.appendChild(buttonBox.element);
+    var commitViewHeader = $('<div id="commit-view-header">')[0];
+    this.element.appendChild(commitViewHeader);
+    var buttonBox = new webui.RadioButtonBox(["Commit", this.showDiff], ["Tree", this.showTree]);
+    commitViewHeader.appendChild(buttonBox.element);
     var commitViewContent = $('<div id="commit-view-content">')[0];
     this.element.appendChild(commitViewContent);
     var diffView = new webui.DiffView(this);
