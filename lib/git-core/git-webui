@@ -116,7 +116,7 @@ if __name__ == '__main__':
         sys.exit(1)
     WebUiRequestHandler.setup_paths(args.repo_root)
 
-    httpd = HTTPServer(("", args.port), WebUiRequestHandler)
+    httpd = HTTPServer(("127.0.0.1", args.port), WebUiRequestHandler)
 
     url = "http://localhost:{}".format(args.port)
     print("Serving at {}".format(url))
