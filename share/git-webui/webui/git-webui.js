@@ -2,6 +2,8 @@
 
 var webui = webui || {};
 
+webui.repo = "/";
+
 webui.git = function(cmd, callback) {
     $.post("git", cmd, function(data, status, xhr) {
         if (xhr.status == 200) {
@@ -30,7 +32,7 @@ webui.getNodeIndex = function(element) {
     return index;
 }
 
-webui.RadioButtonBox = function() {
+webui.RadioButtonBox = function(buttons) {
 
     var buttonBox = this;
     this.element = $('<span class="button-box">')[0];
@@ -53,8 +55,8 @@ webui.RadioButtonBox = function() {
         current.callback();
     }
 
-    for (var i = 0; i < arguments.length; ++i) {
-        var item = arguments[i];
+    for (var i = 0; i < buttons.length; ++i) {
+        var item = buttons[i];
         var a = $('<a> ' + item[0] + ' </a>')[0];
         this.element.appendChild(a);
         a.callback = item[1];
@@ -62,13 +64,13 @@ webui.RadioButtonBox = function() {
     }
 };
 
-webui.ButtonBox = function() {
+webui.ButtonBox = function(buttons) {
     var self = this;
 
     self.element = $('<span class="button-box">')[0];
 
-    for (var i = 0; i < arguments.length; ++i) {
-        var item = arguments[i];
+    for (var i = 0; i < buttons.length; ++i) {
+        var item = buttons[i];
         var a = $('<a> ' + item[0] + ' </a>')[0];
         self.element.appendChild(a);
         a.onclick = item[1];
@@ -263,7 +265,6 @@ webui.LogView = function(historyView) {
             if (this.refs) {
                 var entryName = $(".log-entry-name", this.element);
                 var container = $('<span class="log-entry-refs">').insertAfter(entryName);
-                console.log(entryName[0]);
                 this.refs.forEach(function (ref) {
                     if (ref.indexOf("refs/remotes") == 0) {
                         ref = ref.substr(13);
@@ -344,6 +345,9 @@ webui.TreeView = function(commitView) {
 
     var treeView = this;
     this.element = $('<div id="tree-view">')[0];
+    var breadcrumb = $('<div id="tree-view-breadcrumb">')[0];
+    treeView.element.appendChild(breadcrumb);
+    treeView.element.appendChild($('<div id="tree-view-tree-content">')[0]);
     var stack;
 
     function Entry(line) {
@@ -383,15 +387,33 @@ webui.TreeView = function(commitView) {
 
 
     this.update = function(treeRef) {
-        stack = [ treeRef ];
+        treeView.stack = [ { name: webui.repo, object: treeRef } ];
         this.showTree();
     }
 
+    this.createBreadcrumb = function() {
+        $(breadcrumb).empty();
+        var list = []
+        treeView.stack.forEach(function (item) {
+            list.push([item.name, treeView.breadcrumbClicked]);
+        });
+        var buttons = new webui.ButtonBox(list);
+        breadcrumb.appendChild(buttons.element);
+    }
+
+    this.breadcrumbClicked = function(event) {
+        var to = webui.getNodeIndex(event.target);
+        treeView.stack = treeView.stack.slice(0, to + 1);
+        treeView.showTree();
+    }
+
     this.showTree = function() {
-        $(this.element).empty();
-        var content = $('<div id="tree-view-tree-content">').appendTo(this.element)[0];
-        var treeRef = stack[stack.length - 1];
-        var parentTreeRef = stack[stack.length - 2];
+        treeView.element.lastElementChild.remove();
+        var treeViewTreeContent = $('<div id="tree-view-tree-content">')[0];
+        treeView.element.appendChild(treeViewTreeContent);
+        treeView.createBreadcrumb();
+        var treeRef = treeView.stack[treeView.stack.length - 1].object;
+        var parentTreeRef = treeView.stack.length > 1 ? treeView.stack[treeView.stack.length - 2].object : undefined;
         webui.git("ls-tree -l " + treeRef, function(data) {
             var blobs = [];
             var trees = [];
@@ -402,10 +424,10 @@ webui.TreeView = function(commitView) {
                                 '<span></span> ' +
                             '</div>')[0];
                 elt.onclick = function() {
-                    stack.pop();
+                    treeView.stack.pop();
                     treeView.showTree();
                 };
-                content.appendChild(elt);
+                treeViewTreeContent.appendChild(elt);
             }
             webui.splitLines(data).forEach(function(line) {
                 var entry = new Entry(line);
@@ -424,13 +446,13 @@ webui.TreeView = function(commitView) {
                 if (entry.type == "tree") {
                     trees.push(elt);
                     elt.onclick = function() {
-                        stack.push(elt.model.object);
+                        treeView.stack.push({ name: elt.model.name, object: elt.model.object});
                         treeView.showTree();
                     };
                 } else {
                     blobs.push(elt);
                     elt.onclick = function() {
-                        stack.push(elt.model.object);
+                        treeView.stack.push({ name: elt.model.name, object: elt.model.object});
                         treeView.showBlob();
                     };
                 }
@@ -441,27 +463,19 @@ webui.TreeView = function(commitView) {
             blobs.sort(compare);
             trees.sort(compare);
             trees.forEach(function (elt) {
-                content.appendChild(elt);
+                treeViewTreeContent.appendChild(elt);
             });
             blobs.forEach(function (elt) {
-                content.appendChild(elt);
+                treeViewTreeContent.appendChild(elt);
             });
         });
     }
 
     this.showBlob = function(blobRef) {
-        $(treeView.element).empty();
-        var content = $('<div id="tree-view-blob-content">' +
-                            '<div id="tree-view-blob-header">' +
-                                '<span>Back to folder</span>' +
-                            '</div>' +
-                            '<iframe src="/git/cat-file/' + stack[stack.length - 1] + '"></iframe>' +
-                        '</div>').appendTo(treeView.element)[0];
-        var button = $("span", content)[0];
-        button.onclick = function() {
-            stack.pop();
-            treeView.showTree();
-        };
+        treeView.element.lastElementChild.remove();
+        $(  '<div id="tree-view-blob-content">' +
+                '<iframe src="/git/cat-file/' + treeView.stack[treeView.stack.length - 1].object + '"></iframe>' +
+            '</div>').appendTo(treeView.element);
     }
 }
 
@@ -500,7 +514,7 @@ webui.CommitView = function(historyView) {
     this.element = $('<div id="commit-view">')[0];
     var commitViewHeader = $('<div id="commit-view-header">')[0];
     this.element.appendChild(commitViewHeader);
-    var buttonBox = new webui.RadioButtonBox(["Commit", this.showDiff], ["Tree", this.showTree]);
+    var buttonBox = new webui.RadioButtonBox([["Commit", this.showDiff], ["Tree", this.showTree]]);
     commitViewHeader.appendChild(buttonBox.element);
     var commitViewContent = $('<div id="commit-view-content">')[0];
     this.element.appendChild(commitViewContent);
@@ -618,7 +632,6 @@ webui.ChangedFilesView = function(workspaceView, type, label) {
                 var from = selectedIndex;
                 var to = clickedIndex;
             }
-            console.log(from, to);
             for (var i = from; i <= to; ++i) {
                 $(fileList.children[i]).addClass("selected");
             }
@@ -700,9 +713,9 @@ webui.ChangedFilesView = function(workspaceView, type, label) {
 
     var changedFilesView = this;
     if (type == "working-copy") {
-        var buttons = new webui.ButtonBox(["Stage", changedFilesView.stage], ["Cancel", changedFilesView.cancel]);
+        var buttons = new webui.ButtonBox([["Stage", changedFilesView.stage], ["Cancel", changedFilesView.cancel]]);
     } else {
-        var buttons = new webui.ButtonBox(["Unstage", changedFilesView.unstage]);
+        var buttons = new webui.ButtonBox([["Unstage", changedFilesView.unstage]]);
     }
     this.element = $(   '<div id="' + type + '-view" class="workspace-editor-box">' +
                             '<div class="workspace-editor-box-header"><span>'+ label + '</span></div>' +
@@ -780,6 +793,11 @@ function MainUi() {
     body.appendChild(this.element);
     this.historyView = new webui.HistoryView(this);
     this.workspaceView = new webui.WorkspaceView(this);
+    $.get("/dirname", function (data) {
+        webui.repo = data;
+        var title = $("title")[0];
+        title.textContent = "Git - " + webui.repo;
+    });
 }
 
 $(document).ready(function () {
