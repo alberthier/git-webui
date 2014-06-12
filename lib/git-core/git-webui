@@ -63,6 +63,9 @@ class WebUiRequestHandler(SimpleHTTPRequestHandler):
         if self.path.startswith("/git/cat-file/"):
             obj = self.path[14:]
             self.process(["git", "cat-file", "-p", obj])
+        elif self.path == "/dirname":
+            wc = os.path.split(WebUiRequestHandler.REPO_ROOT)[1]
+            self.send_text(200, codecs.encode(wc, "utf-8"))
         else:
             SimpleHTTPRequestHandler.do_GET(self)
 
@@ -86,11 +89,15 @@ class WebUiRequestHandler(SimpleHTTPRequestHandler):
         else:
             http_status = 500
             result = stderr
+        self.send_text(http_status, result)
+
+
+    def send_text(self, http_status, text):
         self.send_response(http_status)
         self.send_header("Content-type", "text/plain")
-        self.send_header("Content-Length", len(result))
+        self.send_header("Content-Length", len(text))
         self.end_headers()
-        self.wfile.write(result)
+        self.wfile.write(text)
 
 
 
