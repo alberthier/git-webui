@@ -34,19 +34,17 @@ webui.getNodeIndex = function(element) {
 
 webui.RadioButtonBox = function(buttons) {
 
-    var buttonBox = this;
-    this.element = $('<span class="button-box">')[0];
-    var current = null;
+    var self = this;
 
-    this.itemClicked = function(event) {
-        buttonBox.updateSelection(event.target);
+    self.itemClicked = function(event) {
+        self.updateSelection(event.target);
     }
 
-    this.select = function(index) {
-        buttonBox.updateSelection(this.element.children[index]);
+    self.select = function(index) {
+        self.updateSelection(self.element.children[index]);
     }
 
-    this.updateSelection = function(elt) {
+    self.updateSelection = function(elt) {
         if (current) {
             $(current).removeClass("button-box-current");
         }
@@ -55,16 +53,20 @@ webui.RadioButtonBox = function(buttons) {
         current.callback();
     }
 
+    self.element = $('<span class="button-box">')[0];
+    var current = null;
+
     for (var i = 0; i < buttons.length; ++i) {
         var item = buttons[i];
         var a = $('<a> ' + item[0] + ' </a>')[0];
-        this.element.appendChild(a);
+        self.element.appendChild(a);
         a.callback = item[1];
-        a.onclick = this.itemClicked;
+        a.onclick = self.itemClicked;
     }
 };
 
 webui.ButtonBox = function(buttons) {
+
     var self = this;
 
     self.element = $('<span class="button-box">')[0];
@@ -82,9 +84,29 @@ webui.ButtonBox = function(buttons) {
  */
 webui.SideBarView = function(mainView) {
 
-    this.mainView = mainView;
-    var sideBarView = this;
-    this.element = $(   '<div id="sidebar">' +
+    var self = this;
+
+    self.select = function(node) {
+        var selected = $(".selected", contentElement);
+        if (selected.length > 0) {
+            selected = selected[0];
+        } else {
+            selected = undefined;
+        }
+        if (selected != node) {
+            if (selected != undefined) {
+                $(selected).toggleClass("selected");
+            }
+            $(node).toggleClass("selected");
+            if (node.tagName == "LI") {
+                // TODO: find a better way to distinguish history viewer and working copy nodes
+                self.mainView.historyView.update(node.name);
+            }
+        }
+    };
+
+    self.mainView = mainView;
+    self.element = $(   '<div id="sidebar">' +
                             '<img id="sidebar-logo" src="git-logo.png">' +
                             '<div id="sidebar-content">' +
                                 '<div id="sidebar-workspace">' +
@@ -100,29 +122,29 @@ webui.SideBarView = function(mainView) {
                                 '</div>' +
                             '</div>' +
                         '</div>')[0];
-    var contentElement = $("#sidebar-content", this.element)[0];
-    var workspaceElement = $("#sidebar-workspace h1", this.element)[0];
+    var contentElement = $("#sidebar-content", self.element)[0];
+    var workspaceElement = $("#sidebar-workspace h1", self.element)[0];
 
     $(workspaceElement).click(function (event) {
-        sideBarView.select(workspaceElement);
-        sideBarView.mainView.workspaceView.update();
+        self.select(workspaceElement);
+        self.mainView.workspaceView.update();
     });
 
     webui.git("branch", function(data) {
         var branches = webui.splitLines(data);
         if (branches.length > 0) {
-            var branchesElement = $("#sidebar-branches", sideBarView.element)[0];
+            var branchesElement = $("#sidebar-branches", self.element)[0];
             branchesElement.style.display = "block";
             var ul = $("ul", branchesElement)[0];
             branches.forEach(function (branch) {
                 var name = branch.substr(2);
                 var li = $("<li>" + name + "</li>").appendTo(ul)[0];
                 li.name = name;
-                $(li).click(function (event) { sideBarView.select(li); });
+                $(li).click(function (event) { self.select(li); });
                 if (branch.substr(0, 1) == "*") {
                     $(li).addClass("branch-current")
                     window.setTimeout(function() {
-                        sideBarView.select(li);
+                        self.select(li);
                     }, 0);
                 }
             });
@@ -132,35 +154,16 @@ webui.SideBarView = function(mainView) {
     webui.git("tag", function(data) {
         var tags = webui.splitLines(data);
         if (tags.length > 0) {
-            var tagsElement = $("#sidebar-tags", sideBarView.element)[0];
+            var tagsElement = $("#sidebar-tags", self.element)[0];
             tagsElement.style.display = "block";
             var ul = $("ul", tagsElement)[0];
             tags.forEach(function (tag) {
                 var li = $("<li>" + tag + "</li>").appendTo(ul)[0];
                 li.name = tag;
-                $(li).click(function (event) { sideBarView.select(li); });
+                $(li).click(function (event) { self.select(li); });
             });
         }
     });
-
-    this.select = function(node) {
-        var selected = $(".selected", contentElement);
-        if (selected.length > 0) {
-            selected = selected[0];
-        } else {
-            selected = undefined;
-        }
-        if (selected != node) {
-            if (selected != undefined) {
-                $(selected).toggleClass("selected");
-            }
-            $(node).toggleClass("selected");
-            if (node.tagName == "LI") {
-                // TODO: find a better way to distinguish history viewer and working copy nodes
-                this.mainView.historyView.update(node.name);
-            }
-        }
-    };
 };
 
 /*
@@ -168,13 +171,10 @@ webui.SideBarView = function(mainView) {
  */
 webui.LogView = function(historyView) {
 
-    var logView = this;
-    this.historyView = historyView;
-    this.element = $('<div id="log-view">')[0];
-    var currentSelection = -1;
+    var self = this;
 
-    this.update = function(ref) {
-        $(this.element).empty();
+    self.update = function(ref) {
+        $(self.element).empty();
         webui.git("log --pretty=raw --decorate=full " + ref, function(data) {
             var start = 0;
             while (true) {
@@ -184,8 +184,8 @@ webui.LogView = function(historyView) {
                 } else {
                     var len = undefined;
                 }
-                var entry = new Entry(data.substr(start, len));
-                logView.element.appendChild(entry.element);
+                var entry = new Entry(self, data.substr(start, len));
+                self.element.appendChild(entry.element);
                 if (!currentSelection) {
                     entry.select();
                 }
@@ -208,64 +208,36 @@ webui.LogView = function(historyView) {
         this.date.setUTCSeconds(parseInt(secs));
     };
 
-    function Entry(data) {
-        this.parents = [];
-        this.message = ""
-        var entry = this;
+    function Entry(logView, data) {
+        var self = this;
 
-        data.split("\n").forEach(function(line) {
-            if (line.indexOf("commit ") == 0) {
-                entry.commit = line.substr(7, 40);
-                if (line.length > 47) {
-                    entry.refs = []
-                    var s = line.lastIndexOf("(") + 1;
-                    var e = line.lastIndexOf(")");
-                    line.substr(s, e - s).split(", ").forEach(function(ref) {
-                        entry.refs.push(ref);
-                    });
-                }
-            } else if (line.indexOf("parent ") == 0) {
-                entry.parents.push(line.substr(7));
-            } else if (line.indexOf("tree ") == 0) {
-                entry.tree = line.substr(5);
-            } else if (line.indexOf("author ") == 0) {
-                entry.author = new Person(line.substr(7));
-            } else if (line.indexOf("committer ") == 0) {
-                entry.committer = new Person(line.substr(10));
-            } else if (line.indexOf("    ") == 0) {
-                entry.message += line.substr(4) + "\n";
-            }
-        });
-
-        this.message = this.message.trimRight();
-
-        this.abbrevCommitHash = function() {
-            return this.commit.substr(0, 7);
+        self.abbrevCommitHash = function() {
+            return self.commit.substr(0, 7);
         };
 
-        this.abbrevMessage = function() {
-            var end = this.message.indexOf("\n");
+        self.abbrevMessage = function() {
+            var end = self.message.indexOf("\n");
             if (end == -1) {
-                return this.message
+                return self.message
             } else {
-                return this.message.substr(0, end);
+                return self.message.substr(0, end);
             }
         };
 
-        this.createElement = function() {
-            this.element = $('<div class="log-entry">' +
+        self.createElement = function() {
+            self.element = $('<div class="log-entry">' +
                                  '<div class="log-entry-header">' +
-                                     '<a class="log-entry-name" target="_blank" href="mailto:' + this.author.email + '">' + this.author.name + '</a> ' +
-                                     '<span  class="log-entry-date">' + this.author.date.toLocaleString() + '</span> ' +
-                                     '<pre class="log-entry-hash">' + this.abbrevCommitHash() + '</pre>' +
+                                     '<a class="log-entry-name" target="_blank" href="mailto:' + self.author.email + '">' + self.author.name + '</a> ' +
+                                     '<span  class="log-entry-date">' + self.author.date.toLocaleString() + '</span> ' +
+                                     '<pre class="log-entry-hash">' + self.abbrevCommitHash() + '</pre>' +
                                  '</div>' +
                                  '<div class="log-entry-message"></div>' +
                              '</div>')[0];
-            $(".log-entry-message", this.element)[0].appendChild(document.createTextNode(this.abbrevMessage()));
-            if (this.refs) {
-                var entryName = $(".log-entry-name", this.element);
+            $(".log-entry-message", self.element)[0].appendChild(document.createTextNode(self.abbrevMessage()));
+            if (self.refs) {
+                var entryName = $(".log-entry-name", self.element);
                 var container = $('<span class="log-entry-refs">').insertAfter(entryName);
-                this.refs.forEach(function (ref) {
+                self.refs.forEach(function (ref) {
                     if (ref.indexOf("refs/remotes") == 0) {
                         ref = ref.substr(13);
                         var reftype = "remote";
@@ -281,27 +253,60 @@ webui.LogView = function(historyView) {
                     $('<span class="log-entry-ref-' + reftype + '">' + ref + '</span>').appendTo(container);
                 });
             }
-            this.element.model = this;
-            var model = this;
-            $(this.element).click(function (event) {
+            self.element.model = self;
+            var model = self;
+            $(self.element).click(function (event) {
                 model.select();
             });
-            return this.element;
+            return self.element;
         };
 
-        this.select = function() {
-            if (currentSelection != this) {
+        self.select = function() {
+            if (currentSelection != self) {
                 if (currentSelection) {
                     $(currentSelection.element).removeClass("selected");
                 }
-                $(this.element).addClass("selected");
-                currentSelection = this;
-                logView.historyView.commitView.update(this);
+                $(self.element).addClass("selected");
+                currentSelection = self;
+                logView.historyView.commitView.update(self);
             }
         };
 
-        this.createElement();
+        self.parents = [];
+        self.message = ""
+
+        data.split("\n").forEach(function(line) {
+            if (line.indexOf("commit ") == 0) {
+                self.commit = line.substr(7, 40);
+                if (line.length > 47) {
+                    self.refs = []
+                    var s = line.lastIndexOf("(") + 1;
+                    var e = line.lastIndexOf(")");
+                    line.substr(s, e - s).split(", ").forEach(function(ref) {
+                        self.refs.push(ref);
+                    });
+                }
+            } else if (line.indexOf("parent ") == 0) {
+                self.parents.push(line.substr(7));
+            } else if (line.indexOf("tree ") == 0) {
+                self.tree = line.substr(5);
+            } else if (line.indexOf("author ") == 0) {
+                self.author = new Person(line.substr(7));
+            } else if (line.indexOf("committer ") == 0) {
+                self.committer = new Person(line.substr(10));
+            } else if (line.indexOf("    ") == 0) {
+                self.message += line.substr(4) + "\n";
+            }
+        });
+
+        self.message = self.message.trimRight();
+
+        self.createElement();
     };
+
+    self.historyView = historyView;
+    self.element = $('<div id="log-view">')[0];
+    var currentSelection = -1;
 };
 
 /*
@@ -309,16 +314,16 @@ webui.LogView = function(historyView) {
  */
 webui.DiffView = function(parent) {
 
-    this.element = $('<div class="diff-view">')[0];
+    var self = this;
 
-    this.update = function(diff) {
-        $(this.element).empty();
+    self.update = function(diff) {
+        $(self.element).empty();
 
         var inHeader = true;
         var diffLines = diff.split("\n");
         for (var i = 0; i < diffLines.length; ++i) {
             var line = diffLines[i];
-            var pre = $('<pre class="diff-view-line">').appendTo(this.element)[0];
+            var pre = $('<pre class="diff-view-line">').appendTo(self.element)[0];
             pre.appendChild(document.createTextNode(line));
             var c = line[0];
             if (c == '+') {
@@ -336,6 +341,8 @@ webui.DiffView = function(parent) {
             }
         }
     };
+
+    self.element = $('<div class="diff-view">')[0];
 };
 
 /*
@@ -343,77 +350,75 @@ webui.DiffView = function(parent) {
  */
 webui.TreeView = function(commitView) {
 
-    var treeView = this;
-    this.element = $('<div id="tree-view">')[0];
-    var breadcrumb = $('<div id="tree-view-breadcrumb">')[0];
-    treeView.element.appendChild(breadcrumb);
-    treeView.element.appendChild($('<div id="tree-view-tree-content">')[0]);
-    var stack;
+    var self = this;
 
     function Entry(line) {
-        var end = line.indexOf(" ");
-        this.mode = parseInt(line.substr(0, end));
-        var start = end + 1;
-        var end = line.indexOf(" ", start);
-        this.type = line.substr(start, end - start);
-        start = end + 1;
-        var end = line.indexOf(" ", start);
-        this.object = line.substr(start, end - start);
-        start = end + 1;
-        var end = line.indexOf("\t", start);
-        this.size = parseInt(line.substr(start, end - start).trim());
-        start = end + 1;
-        this.name = line.substr(start);
 
-        this.formatedSize = function(size) {
-            if (isNaN(this.size)) {
+        var self = this;
+
+        self.formatedSize = function(size) {
+            if (isNaN(self.size)) {
                 return ["", ""]
             }
-            if (this.size < 1024) {
-                return [this.size.toString(), ""];
-            } else if (this.size < 1024 * 1024) {
-                return [(this.size / 1024).toFixed(2), "K"];
-            } else if (this.size < 1024 * 1024 * 1024) {
-                return [(this.size / 1024 * 1024).toFixed(2), "M"];
+            if (self.size < 1024) {
+                return [self.size.toString(), ""];
+            } else if (self.size < 1024 * 1024) {
+                return [(self.size / 1024).toFixed(2), "K"];
+            } else if (self.size < 1024 * 1024 * 1024) {
+                return [(self.size / 1024 * 1024).toFixed(2), "M"];
             } else {
-                return [(this.size / 1024 * 1024 * 1024).toFixed(2), "G"];
+                return [(self.size / 1024 * 1024 * 1024).toFixed(2), "G"];
             }
         };
 
-        this.isSymbolicLink = function() {
-            return (this.mode & 120000) == 120000; // S_IFLNK
+        self.isSymbolicLink = function() {
+            return (self.mode & 120000) == 120000; // S_IFLNK
         }
+
+        var end = line.indexOf(" ");
+        self.mode = parseInt(line.substr(0, end));
+        var start = end + 1;
+        var end = line.indexOf(" ", start);
+        self.type = line.substr(start, end - start);
+        start = end + 1;
+        var end = line.indexOf(" ", start);
+        self.object = line.substr(start, end - start);
+        start = end + 1;
+        var end = line.indexOf("\t", start);
+        self.size = parseInt(line.substr(start, end - start).trim());
+        start = end + 1;
+        self.name = line.substr(start);
     }
 
 
-    this.update = function(treeRef) {
-        treeView.stack = [ { name: webui.repo, object: treeRef } ];
-        this.showTree();
+    self.update = function(treeRef) {
+        self.stack = [ { name: webui.repo, object: treeRef } ];
+        self.showTree();
     }
 
-    this.createBreadcrumb = function() {
+    self.createBreadcrumb = function() {
         $(breadcrumb).empty();
         var list = []
-        treeView.stack.forEach(function (item) {
-            list.push([item.name, treeView.breadcrumbClicked]);
+        self.stack.forEach(function (item) {
+            list.push([item.name, self.breadcrumbClicked]);
         });
         var buttons = new webui.ButtonBox(list);
         breadcrumb.appendChild(buttons.element);
     }
 
-    this.breadcrumbClicked = function(event) {
+    self.breadcrumbClicked = function(event) {
         var to = webui.getNodeIndex(event.target);
-        treeView.stack = treeView.stack.slice(0, to + 1);
-        treeView.showTree();
+        self.stack = self.stack.slice(0, to + 1);
+        self.showTree();
     }
 
-    this.showTree = function() {
-        treeView.element.lastElementChild.remove();
+    self.showTree = function() {
+        self.element.lastElementChild.remove();
         var treeViewTreeContent = $('<div id="tree-view-tree-content">')[0];
-        treeView.element.appendChild(treeViewTreeContent);
-        treeView.createBreadcrumb();
-        var treeRef = treeView.stack[treeView.stack.length - 1].object;
-        var parentTreeRef = treeView.stack.length > 1 ? treeView.stack[treeView.stack.length - 2].object : undefined;
+        self.element.appendChild(treeViewTreeContent);
+        self.createBreadcrumb();
+        var treeRef = self.stack[self.stack.length - 1].object;
+        var parentTreeRef = self.stack.length > 1 ? self.stack[self.stack.length - 2].object : undefined;
         webui.git("ls-tree -l " + treeRef, function(data) {
             var blobs = [];
             var trees = [];
@@ -424,8 +429,8 @@ webui.TreeView = function(commitView) {
                                 '<span></span> ' +
                             '</div>')[0];
                 elt.onclick = function() {
-                    treeView.stack.pop();
-                    treeView.showTree();
+                    self.stack.pop();
+                    self.showTree();
                 };
                 treeViewTreeContent.appendChild(elt);
             }
@@ -446,14 +451,14 @@ webui.TreeView = function(commitView) {
                 if (entry.type == "tree") {
                     trees.push(elt);
                     elt.onclick = function() {
-                        treeView.stack.push({ name: elt.model.name, object: elt.model.object});
-                        treeView.showTree();
+                        self.stack.push({ name: elt.model.name, object: elt.model.object});
+                        self.showTree();
                     };
                 } else {
                     blobs.push(elt);
                     elt.onclick = function() {
-                        treeView.stack.push({ name: elt.model.name, object: elt.model.object});
-                        treeView.showBlob();
+                        self.stack.push({ name: elt.model.name, object: elt.model.object});
+                        self.showBlob();
                     };
                 }
             });
@@ -471,12 +476,18 @@ webui.TreeView = function(commitView) {
         });
     }
 
-    this.showBlob = function(blobRef) {
-        treeView.element.lastElementChild.remove();
+    self.showBlob = function(blobRef) {
+        self.element.lastElementChild.remove();
         $(  '<div id="tree-view-blob-content">' +
-                '<iframe src="/git/cat-file/' + treeView.stack[treeView.stack.length - 1].object + '"></iframe>' +
-            '</div>').appendTo(treeView.element);
+                '<iframe src="/git/cat-file/' + self.stack[self.stack.length - 1].object + '"></iframe>' +
+            '</div>').appendTo(self.element);
     }
+
+    self.element = $('<div id="tree-view">')[0];
+    var breadcrumb = $('<div id="tree-view-breadcrumb">')[0];
+    self.element.appendChild(breadcrumb);
+    self.element.appendChild($('<div id="tree-view-tree-content">')[0]);
+    var stack;
 }
 
 /*
@@ -484,16 +495,15 @@ webui.TreeView = function(commitView) {
  */
 webui.CommitView = function(historyView) {
 
-    this.historyView = historyView;
-    var currentCommit = null;
+    var self = this;
 
-    this.update = function(entry) {
+    self.update = function(entry) {
         if (currentCommit == entry.commit) {
             // We already display the right data. No need to update.
             return;
         }
         currentCommit = entry.commit;
-        this.showDiff();
+        self.showDiff();
         buttonBox.select(0);
         webui.git("show " + entry.commit, function(data) {
             diffView.update(data);
@@ -501,25 +511,27 @@ webui.CommitView = function(historyView) {
         treeView.update(entry.tree);
     };
 
-    this.showDiff = function() {
+    self.showDiff = function() {
         $(commitViewContent).empty();
         commitViewContent.appendChild(diffView.element);
     };
 
-    this.showTree = function() {
+    self.showTree = function() {
         $(commitViewContent).empty();
         commitViewContent.appendChild(treeView.element);
     };
 
-    this.element = $('<div id="commit-view">')[0];
+    self.historyView = historyView;
+    var currentCommit = null;
+    self.element = $('<div id="commit-view">')[0];
     var commitViewHeader = $('<div id="commit-view-header">')[0];
-    this.element.appendChild(commitViewHeader);
-    var buttonBox = new webui.RadioButtonBox([["Commit", this.showDiff], ["Tree", this.showTree]]);
+    self.element.appendChild(commitViewHeader);
+    var buttonBox = new webui.RadioButtonBox([["Commit", self.showDiff], ["Tree", self.showTree]]);
     commitViewHeader.appendChild(buttonBox.element);
     var commitViewContent = $('<div id="commit-view-content">')[0];
-    this.element.appendChild(commitViewContent);
-    var diffView = new webui.DiffView(this);
-    var treeView = new webui.TreeView(this);
+    self.element.appendChild(commitViewContent);
+    var diffView = new webui.DiffView(self);
+    var treeView = new webui.TreeView(self);
 };
 
 /*
@@ -527,23 +539,23 @@ webui.CommitView = function(historyView) {
  */
 webui.HistoryView = function(mainView) {
 
-    var historyView = this;
-    this.element = $('<div id="history-view">')[0];
+    var self = this;
 
-    this.logView = new webui.LogView(this);
-    this.element.appendChild(this.logView.element);
-    this.commitView = new webui.CommitView(this);
-    this.element.appendChild(this.commitView.element);
-
-    this.show = function() {
+    self.show = function() {
         $(mainView.element).empty();
-        mainView.element.appendChild(this.element);
+        mainView.element.appendChild(self.element);
     };
 
-    this.update = function(ref) {
-        this.show();
-        this.logView.update(ref);
+    self.update = function(ref) {
+        self.show();
+        self.logView.update(ref);
     };
+
+    self.element = $('<div id="history-view">')[0];
+    self.logView = new webui.LogView(self);
+    self.element.appendChild(self.logView.element);
+    self.commitView = new webui.CommitView(self);
+    self.element.appendChild(self.commitView.element);
 };
 
 /*
@@ -551,34 +563,35 @@ webui.HistoryView = function(mainView) {
  */
 webui.WorkspaceView = function(mainView) {
 
-    var workspaceView = this;
-    this.element = $(   '<div id="workspace-view">' +
+    var self = this;
+
+    self.show = function() {
+        $(mainView.element).empty();
+        mainView.element.appendChild(self.element);
+    };
+
+    self.update = function() {
+        self.show();
+        self.diffView.update("");
+        self.workingCopyView.update();
+        self.stagingAreaView.update();
+        self.commitMessageView.update();
+    };
+
+    self.element = $(   '<div id="workspace-view">' +
                             '<div id="workspace-diff-view"></div>' +
                             '<div id="workspace-editor"></div>' +
                         '</div>')[0];
-    var workspaceDiffView = $("#workspace-diff-view", this.element)[0];
-    this.diffView = new webui.DiffView(this);
-    workspaceDiffView.appendChild(this.diffView.element);
-    var workspaceEditor = $("#workspace-editor", this.element)[0];
-    this.workingCopyView = new webui.ChangedFilesView(this, "working-copy", "Working Copy");
-    workspaceEditor.appendChild(this.workingCopyView.element);
-    this.commitMessageView = new webui.CommitMessageView(this);
-    workspaceEditor.appendChild(this.commitMessageView.element);
-    this.stagingAreaView = new webui.ChangedFilesView(this, "staging-area", "Staging Area");
-    workspaceEditor.appendChild(this.stagingAreaView.element);
-
-    this.show = function() {
-        $(mainView.element).empty();
-        mainView.element.appendChild(this.element);
-    };
-
-    this.update = function() {
-        this.show();
-        this.diffView.update("");
-        this.workingCopyView.update();
-        this.stagingAreaView.update();
-        this.commitMessageView.update();
-    };
+    var workspaceDiffView = $("#workspace-diff-view", self.element)[0];
+    self.diffView = new webui.DiffView(self);
+    workspaceDiffView.appendChild(self.diffView.element);
+    var workspaceEditor = $("#workspace-editor", self.element)[0];
+    self.workingCopyView = new webui.ChangedFilesView(self, "working-copy", "Working Copy");
+    workspaceEditor.appendChild(self.workingCopyView.element);
+    self.commitMessageView = new webui.CommitMessageView(self);
+    workspaceEditor.appendChild(self.commitMessageView.element);
+    self.stagingAreaView = new webui.ChangedFilesView(self, "staging-area", "Staging Area");
+    workspaceEditor.appendChild(self.stagingAreaView.element);
 };
 
 /*
@@ -586,23 +599,25 @@ webui.WorkspaceView = function(mainView) {
  */
 webui.ChangedFilesView = function(workspaceView, type, label) {
 
-    this.update = function() {
+    var self = this;
+
+    self.update = function() {
         $(fileList).empty()
         var col = type == "working-copy" ? 1 : 0;
         webui.git("status --porcelain", function(data) {
-            changedFilesView.filesCount = 0;
+            self.filesCount = 0;
             webui.splitLines(data).forEach(function(line) {
                 var status = line[col];
                 if (col == 0 && status != " " && status != "?" || col == 1 && status != " ") {
-                    ++changedFilesView.filesCount;
+                    ++self.filesCount;
                     var li = $('<li>').appendTo(fileList)[0];
                     li.model = line.substr(3);
                     li.appendChild(document.createTextNode(li.model));
-                    $(li).click(changedFilesView.select);
+                    $(li).click(self.select);
                     if (col == 0) {
-                        $(li).dblclick(changedFilesView.unstage);
+                        $(li).dblclick(self.unstage);
                     } else {
-                        $(li).dblclick(changedFilesView.stage);
+                        $(li).dblclick(self.stage);
                     }
                 }
             });
@@ -615,12 +630,12 @@ webui.ChangedFilesView = function(workspaceView, type, label) {
             if (selectedIndex !== null) {
                 var selectedNode = fileList.children[selectedIndex];
                 $(selectedNode).addClass("selected");
-                changedFilesView.refreshDiff(selectedNode);
+                self.refreshDiff(selectedNode);
             }
         });
     };
 
-    this.select = function(event) {
+    self.select = function(event) {
         var clicked = event.target;
 
         if (event.shiftKey && selectedIndex !== null) {
@@ -651,10 +666,10 @@ webui.ChangedFilesView = function(workspaceView, type, label) {
         } else {
             workspaceView.workingCopyView.unselect();
         }
-        changedFilesView.refreshDiff(clicked);
+        self.refreshDiff(clicked);
     };
 
-    this.refreshDiff = function(element) {
+    self.refreshDiff = function(element) {
         var gitCmd = "diff "
         if (type == "staging-area") {
             gitCmd += " --cached "
@@ -666,14 +681,14 @@ webui.ChangedFilesView = function(workspaceView, type, label) {
 
     };
 
-    this.unselect = function() {
+    self.unselect = function() {
         if (selectedIndex !== null) {
             $(fileList.children[selectedIndex]).removeClass("selected");
             selectedIndex = null;
         }
     };
 
-    this.getFileList = function() {
+    self.getFileList = function() {
         var files = "";
         for (var i = 0; i < fileList.childElementCount; ++i) {
             var child = fileList.children[i];
@@ -684,8 +699,8 @@ webui.ChangedFilesView = function(workspaceView, type, label) {
         return files;
     }
 
-    this.stage = function() {
-        var files = changedFilesView.getFileList();
+    self.stage = function() {
+        var files = self.getFileList();
         if (files.length != 0) {
             webui.git("add -- " + files, function(data) {
                 workspaceView.update();
@@ -693,8 +708,8 @@ webui.ChangedFilesView = function(workspaceView, type, label) {
         }
     };
 
-    this.unstage = function() {
-        var files = changedFilesView.getFileList();
+    self.unstage = function() {
+        var files = self.getFileList();
         if (files.length != 0) {
             webui.git("reset -- " + files, function(data) {
                 workspaceView.update();
@@ -702,8 +717,8 @@ webui.ChangedFilesView = function(workspaceView, type, label) {
         }
     };
 
-    this.cancel = function() {
-        var files = changedFilesView.getFileList();
+    self.cancel = function() {
+        var files = self.getFileList();
         if (files.length != 0) {
             webui.git("checkout -- " + files, function(data) {
                 workspaceView.update();
@@ -711,23 +726,22 @@ webui.ChangedFilesView = function(workspaceView, type, label) {
         }
     }
 
-    var changedFilesView = this;
     if (type == "working-copy") {
-        var buttons = new webui.ButtonBox([["Stage", changedFilesView.stage], ["Cancel", changedFilesView.cancel]]);
+        var buttons = new webui.ButtonBox([["Stage", self.stage], ["Cancel", self.cancel]]);
     } else {
-        var buttons = new webui.ButtonBox([["Unstage", changedFilesView.unstage]]);
+        var buttons = new webui.ButtonBox([["Unstage", self.unstage]]);
     }
-    this.element = $(   '<div id="' + type + '-view" class="workspace-editor-box">' +
+    self.element = $(   '<div id="' + type + '-view" class="workspace-editor-box">' +
                             '<div class="workspace-editor-box-header"><span>'+ label + '</span></div>' +
                             '<div id="' + type + '-file-list" class="file-list">' +
                                 '<ul id="' + type + '-file-list-content" class="file-list"></ul>' +
                             '</div>' +
                         '</div>')[0];
-    $(".workspace-editor-box-header", this.element)[0].appendChild(buttons.element);
-    var fileList = $("#" + type + "-file-list-content", this.element)[0];
+    $(".workspace-editor-box-header", self.element)[0].appendChild(buttons.element);
+    var fileList = $("#" + type + "-file-list-content", self.element)[0];
     var selectedIndex = null;
 
-    this.filesCount = 0;
+    self.filesCount = 0;
 };
 
 /*
@@ -735,9 +749,39 @@ webui.ChangedFilesView = function(workspaceView, type, label) {
  */
 webui.CommitMessageView = function(workspaceView) {
 
-    var commitMessageView = this;
+    var self = this;
 
-    this.element = $(   '<div id="commit-message-view" class="workspace-editor-box">' +
+    self.onAmend = function() {
+        if (self.amend.checked && self.textArea.value.length == 0) {
+            webui.git("log --pretty=format:%s -n 1", function(data) {
+                self.textArea.value = data;
+            });
+        }
+    };
+
+    self.onCommit = function() {
+        if (workspaceView.stagingAreaView.filesCount == 0) {
+            console.log("No files staged for commit");
+        } else if (self.textArea.value.length == 0) {
+            console.log("Enter a commit message first");
+        } else {
+            var cmd = "commit ";
+            if (amend.checked) {
+                cmd += "--amend ";
+            }
+            cmd += '-m "' + self.textArea.value + '"'
+            webui.git(cmd, function(data) {
+                self.textArea.value = "";
+                amend.checked = false;
+                workspaceView.update();
+            });
+        }
+    }
+
+    self.update = function() {
+    }
+
+    self.element = $(   '<div id="commit-message-view" class="workspace-editor-box">' +
                             '<div class="workspace-editor-box-header"><span>Message</span></div>' +
                             '<textarea id="commit-message-textarea"></textarea>' +
                             '<div id="commit-controls">' +
@@ -745,39 +789,10 @@ webui.CommitMessageView = function(workspaceView) {
                                 '<button type="button">Commit</button>' +
                             '</div>' +
                         '</div>')[0];
-    var textArea = $("#commit-message-textarea", this.element)[0];
-    var amend = $("input", this.element)[0];
-    var commitButton = $("button", this.element)[0];
-
-    amend.onchange = function() {
-        if (amend.checked && textArea.value.length == 0) {
-            webui.git("log --pretty=format:%s -n 1", function(data) {
-                textArea.value = data;
-            });
-        }
-    };
-
-    commitButton.onclick = function() {
-        if (workspaceView.stagingAreaView.filesCount == 0) {
-            console.log("No files staged for commit");
-        } else if (textArea.value.length == 0) {
-            console.log("Enter a commit message first");
-        } else {
-            var cmd = "commit ";
-            if (amend.checked) {
-                cmd += "--amend ";
-            }
-            cmd += '-m "' + textArea.value + '"'
-            webui.git(cmd, function(data) {
-                textArea.value = "";
-                amend.checked = false;
-                workspaceView.update();
-            });
-        }
-    }
-
-    this.update = function() {
-    };
+    self.textArea = $("#commit-message-textarea", self.element)[0];
+    self.amend = $("input", self.element)[0];
+    self.amend.onchange = self.onAmend;
+    $("button", self.element)[0].onclick = self.onCommit;
 };
 
 
@@ -785,14 +800,17 @@ webui.CommitMessageView = function(workspaceView) {
  *  == Initialization =========================================================
  */
 function MainUi() {
-    var body = $("body")[0];
-    this.sideBarView = new webui.SideBarView(this);
-    body.appendChild(this.sideBarView.element);
 
-    this.element = $('<div id="main-view">')[0];
-    body.appendChild(this.element);
-    this.historyView = new webui.HistoryView(this);
-    this.workspaceView = new webui.WorkspaceView(this);
+    var self = this;
+
+    var body = $("body")[0];
+    self.sideBarView = new webui.SideBarView(self);
+    body.appendChild(self.sideBarView.element);
+
+    self.element = $('<div id="main-view">')[0];
+    body.appendChild(self.element);
+    self.historyView = new webui.HistoryView(self);
+    self.workspaceView = new webui.WorkspaceView(self);
     $.get("/dirname", function (data) {
         webui.repo = data;
         var title = $("title")[0];
