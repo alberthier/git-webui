@@ -277,45 +277,67 @@ body {
     }
 }
 
+.diff-view-container {
+    display: flex;
+    flex: 1;
+
+    .diff-view {
+        flex: 1 0 0;
+    }
+
+    .diff-view:first-child {
+        border: solid $medium_gray;
+        border-width: 0 1px 0 0;
+    }
+}
+
 .diff-view {
-    width: 100%;
-    display: table;
+    overflow: auto;
 
-    .diff-view-line {
-        margin: 0;
-        padding: 0 0.3em 0 0.3em;
-    }
+    .diff-view-lines {
+        width: 100%;
+        display: table;
 
-    .diff-line-header {
-        font-weight: bold;
-        background-color: $light_gray;
-    }
+        .diff-view-line {
+            margin: 0;
+            padding: 0 0.3em 0 0.3em;
+        }
 
-    .diff-line-header.diff-line-add {
-        background-color: $light_gray;
-        color: $dark_green;
-    }
+        .diff-line-header {
+            font-weight: bold;
+            background-color: $light_gray;
+        }
 
-    .diff-line-header.diff-line-del {
-        background-color: $light_gray;
-        color: $dark_red;
-    }
+        .diff-line-phantom {
+            background-color: $light_gray;
+        }
 
-    .diff-line-header.diff-line-offset {
-        background-color: $light_gray;
-        color: $dark_violet;
-    }
+        .diff-line-header.diff-line-add {
+            background-color: $light_gray;
+            color: $dark_green;
+        }
 
-    .diff-line-add {
-        background-color: $light_green;
-    }
+        .diff-line-header.diff-line-del {
+            background-color: $light_gray;
+            color: $dark_red;
+        }
 
-    .diff-line-del {
-        background-color: $light_red;
-    }
+        .diff-line-header.diff-line-offset {
+            background-color: $light_gray;
+            color: $dark_violet;
+        }
 
-    .diff-line-offset {
-        background-color: $light_violet;
+        .diff-line-add {
+            background-color: $light_green;
+        }
+
+        .diff-line-del {
+            background-color: $light_red;
+        }
+
+        .diff-line-offset {
+            background-color: $light_violet;
+        }
     }
 }
 
@@ -329,6 +351,11 @@ body {
     #tree-view-breadcrumb {
         a {
             flex: initial;
+        }
+
+        .button-box {
+            border: solid $medium_gray;
+            border-width: 0 0 1px 0;
         }
     }
 
@@ -396,6 +423,7 @@ body {
     width: 100%;
 
     #workspace-diff-view {
+        display: flex;
         flex: 2 0 0;
         overflow: auto;
     }

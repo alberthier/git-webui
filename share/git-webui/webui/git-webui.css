@@ -175,30 +175,43 @@ body {
     height: 100%;
     overflow: auto; }
 
+.diff-view-container {
+  display: flex;
+  flex: 1; }
+  .diff-view-container .diff-view {
+    flex: 1 0 0; }
+  .diff-view-container .diff-view:first-child {
+    border: solid #d0d0d0;
+    border-width: 0 1px 0 0; }
+
 .diff-view {
-  width: 100%;
-  display: table; }
-  .diff-view .diff-view-line {
-    margin: 0;
-    padding: 0 0.3em 0 0.3em; }
-  .diff-view .diff-line-header {
-    font-weight: bold;
-    background-color: #f0f0f0; }
-  .diff-view .diff-line-header.diff-line-add {
-    background-color: #f0f0f0;
-    color: #669900; }
-  .diff-view .diff-line-header.diff-line-del {
-    background-color: #f0f0f0;
-    color: #cc0000; }
-  .diff-view .diff-line-header.diff-line-offset {
-    background-color: #f0f0f0;
-    color: #9933cc; }
-  .diff-view .diff-line-add {
-    background-color: #c5e26d; }
-  .diff-view .diff-line-del {
-    background-color: #ff9494; }
-  .diff-view .diff-line-offset {
-    background-color: #d6adeb; }
+  overflow: auto; }
+  .diff-view .diff-view-lines {
+    width: 100%;
+    display: table; }
+    .diff-view .diff-view-lines .diff-view-line {
+      margin: 0;
+      padding: 0 0.3em 0 0.3em; }
+    .diff-view .diff-view-lines .diff-line-header {
+      font-weight: bold;
+      background-color: #f0f0f0; }
+    .diff-view .diff-view-lines .diff-line-phantom {
+      background-color: #f0f0f0; }
+    .diff-view .diff-view-lines .diff-line-header.diff-line-add {
+      background-color: #f0f0f0;
+      color: #669900; }
+    .diff-view .diff-view-lines .diff-line-header.diff-line-del {
+      background-color: #f0f0f0;
+      color: #cc0000; }
+    .diff-view .diff-view-lines .diff-line-header.diff-line-offset {
+      background-color: #f0f0f0;
+      color: #9933cc; }
+    .diff-view .diff-view-lines .diff-line-add {
+      background-color: #c5e26d; }
+    .diff-view .diff-view-lines .diff-line-del {
+      background-color: #ff9494; }
+    .diff-view .diff-view-lines .diff-line-offset {
+      background-color: #d6adeb; }
 
 #tree-view {
   width: 100%;
@@ -208,6 +221,9 @@ body {
   display: flex; }
   #tree-view #tree-view-breadcrumb a {
     flex: initial; }
+  #tree-view #tree-view-breadcrumb .button-box {
+    border: solid #d0d0d0;
+    border-width: 0 0 1px 0; }
   #tree-view #tree-view-tree-content {
     width: 100%;
     height: 100%;
@@ -251,6 +267,7 @@ body {
   height: 100%;
   width: 100%; }
   #workspace-view #workspace-diff-view {
+    display: flex;
     flex: 2 0 0;
     overflow: auto; }
   #workspace-view #workspace-editor {

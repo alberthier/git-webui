@@ -312,37 +312,131 @@ webui.LogView = function(historyView) {
 /*
  * == DiffView ================================================================
  */
-webui.DiffView = function(parent) {
+webui.DiffView = function(sideBySide, parent) {
 
     var self = this;
 
     self.update = function(diff) {
-        $(self.element).empty();
+        if (sideBySide) {
+            self.updateSplitView(leftLines, diff, '-');
+            self.updateSplitView(rightLines, diff, '+');
+        } else {
+            self.updateSimpleView(single, diff);
+        }
+    };
+
+    self.updateSimpleView = function(view, diff) {
+        $(view).empty();
 
         var inHeader = true;
         var diffLines = diff.split("\n");
         for (var i = 0; i < diffLines.length; ++i) {
             var line = diffLines[i];
-            var pre = $('<pre class="diff-view-line">').appendTo(self.element)[0];
-            pre.appendChild(document.createTextNode(line));
+            inHeader = self.addDiffLine(view, inHeader, line);
+        }        
+    }
+
+    self.updateSplitView = function(view, diff, operation) {
+        $(view).empty();
+
+        var inHeader = true;
+        var diffLines = diff.split("\n");
+        var addedLines = [];
+        var removedLines = [];
+        for (var i = 0; i < diffLines.length; ++i) {
+            var line = diffLines[i];
             var c = line[0];
             if (c == '+') {
-                $(pre).addClass("diff-line-add");
+                addedLines.push(line);
             } else if (c == '-') {
-                $(pre).addClass("diff-line-del");
-            } else if (c == '@') {
-                $(pre).addClass("diff-line-offset");
-                inHeader = false;
-            } else if (c == 'd') {
-                inHeader = true;
-            }
-            if (inHeader) {
-                $(pre).addClass("diff-line-header");
+                removedLines.push(line);
+            } else {
+                self.flushAddedRemovedLines(view, inHeader, operation, addedLines, removedLines);
+                addedLines = [];
+                removedLines = [];
+                inHeader = self.addDiffLine(view, inHeader, line);
             }
         }
-    };
+        self.flushAddedRemovedLines(view, inHeader, operation, addedLines, removedLines);
+    }
 
-    self.element = $('<div class="diff-view">')[0];
+    self.flushAddedRemovedLines = function(view, inHeader, operation, addedLines, removedLines) {
+        if (operation == '+') {
+            var lines = addedLines;
+            var offset = removedLines.length - addedLines.length;
+        } else {
+            var lines = removedLines;
+            var offset = addedLines.length - removedLines.length;
+        }
+        lines.forEach(function(line) {
+            self.addDiffLine(view, inHeader, line);
+        });
+        if (offset > 0) {
+            for (var i = 0; i < offset; ++i) {
+                var pre = $('<pre class="diff-view-line diff-line-phantom">').appendTo(view)[0];
+                pre.appendChild(document.createTextNode(" "));
+            }
+        }
+    }
+
+    self.addDiffLine = function(view, inHeader, line) {
+        var c = line[0];
+        var pre = $('<pre class="diff-view-line">').appendTo(view)[0];
+        pre.appendChild(document.createTextNode(line));
+        if (c == '+') {
+            $(pre).addClass("diff-line-add");
+        } else if (c == '-') {
+            $(pre).addClass("diff-line-del");
+        } else if (c == '@') {
+            $(pre).addClass("diff-line-offset");
+            inHeader = false;
+        } else if (c == 'd') {
+            inHeader = true;
+        }
+        if (inHeader) {
+            $(pre).addClass("diff-line-header");
+        }
+        return inHeader;
+    }
+
+    self.diffViewScrolled = function(event) {
+        if (event.target == left) {
+            var current = left;
+            var other = right;
+        } else {
+            var current = right;
+            var other = left;
+        }
+        if (current.prevScrollTop != current.scrollTop) {
+            // Vertical scrolling
+            other.scrollTop = current.scrollTop
+            current.prevScrollTop = current.scrollTop;
+        } else {
+            // Horizontal scrolling
+            other.scrollLeft = current.scrollLeft
+            current.prevScrollLeft = current.scrollLeft;
+        }
+    }
+
+    if (sideBySide) {
+        self.element = $('<div class="diff-view-container">')[0];
+        var left = $('<div class="diff-view"><div class="diff-view-lines"></div></div>')[0];
+        self.element.appendChild(left);
+        var leftLines = left.firstChild;
+        left.onscroll = self.diffViewScrolled;
+        left.prevScrollTop = left.scrollTop;
+        left.prevScrollLeft = left.scrollLeft;
+        var right = $('<div class="diff-view"><div class="diff-view-lines"></div></div>')[0];
+        self.element.appendChild(right);
+        var rightLines = right.firstChild;
+        right.onscroll = self.diffViewScrolled;
+        right.prevScrollTop = right.scrollTop;
+        right.prevScrollLeft = right.scrollLeft;
+    } else {
+        self.element = $('<div class="diff-view"><div class="diff-view-lines"></div></div>')[0];
+        var single = self.element.firstChild;
+    }
+
 };
 
 /*
@@ -530,7 +624,7 @@ webui.CommitView = function(historyView) {
     commitViewHeader.appendChild(buttonBox.element);
     var commitViewContent = $('<div id="commit-view-content">')[0];
     self.element.appendChild(commitViewContent);
-    var diffView = new webui.DiffView(self);
+    var diffView = new webui.DiffView(false, self);
     var treeView = new webui.TreeView(self);
 };
 
@@ -583,7 +677,7 @@ webui.WorkspaceView = function(mainView) {
                             '<div id="workspace-editor"></div>' +
                         '</div>')[0];
     var workspaceDiffView = $("#workspace-diff-view", self.element)[0];
-    self.diffView = new webui.DiffView(self);
+    self.diffView = new webui.DiffView(true, self);
     workspaceDiffView.appendChild(self.diffView.element);
     var workspaceEditor = $("#workspace-editor", self.element)[0];
     self.workingCopyView = new webui.ChangedFilesView(self, "working-copy", "Working Copy");
@@ -752,9 +846,9 @@ webui.CommitMessageView = function(workspaceView) {
     var self = this;
 
     self.onAmend = function() {
-        if (self.amend.checked && self.textArea.value.length == 0) {
+        if (amend.checked && textArea.value.length == 0) {
             webui.git("log --pretty=format:%s -n 1", function(data) {
-                self.textArea.value = data;
+                textArea.value = data;
             });
         }
     };
@@ -762,16 +856,16 @@ webui.CommitMessageView = function(workspaceView) {
     self.onCommit = function() {
         if (workspaceView.stagingAreaView.filesCount == 0) {
             console.log("No files staged for commit");
-        } else if (self.textArea.value.length == 0) {
+        } else if (textArea.value.length == 0) {
             console.log("Enter a commit message first");
         } else {
             var cmd = "commit ";
             if (amend.checked) {
                 cmd += "--amend ";
             }
-            cmd += '-m "' + self.textArea.value + '"'
+            cmd += '-m "' + textArea.value + '"'
             webui.git(cmd, function(data) {
-                self.textArea.value = "";
+                textArea.value = "";
                 amend.checked = false;
                 workspaceView.update();
             });
@@ -789,9 +883,9 @@ webui.CommitMessageView = function(workspaceView) {
                                 '<button type="button">Commit</button>' +
                             '</div>' +
                         '</div>')[0];
-    self.textArea = $("#commit-message-textarea", self.element)[0];
-    self.amend = $("input", self.element)[0];
-    self.amend.onchange = self.onAmend;
+    var textArea = $("#commit-message-textarea", self.element)[0];
+    var amend = $("input", self.element)[0];
+    amend.onchange = self.onAmend;
     $("button", self.element)[0].onclick = self.onCommit;
 };
 
