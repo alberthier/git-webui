@@ -65,7 +65,8 @@ body {
     #sidebar #sidebar-content #sidebar-workspace {
       border-top: 1px solid #505050; }
       #sidebar #sidebar-content #sidebar-workspace h1 {
-        cursor: pointer; }
+        cursor: pointer;
+        padding: 0.3em 0; }
       #sidebar #sidebar-content #sidebar-workspace h1:before {
         content: url(computer.svg); }
     #sidebar #sidebar-content #sidebar-branches h1:before {
@@ -80,7 +81,7 @@ body {
       margin: 0.3em; }
     #sidebar #sidebar-content li {
       cursor: pointer;
-      padding: 0.15em 0 0.15em 1em; }
+      padding: 0.2em 0 0.2em 1em; }
     #sidebar #sidebar-content .sidebar-ref-selected {
       color: #33b5e5; }
     #sidebar #sidebar-content .branch-current {
@@ -178,14 +179,13 @@ body {
 .diff-view-container {
   display: flex;
   flex: 1; }
-  .diff-view-container .diff-view {
-    flex: 1 0 0; }
   .diff-view-container .diff-view:first-child {
     border: solid #d0d0d0;
     border-width: 0 1px 0 0; }
 
 .diff-view {
-  overflow: auto; }
+  overflow: auto;
+  flex: 1; }
   .diff-view .diff-view-lines {
     width: 100%;
     display: table; }

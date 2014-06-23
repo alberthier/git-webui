@@ -111,6 +111,7 @@ body {
             border-top: 1px solid darken($medium_gray, 50%);
             h1 {
                 cursor: pointer;
+                padding: 0.3em 0;
             }
 
             h1:before {
@@ -138,7 +139,7 @@ body {
 
         li {
             cursor: pointer;
-            padding: 0.15em 0 0.15em 1em;
+            padding: 0.2em 0 0.2em 1em;
         }
 
         .sidebar-ref-selected {
@@ -281,10 +282,6 @@ body {
     display: flex;
     flex: 1;
 
-    .diff-view {
-        flex: 1 0 0;
-    }
-
     .diff-view:first-child {
         border: solid $medium_gray;
         border-width: 0 1px 0 0;
@@ -293,6 +290,7 @@ body {
 
 .diff-view {
     overflow: auto;
+    flex: 1;
 
     .diff-view-lines {
         width: 100%;
