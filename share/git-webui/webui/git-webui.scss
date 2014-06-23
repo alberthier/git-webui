@@ -172,9 +172,6 @@ body {
     height: 100%;
     width: 100%;
     overflow-y: auto;
-    border-width: 0 1px 0 0;
-    border-style: solid;
-    border-color: $medium_gray;
     cursor: default;
     background-color: $light_gray;
 
@@ -262,6 +259,9 @@ body {
     flex-direction: column;
     height: 100%;
     width: 100%;
+    border-width: 0 0 0 1px;
+    border-style: solid;
+    border-color: $medium_gray;
 
     #commit-view-header {
         border: solid $medium_gray;
@@ -282,9 +282,9 @@ body {
     display: flex;
     flex: 1;
 
-    .diff-view:first-child {
+    .diff-view:last-child {
         border: solid $medium_gray;
-        border-width: 0 1px 0 0;
+        border-width: 0 0 0 1px;
     }
 }
 

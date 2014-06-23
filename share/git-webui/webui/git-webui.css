@@ -104,9 +104,6 @@ body {
   height: 100%;
   width: 100%;
   overflow-y: auto;
-  border-width: 0 1px 0 0;
-  border-style: solid;
-  border-color: #d0d0d0;
   cursor: default;
   background-color: #f0f0f0; }
   #log-view .log-entry:first-child {
@@ -164,7 +161,10 @@ body {
   display: flex;
   flex-direction: column;
   height: 100%;
-  width: 100%; }
+  width: 100%;
+  border-width: 0 0 0 1px;
+  border-style: solid;
+  border-color: #d0d0d0; }
   #commit-view #commit-view-header {
     border: solid #d0d0d0;
     border-width: 0 0 1px 0; }
@@ -179,9 +179,9 @@ body {
 .diff-view-container {
   display: flex;
   flex: 1; }
-  .diff-view-container .diff-view:first-child {
+  .diff-view-container .diff-view:last-child {
     border: solid #d0d0d0;
-    border-width: 0 1px 0 0; }
+    border-width: 0 0 0 1px; }
 
 .diff-view {
   overflow: auto;
