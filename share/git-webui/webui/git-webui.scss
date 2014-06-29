@@ -98,6 +98,10 @@ body {
         cursor: default;
         border-top: 1px solid darken($dark_gray, 10%);
 
+        >:first-child {
+            border-top: 1px solid darken($medium_gray, 50%);
+        }
+
         h1:before {
             vertical-align: middle;
             margin: 0.3em;
@@ -108,7 +112,6 @@ body {
         }
 
         #sidebar-workspace {
-            border-top: 1px solid darken($medium_gray, 50%);
             h1 {
                 cursor: pointer;
                 padding: 0.3em 0;

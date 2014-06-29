@@ -57,18 +57,18 @@ body {
     overflow-y: auto;
     cursor: default;
     border-top: 1px solid #181818; }
+    #sidebar #sidebar-content > :first-child {
+      border-top: 1px solid #505050; }
     #sidebar #sidebar-content h1:before {
       vertical-align: middle;
       margin: 0.3em; }
     #sidebar #sidebar-content h1 {
       margin: 1em 0 0 0; }
-    #sidebar #sidebar-content #sidebar-workspace {
-      border-top: 1px solid #505050; }
-      #sidebar #sidebar-content #sidebar-workspace h1 {
-        cursor: pointer;
-        padding: 0.3em 0; }
-      #sidebar #sidebar-content #sidebar-workspace h1:before {
-        content: url(computer.svg); }
+    #sidebar #sidebar-content #sidebar-workspace h1 {
+      cursor: pointer;
+      padding: 0.3em 0; }
+    #sidebar #sidebar-content #sidebar-workspace h1:before {
+      content: url(computer.svg); }
     #sidebar #sidebar-content #sidebar-branches h1:before {
       content: url(branch.svg); }
     #sidebar #sidebar-content #sidebar-tags h1:before {

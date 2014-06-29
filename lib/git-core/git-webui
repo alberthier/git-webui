@@ -66,6 +66,9 @@ class WebUiRequestHandler(SimpleHTTPRequestHandler):
         elif self.path == "/dirname":
             wc = os.path.split(WebUiRequestHandler.REPO_ROOT)[1]
             self.send_text(200, codecs.encode(wc, "utf-8"))
+        elif self.path == "/viewonly":
+            t = "1" if self.is_view_only() else "0"
+            self.send_text(200, codecs.encode(t, "utf-8"))
         else:
             SimpleHTTPRequestHandler.do_GET(self)
 
@@ -75,9 +78,19 @@ class WebUiRequestHandler(SimpleHTTPRequestHandler):
             content_length = int(self.headers["Content-Length"])
             args = codecs.decode(self.rfile.read(content_length), "utf-8")
             cmd = shlex.split("git " + args)
-            self.process(cmd)
+            action = cmd[1]
+            print(args)
+            if not self.is_view_only() or args in ["branch", "tag"] or action in ["show", "status", "log", "ls-tree"]:
+                self.process(cmd)
+            else:
+                self.send_error(403)
         else:
             self.send_error(404)
+
+
+    def is_view_only(self):
+        host = self.headers["Host"].split(":")[0]
+        return host not in ["127.0.0.1", "localhost"]
 
 
     def process(self, cmd):
@@ -123,7 +136,7 @@ if __name__ == '__main__':
         sys.exit(1)
     WebUiRequestHandler.setup_paths(args.repo_root)
 
-    httpd = HTTPServer(("127.0.0.1", args.port), WebUiRequestHandler)
+    httpd = HTTPServer(("", args.port), WebUiRequestHandler)
 
     url = "http://localhost:{}".format(args.port)
     print("Serving at {}".format(url))

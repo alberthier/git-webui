@@ -109,9 +109,6 @@ webui.SideBarView = function(mainView) {
     self.element = $(   '<div id="sidebar">' +
                             '<img id="sidebar-logo" src="git-logo.png">' +
                             '<div id="sidebar-content">' +
-                                '<div id="sidebar-workspace">' +
-                                    '<h1>Workspace</h1>' +
-                                '</div>' +
                                 '<div id="sidebar-branches" style="display: none;">' +
                                     '<h1>Branches</h1>' +
                                     '<ul></ul>' +
@@ -123,12 +120,19 @@ webui.SideBarView = function(mainView) {
                             '</div>' +
                         '</div>')[0];
     var contentElement = $("#sidebar-content", self.element)[0];
-    var workspaceElement = $("#sidebar-workspace h1", self.element)[0];
 
-    $(workspaceElement).click(function (event) {
-        self.select(workspaceElement);
-        self.mainView.workspaceView.update();
-    });
+    if (!webui.viewonly) {
+        var workspace = $(  '<div id="sidebar-workspace">' +
+                                '<h1>Workspace</h1>' +
+                            '</div>')[0];
+        contentElement.insertBefore(workspace, contentElement.firstChild);
+        var workspaceElement = $("h1", workspace)[0];
+
+        $(workspaceElement).click(function (event) {
+            self.select(workspaceElement);
+            self.mainView.workspaceView.update();
+        });
+    }
 
     webui.git("branch", function(data) {
         var branches = webui.splitLines(data);
@@ -897,18 +901,26 @@ function MainUi() {
 
     var self = this;
 
-    var body = $("body")[0];
-    self.sideBarView = new webui.SideBarView(self);
-    body.appendChild(self.sideBarView.element);
-
-    self.element = $('<div id="main-view">')[0];
-    body.appendChild(self.element);
-    self.historyView = new webui.HistoryView(self);
-    self.workspaceView = new webui.WorkspaceView(self);
     $.get("/dirname", function (data) {
         webui.repo = data;
         var title = $("title")[0];
         title.textContent = "Git - " + webui.repo;
+        $.get("/viewonly", function (data) {
+            webui.viewonly = data == "1";
+
+            var body = $("body")[0];
+        
+            self.sideBarView = new webui.SideBarView(self);
+            body.appendChild(self.sideBarView.element);
+
+            self.element = $('<div id="main-view">')[0];
+            body.appendChild(self.element);
+        
+            self.historyView = new webui.HistoryView(self);
+            if (!webui.viewonly) {
+                self.workspaceView = new webui.WorkspaceView(self);
+            }
+        });
     });
 }
 
