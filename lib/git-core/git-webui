@@ -24,6 +24,7 @@ class WebUiRequestHandler(SimpleHTTPRequestHandler):
 
     WEB_ROOT = None
     REPO_ROOT = None
+    DAEMON = None
 
     @classmethod
     def setup_paths(cls, repo_root):
@@ -31,6 +32,23 @@ class WebUiRequestHandler(SimpleHTTPRequestHandler):
         web_root = os.path.join(web_root, "share", "git-webui", "webui")
         WebUiRequestHandler.WEB_ROOT = web_root
         WebUiRequestHandler.REPO_ROOT = repo_root
+
+
+    @classmethod
+    def start_daemon(cls, rw):
+        WebUiRequestHandler.stop_daemon()
+        cmd = [ "git", "daemon", "--reuseaddr", "--strict-paths", "--export-all", "--base-path=" + WebUiRequestHandler.REPO_ROOT, "--enable=upload-pack", "--enable=upload-archive" ]
+        if rw:
+            cmd.append("--enable=receive-pack")
+        cmd.append(WebUiRequestHandler.REPO_ROOT + "/.git")
+        WebUiRequestHandler.DAEMON = subprocess.Popen(cmd)
+
+
+    @classmethod
+    def stop_daemon(cls):
+        if WebUiRequestHandler.DAEMON is not None:
+            WebUiRequestHandler.DAEMON.terminate()
+            WebUiRequestHandler.DAEMON = None
 
 
     def translate_path(self, path):
@@ -69,6 +87,21 @@ class WebUiRequestHandler(SimpleHTTPRequestHandler):
         elif self.path == "/viewonly":
             t = "1" if self.is_view_only() else "0"
             self.send_text(200, codecs.encode(t, "utf-8"))
+        elif self.path == "/daemon-start-rw":
+            self.start_daemon(True)
+            self.send_text(200, b"")
+        elif self.path == "/daemon-start-ro":
+            WebUiRequestHandler.start_daemon(False)
+            self.send_text(200, b"")
+        elif self.path == "/daemon-stop":
+            WebUiRequestHandler.stop_daemon()
+            self.send_text(200, b"")
+        elif self.path == "/daemon-status":
+            if WebUiRequestHandler.DAEMON is not None:
+                port = b"9418"
+            else:
+                port = b"0"
+            self.send_text(200, port)
         else:
             SimpleHTTPRequestHandler.do_GET(self)
 
@@ -146,4 +179,5 @@ if __name__ == '__main__':
         httpd.serve_forever()
     except KeyboardInterrupt:
         httpd.server_close()
+        WebUiRequestHandler.stop_daemon()
         sys.exit(0)
