@@ -122,6 +122,17 @@ webui.SideBarView = function(mainView) {
     var contentElement = $("#sidebar-content", self.element)[0];
 
     if (!webui.viewonly) {
+        var daemon = $( '<div id="sidebar-daemon">' +
+                            '<h1>Daemon</h1>' +
+                        '</div>')[0];
+        contentElement.insertBefore(daemon, contentElement.firstChild);
+        var daemonElement = $("h1", daemon)[0];
+
+        $(daemonElement).click(function (event) {
+            self.select(daemonElement);
+            //self.mainView.daemonView.update();
+        });
+
         var workspace = $(  '<div id="sidebar-workspace">' +
                                 '<h1>Workspace</h1>' +
                             '</div>')[0];
@@ -337,7 +348,7 @@ webui.DiffView = function(sideBySide, parent) {
         for (var i = 0; i < diffLines.length; ++i) {
             var line = diffLines[i];
             inHeader = self.addDiffLine(view, inHeader, line);
-        }        
+        }
     }
 
     self.updateSplitView = function(view, diff, operation) {
@@ -909,13 +920,13 @@ function MainUi() {
             webui.viewonly = data == "1";
 
             var body = $("body")[0];
-        
+
             self.sideBarView = new webui.SideBarView(self);
             body.appendChild(self.sideBarView.element);
 
             self.element = $('<div id="main-view">')[0];
             body.appendChild(self.element);
-        
+
             self.historyView = new webui.HistoryView(self);
             if (!webui.viewonly) {
                 self.workspaceView = new webui.WorkspaceView(self);

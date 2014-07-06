@@ -98,7 +98,7 @@ body {
         cursor: default;
         border-top: 1px solid darken($dark_gray, 10%);
 
-        >:first-child {
+        > :first-child {
             border-top: 1px solid darken($medium_gray, 50%);
         }
 
@@ -111,15 +111,19 @@ body {
             margin: 1em 0 0 0;
         }
 
-        #sidebar-workspace {
+        > div {
             h1 {
                 cursor: pointer;
                 padding: 0.3em 0;
             }
+        }
 
-            h1:before {
-                content: url(computer.svg);
-            }
+        #sidebar-workspace h1:before {
+            content: url(computer.svg);
+        }
+
+        #sidebar-daemon h1:before {
+            content: url(daemon.svg);
         }
 
         #sidebar-branches h1:before {

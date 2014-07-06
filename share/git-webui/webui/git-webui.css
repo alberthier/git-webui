@@ -64,11 +64,13 @@ body {
       margin: 0.3em; }
     #sidebar #sidebar-content h1 {
       margin: 1em 0 0 0; }
-    #sidebar #sidebar-content #sidebar-workspace h1 {
+    #sidebar #sidebar-content > div h1 {
       cursor: pointer;
       padding: 0.3em 0; }
     #sidebar #sidebar-content #sidebar-workspace h1:before {
       content: url(computer.svg); }
+    #sidebar #sidebar-content #sidebar-daemon h1:before {
+      content: url(daemon.svg); }
     #sidebar #sidebar-content #sidebar-branches h1:before {
       content: url(branch.svg); }
     #sidebar #sidebar-content #sidebar-tags h1:before {
