@@ -39,12 +39,20 @@ module.exports = function(grunt) {
             },
         },
 
+        shell: {
+            serve: {
+                command: './dist/lib/git-core/git-webui'
+            },
+        },
+
         clean: ['dist'],
     });
 
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-contrib-less');
     grunt.loadNpmTasks('grunt-contrib-clean');
+    grunt.loadNpmTasks('grunt-shell');
 
     grunt.registerTask('default', ['copy', 'less']);
+    grunt.registerTask('serve', ['default', 'shell:serve']);
 };
