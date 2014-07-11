@@ -107,7 +107,7 @@ webui.SideBarView = function(mainView) {
 
     self.mainView = mainView;
     self.element = $(   '<div id="sidebar">' +
-                            '<img id="sidebar-logo" src="git-logo.png">' +
+                            '<img id="sidebar-logo" src="/img/git-logo.png">' +
                             '<div id="sidebar-content">' +
                                 '<div id="sidebar-branches" style="display: none;">' +
                                     '<h1>Branches</h1>' +

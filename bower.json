@@ -1,0 +1,23 @@
+{
+  "name": "git-webui",
+  "version": "0.1.0",
+  "authors": [
+    "Éric ALBER <eric.alber@gmail.com>"
+  ],
+  "description": "A web user interface for git",
+  "keywords": [
+    "git",
+    "gui"
+  ],
+  "license": "LGPL",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "devDependencies": {
+    "bootstrap": "~3.2.0"
+  }
+}
