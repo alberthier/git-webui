@@ -16,6 +16,9 @@ module.exports = function(grunt) {
                 dest: 'dist/share/git-webui/webui/js/',
             },
             git_webui: {
+                options: {
+                    mode: true,
+                },
                 expand: true,
                 cwd: 'src',
                 src: ['lib/**', 'share/**', '!**/less', '!**/*.less'],
