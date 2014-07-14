@@ -37,7 +37,7 @@ webui.RadioButtonBox = function(buttons) {
     var self = this;
 
     self.itemClicked = function(event) {
-        self.updateSelection(event.target);
+        self.updateSelection(event.target.parentElement);
     }
 
     self.select = function(index) {
@@ -46,22 +46,22 @@ webui.RadioButtonBox = function(buttons) {
 
     self.updateSelection = function(elt) {
         if (current) {
-            $(current).removeClass("button-box-current");
+            $(current).removeClass("active");
         }
         current = elt;
-        $(current).addClass("button-box-current");
+        $(current).addClass("active");
         current.callback();
     }
 
-    self.element = $('<span class="button-box">')[0];
+    self.element = $('<ul class="nav nav-pills" role="tablist">')[0];
     var current = null;
 
     for (var i = 0; i < buttons.length; ++i) {
         var item = buttons[i];
-        var a = $('<a> ' + item[0] + ' </a>')[0];
-        self.element.appendChild(a);
-        a.callback = item[1];
-        a.onclick = self.itemClicked;
+        var li = $('<li><a>' + item[0] + '</a></li>')[0];
+        self.element.appendChild(li);
+        li.callback = item[1];
+        li.onclick = self.itemClicked;
     }
 };
 
