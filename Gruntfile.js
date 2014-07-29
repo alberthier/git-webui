@@ -45,6 +45,17 @@ module.exports = function(grunt) {
             },
         },
 
+        watch: {
+            scripts: {
+                files: ['src/lib/**/*', 'src/share/**/*.js'],
+                tasks: 'copy:git_webui'
+            },
+            css: {
+                files: 'src/**/*.less',
+                tasks: 'less',
+            },
+        },
+
         clean: ['dist'],
     });
 
@@ -52,6 +63,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-less');
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-shell');
+    grunt.loadNpmTasks('grunt-contrib-watch');
 
     grunt.registerTask('default', ['copy', 'less']);
     grunt.registerTask('serve', ['default', 'shell:serve']);
