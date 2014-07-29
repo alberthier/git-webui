@@ -32,7 +32,7 @@ webui.getNodeIndex = function(element) {
     return index;
 }
 
-webui.RadioButtonBox = function(buttons) {
+webui.TabBox = function(buttons) {
 
     var self = this;
 
@@ -54,7 +54,7 @@ webui.RadioButtonBox = function(buttons) {
 
     for (var i = 0; i < buttons.length; ++i) {
         var item = buttons[i];
-        var li = $('<li><a>' + item[0] + '</a></li>')[0];
+        var li = $('<li><a href="#">' + item[0] + '</a></li>')[0];
         self.element.appendChild(li);
         li.callback = item[1];
         li.onclick = self.itemClicked;
@@ -625,7 +625,7 @@ webui.CommitView = function(historyView) {
     self.element = $('<div id="commit-view">')[0];
     var commitViewHeader = $('<div id="commit-view-header">')[0];
     self.element.appendChild(commitViewHeader);
-    var buttonBox = new webui.RadioButtonBox([["Commit", self.showDiff], ["Tree", self.showTree]]);
+    var buttonBox = new webui.TabBox([["Commit", self.showDiff], ["Tree", self.showTree]]);
     commitViewHeader.appendChild(buttonBox.element);
     var commitViewContent = $('<div id="commit-view-content">')[0];
     self.element.appendChild(commitViewContent);
