@@ -217,12 +217,9 @@ body {
     flex-direction: column;
     height: 100%;
     width: 100%;
-    border-width: 0 0 0 1px;
-    border-style: solid;
-    border-color: @medium_gray;
 
     #commit-view-header {
-        border: solid @medium_gray;
+        border: solid @list-group-border;
         border-width: 0 0 1px 0;
     }
 
@@ -307,15 +304,9 @@ body {
     flex-direction: column;
     display: flex;
 
-    #tree-view-breadcrumb {
-        a {
-            flex: initial;
-        }
-
-        .button-box {
-            border: solid @medium_gray;
-            border-width: 0 0 1px 0;
-        }
+    .breadcrumb {
+        margin-bottom: 0;
+        border-bottom: 1px @list-group-border solid;
     }
 
     #tree-view-tree-content {
@@ -339,21 +330,18 @@ body {
         }
     }
 
-    .tree-item:hover {
-        background-color: @medium_gray;
-    }
-
-    .tree-item {
+    .list-group-item {
         display: flex;
-        padding: 0.15em;
         cursor: pointer;
+        border: 0;
+        padding: @padding-small-vertical @padding-small-horizontal;
     }
 
-    .tree-item>:first-child {
+    .list-group-item > :first-child {
         flex: 1 0 0;
     }
 
-    .tree-item>:last-child {
+    .list-group-item > :last-child {
         width: 2em;
     }
 

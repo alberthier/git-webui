@@ -513,7 +513,7 @@ webui.TreeView = function(commitView) {
 
     self.showTree = function() {
         self.element.lastElementChild.remove();
-        var treeViewTreeContent = $('<div id="tree-view-tree-content">')[0];
+        var treeViewTreeContent = $('<div id="tree-view-tree-content" class="list-group">')[0];
         self.element.appendChild(treeViewTreeContent);
         self.createBreadcrumb();
         var treeRef = self.stack[self.stack.length - 1].object;
@@ -522,11 +522,11 @@ webui.TreeView = function(commitView) {
             var blobs = [];
             var trees = [];
             if (parentTreeRef) {
-                var elt =   $('<div class="tree-item">' +
+                var elt =   $('<a href="#" class="list-group-item">' +
                                 '<span class="tree-item-tree">..</span> ' +
                                 '<span></span> ' +
                                 '<span></span> ' +
-                            '</div>')[0];
+                            '</a>')[0];
                 elt.onclick = function() {
                     self.stack.pop();
                     self.showTree();
@@ -536,11 +536,11 @@ webui.TreeView = function(commitView) {
             webui.splitLines(data).forEach(function(line) {
                 var entry = new Entry(line);
                 var size = entry.formatedSize()
-                var elt =   $('<div class="tree-item">' +
+                var elt =   $('<a href="#" class="list-group-item">' +
                                 '<span>' + entry.name + '</span> ' +
                                 '<span>' + size[0] + '</span>&nbsp;' +
                                 '<span>' + size[1] + '</span>' +
-                            '</div>')[0];
+                            '</a>')[0];
                 elt.model = entry;
                 var nameElt = $("span", elt)[0];
                 $(nameElt).addClass("tree-item-" + entry.type);
