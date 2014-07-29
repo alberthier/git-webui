@@ -45,16 +45,12 @@ webui.RadioButtonBox = function(buttons) {
     }
 
     self.updateSelection = function(elt) {
-        if (current) {
-            $(current).removeClass("active");
-        }
-        current = elt;
-        $(current).addClass("active");
-        current.callback();
+        $(".active", self.element).removeClass("active");
+        $(elt).addClass("active");
+        elt.callback();
     }
 
-    self.element = $('<ul class="nav nav-pills" role="tablist">')[0];
-    var current = null;
+    self.element = $('<ul class="nav nav-pills nav-justified" role="tablist">')[0];
 
     for (var i = 0; i < buttons.length; ++i) {
         var item = buttons[i];
