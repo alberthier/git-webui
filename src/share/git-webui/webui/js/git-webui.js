@@ -61,20 +61,6 @@ webui.RadioButtonBox = function(buttons) {
     }
 };
 
-webui.ButtonBox = function(buttons) {
-
-    var self = this;
-
-    self.element = $('<span class="button-box">')[0];
-
-    for (var i = 0; i < buttons.length; ++i) {
-        var item = buttons[i];
-        var a = $('<a> ' + item[0] + ' </a>')[0];
-        self.element.appendChild(a);
-        a.onclick = item[1];
-    }
-}
-
 /*
  * == SideBarView =============================================================
  */
@@ -502,16 +488,24 @@ webui.TreeView = function(commitView) {
 
     self.createBreadcrumb = function() {
         $(breadcrumb).empty();
-        var list = []
-        self.stack.forEach(function (item) {
-            list.push([item.name, self.breadcrumbClicked]);
-        });
-        var buttons = new webui.ButtonBox(list);
-        breadcrumb.appendChild(buttons.element);
+        for (var i = 0; i < self.stack.length; ++i) {
+            var last = i == self.stack.length - 1;
+            var name = self.stack[i].name;
+            if (!last) {
+                name = '<a href="#">' + name + '</a>';
+            }
+            var li = $('<li>' + name + '</li>')[0];
+            breadcrumb.appendChild(li);
+            if (!last) {
+                li.onclick = self.breadcrumbClicked;
+            } else {
+                $(li).addClass("active");
+            }
+        }
     }
 
     self.breadcrumbClicked = function(event) {
-        var to = webui.getNodeIndex(event.target);
+        var to = webui.getNodeIndex(event.target.parentElement);
         self.stack = self.stack.slice(0, to + 1);
         self.showTree();
     }
@@ -581,6 +575,7 @@ webui.TreeView = function(commitView) {
     }
 
     self.showBlob = function(blobRef) {
+        self.createBreadcrumb();
         self.element.lastElementChild.remove();
         $(  '<div id="tree-view-blob-content">' +
                 '<iframe src="/git/cat-file/' + self.stack[self.stack.length - 1].object + '"></iframe>' +
@@ -588,7 +583,7 @@ webui.TreeView = function(commitView) {
     }
 
     self.element = $('<div id="tree-view">')[0];
-    var breadcrumb = $('<div id="tree-view-breadcrumb">')[0];
+    var breadcrumb = $('<ol class="breadcrumb">')[0];
     self.element.appendChild(breadcrumb);
     self.element.appendChild($('<div id="tree-view-tree-content">')[0]);
     var stack;
@@ -831,9 +826,9 @@ webui.ChangedFilesView = function(workspaceView, type, label) {
     }
 
     if (type == "working-copy") {
-        var buttons = new webui.ButtonBox([["Stage", self.stage], ["Cancel", self.cancel]]);
+        //var buttons = new webui.ButtonBox([["Stage", self.stage], ["Cancel", self.cancel]]);
     } else {
-        var buttons = new webui.ButtonBox([["Unstage", self.unstage]]);
+        //var buttons = new webui.ButtonBox([["Unstage", self.unstage]]);
     }
     self.element = $(   '<div id="' + type + '-view" class="workspace-editor-box">' +
                             '<div class="workspace-editor-box-header"><span>'+ label + '</span></div>' +
