@@ -222,14 +222,15 @@ webui.LogView = function(historyView) {
         };
 
         self.createElement = function() {
-            self.element = $('<div class="log-entry list-group-item">' +
+            self.element = $('<a class="log-entry list-group-item">' +
                                 '<header>' +
-                                    '<h6><a target="_blank" href="mailto:' + self.author.email + '">' + self.author.name + '</a></h6>' +
+                                    '<h6></h6>' +
                                     '<span class="log-entry-date">' + self.author.date.toLocaleString() + '&nbsp;</span> ' +
                                     '<span class="badge">' + self.abbrevCommitHash() + '</span>' +
                                 '</header>' +
                                 '<p class="list-group-item-text"></p>' +
-                             '</div>')[0];
+                             '</a>')[0];
+            $('<a target="_blank" href="mailto:' + self.author.email + '">' + self.author.name + '</a>').appendTo($("h6", self.element));
             $(".list-group-item-text", self.element)[0].appendChild(document.createTextNode(self.abbrevMessage()));
             if (self.refs) {
                 var entryName = $("h6", self.element);
