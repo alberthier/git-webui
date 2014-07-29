@@ -236,32 +236,31 @@ webui.LogView = function(historyView) {
         };
 
         self.createElement = function() {
-            self.element = $('<div class="log-entry">' +
-                                 '<div class="log-entry-header">' +
-                                     '<a class="log-entry-name" target="_blank" href="mailto:' + self.author.email + '">' + self.author.name + '</a> ' +
-                                     '<span  class="log-entry-date">' + self.author.date.toLocaleString() + '</span> ' +
-                                     '<pre class="log-entry-hash">' + self.abbrevCommitHash() + '</pre>' +
-                                 '</div>' +
-                                 '<div class="log-entry-message"></div>' +
+            self.element = $('<div class="log-entry list-group-item">' +
+                                '<header>' +
+                                    '<h6><a target="_blank" href="mailto:' + self.author.email + '">' + self.author.name + '</a></h6>' +
+                                    '<span class="log-entry-date">' + self.author.date.toLocaleString() + '&nbsp;</span> ' +
+                                    '<span class="badge">' + self.abbrevCommitHash() + '</span>' +
+                                '</header>' +
+                                '<p class="list-group-item-text"></p>' +
                              '</div>')[0];
-            $(".log-entry-message", self.element)[0].appendChild(document.createTextNode(self.abbrevMessage()));
+            $(".list-group-item-text", self.element)[0].appendChild(document.createTextNode(self.abbrevMessage()));
             if (self.refs) {
-                var entryName = $(".log-entry-name", self.element);
-                var container = $('<span class="log-entry-refs">').insertAfter(entryName);
+                var entryName = $("h6", self.element);
                 self.refs.forEach(function (ref) {
                     if (ref.indexOf("refs/remotes") == 0) {
                         ref = ref.substr(13);
-                        var reftype = "remote";
+                        var reftype = "danger";
                     } else if (ref.indexOf("refs/heads") == 0) {
                         ref = ref.substr(11);
-                        var reftype = "head";
+                        var reftype = "success";
                     } else if (ref.indexOf("tag: refs/tags") == 0) {
                         ref = ref.substr(15);
-                        var reftype = "tag";
+                        var reftype = "info";
                     } else {
-                        var reftype = "symbolic";
+                        var reftype = "warning";
                     }
-                    $('<span class="log-entry-ref-' + reftype + '">' + ref + '</span>').appendTo(container);
+                    $('<span>&nbsp;</span><span class="label label-' + reftype + '">' + ref + '</span>').insertAfter(entryName);
                 });
             }
             self.element.model = self;
@@ -275,9 +274,9 @@ webui.LogView = function(historyView) {
         self.select = function() {
             if (currentSelection != self) {
                 if (currentSelection) {
-                    $(currentSelection.element).removeClass("selected");
+                    $(currentSelection.element).removeClass("active");
                 }
-                $(self.element).addClass("selected");
+                $(self.element).addClass("active");
                 currentSelection = self;
                 logView.historyView.commitView.update(self);
             }
@@ -316,7 +315,7 @@ webui.LogView = function(historyView) {
     };
 
     self.historyView = historyView;
-    self.element = $('<div id="log-view">')[0];
+    self.element = $('<div id="log-view" class="list-group">')[0];
     var currentSelection = -1;
 };
 

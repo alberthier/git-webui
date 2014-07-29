@@ -179,84 +179,36 @@ body {
     width: 100%;
     overflow-y: auto;
     cursor: default;
-    background-color: @light_gray;
+    margin-bottom: 0;
 
     .log-entry:first-child {
         border-top-width: 0;
     }
 
     .log-entry {
-        border-top: 1px solid white;
-        border-bottom: 1px solid @medium_gray;
-        padding: 3px 6px 3px 6px;
+        padding: @padding-small-vertical @padding-small-horizontal;
 
-        .log-entry-header {
+        header {
             display: flex;
             align-items: baseline;
-            font-size: 9pt;
-            color: @dark_gray;
-            padding-bottom: 3px;
 
-            .log-entry-name {
-                color: inherit;
+            h6 {
                 font-weight: bold;
-                font-style: italic;
-                text-decoration: initial;
+                margin-top: 0;
+
+                a {
+                    color: inherit;
+                }
             }
 
-            .log-entry-refs {
-                margin-left: 1em;
-
-                span {
-                    border-radius: 1em;
-                    padding: 0 0.5em;
-                    margin: 0 0.3em;
-                    font-size: 75%;
-                }
-
-                .log-entry-ref-remote {
-                    border: 1px solid @dark_orange;
-                    background-color: @medium_orange;
-                }
-
-                .log-entry-ref-head {
-                    border: 1px solid @dark_green;
-                    background-color: @medium_green;
-                }
-
-                .log-entry-ref-tag {
-                    border: 1px solid @dark_violet;
-                    background-color: @medium_violet;
-                }
-
-                .log-entry-ref-symbolic {
-                    border: 1px solid @dark_red;
-                    background-color: @medium_red;
-                }
+            .badge {
+                font-family: @font-family-monospace;
             }
 
             .log-entry-date {
                 margin-left: auto;
             }
-
-            .log-entry-hash {
-                padding-left: 0.5em;
-                display: inline;
-                font-weight: bold;
-                margin: 0 0 0 0;
-            }
         }
-
-        .log-entry-message {
-            margin-left: 0.5em;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-    }
-
-    .selected {
-        background-color: @medium_blue;
     }
 }
 
