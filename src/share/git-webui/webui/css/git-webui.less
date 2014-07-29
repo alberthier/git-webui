@@ -1,4 +1,6 @@
 // Theme
+@import "variables.less";
+
 @light_gray:    #f0f0f0;
 @medium_gray:   #d0d0d0;
 @dark_gray:     #313131;
@@ -80,8 +82,8 @@ body {
     align-items: stretch;
     height: 100%;
     width: 14em;
-    background-color: @dark_gray;
-    color: @light_gray;
+    background-color: @gray-dark;
+    color: @gray-lighter;
 
     #sidebar-logo {
         display: block;
@@ -104,17 +106,18 @@ body {
 
         h1:before {
             vertical-align: middle;
-            margin: 0.3em;
+            margin: @padding-base-horizontal;
         }
 
         h1 {
-            margin: 1em 0 0 0;
+            vertical-align: baseline;
+            margin: 0.5em 0 0 0;
         }
 
         > div {
             h1 {
                 cursor: pointer;
-                padding: 0.3em 0;
+                padding: @padding-large-vertical 0;
             }
         }
 
@@ -141,16 +144,12 @@ body {
 
         li:before {
             content: "\2022";
-            margin: 0.3em;
+            margin: @padding-base-horizontal;
         }
 
         li {
             cursor: pointer;
-            padding: 0.2em 0 0.2em 1em;
-        }
-
-        .sidebar-ref-selected {
-            color: @medium_blue;
+            padding: @padding-base-vertical 0 @padding-base-vertical 1em;
         }
 
         .branch-current {
@@ -165,7 +164,7 @@ body {
 }
 
 .selected {
-    background-color: @medium_blue;
+    background-color: @brand-primary;
 }
 
 #history-view {

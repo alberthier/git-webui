@@ -33,8 +33,8 @@
      bordercolor="#666666"
      borderopacity="1"
      inkscape:current-layer="layer9"
-     inkscape:cx="7.6933704"
-     inkscape:cy="10.969458"
+     inkscape:cx="-7.1053255"
+     inkscape:cy="4.6627926"
      gridtolerance="10"
      inkscape:guide-bbox="true"
      guidetolerance="10"
@@ -55,12 +55,12 @@
      inkscape:snap-nodes="true"
      inkscape:snap-others="false"
      inkscape:snap-to-guides="true"
-     inkscape:window-height="876"
+     inkscape:window-height="1056"
      inkscape:window-maximized="1"
-     inkscape:window-width="1375"
+     inkscape:window-width="1855"
      inkscape:window-x="65"
      inkscape:window-y="24"
-     inkscape:zoom="20.48">
+     inkscape:zoom="10.24">
     <inkscape:grid
        empspacing="2"
        enabled="true"
@@ -137,21 +137,21 @@
        inkscape:connector-curvature="0"
        d="m 27.0625,220.5 a 1.1640267,1.1640267 0 0 0 -0.6875,2 c 0.800009,0.80001 0.800009,2.07499 0,2.875 A 1.1640267,1.1640267 0 1 0 28,227 c 1.689583,-1.68958 1.689583,-4.43542 0,-6.125 A 1.1640267,1.1640267 0 0 0 27.0625,220.5 z"
        id="path6297"
-       style="font-size:medium;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;baseline-shift:baseline;color:#000000;fill:#f0f0f0;fill-opacity:1;stroke:none;stroke-width:2.32782053999999983;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Sans;-inkscape-font-specification:Sans"
+       style="font-size:medium;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;baseline-shift:baseline;color:#000000;fill:#eeeeee;fill-opacity:1;stroke:none;stroke-width:2.32782053999999983;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Sans;-inkscape-font-specification:Sans"
        transform="matrix(0,-0.784314,0.94117704,0,-161.76464,208.059)" />
     <path
        clip-path="url(#clipPath6258-0)"
        inkscape:connector-curvature="0"
        d="m 27.0625,221.125 a 0.55495196,0.55495196 0 0 0 -0.25,0.9375 c 1.032743,1.03274 1.032743,2.71726 0,3.75 a 0.55495196,0.55495196 0 1 0 0.78125,0.78125 c 1.456849,-1.45685 1.456849,-3.85565 0,-5.3125 A 0.55495196,0.55495196 0 0 0 27.0625,221.125 z"
        id="path6299"
-       style="font-size:medium;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;baseline-shift:baseline;color:#000000;fill:#f0f0f0;fill-opacity:1;stroke:none;stroke-width:1.10979294999999989;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Sans;-inkscape-font-specification:Sans"
+       style="font-size:medium;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;baseline-shift:baseline;color:#000000;fill:#eeeeee;fill-opacity:1;stroke:none;stroke-width:1.10979294999999989;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Sans;-inkscape-font-specification:Sans"
        transform="matrix(0,-1.72549,1.8821873,0,-372.49324,231.529)" />
     <path
        clip-path="url(#clipPath6254-6)"
        inkscape:connector-curvature="0"
        d="m 27.125,221.3125 a 0.36160181,0.36160181 0 0 0 -0.21875,0.59375 0.36160181,0.36160181 0 0 0 0.03125,0.0312 c 1.106624,1.10662 1.106624,2.89338 0,4 a 0.36160181,0.36160181 0 1 0 0.5,0.5 c 1.382968,-1.38297 1.382968,-3.61703 0,-5 a 0.36160181,0.36160181 0 0 0 -0.3125,-0.125 z"
        id="path6301"
-       style="font-size:medium;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;baseline-shift:baseline;color:#000000;fill:#f0f0f0;fill-opacity:1;stroke:none;stroke-width:0.72313130000000003;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Sans;-inkscape-font-specification:Sans"
+       style="font-size:medium;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;baseline-shift:baseline;color:#000000;fill:#eeeeee;fill-opacity:1;stroke:none;stroke-width:0.72313130000000003;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Sans;-inkscape-font-specification:Sans"
        transform="matrix(0,-2.66667,2.8685171,0,-593.37427,255)" />
     <path
        clip-path="none"
@@ -161,7 +161,7 @@
        id="path6305"
        sodipodi:rx="1"
        sodipodi:ry="1"
-       style="fill:#f0f0f0;fill-opacity:1;stroke:none;display:inline"
+       style="fill:#eeeeee;fill-opacity:1;stroke:none;display:inline"
        transform="matrix(1.9999995,0,0,1.9999995,-6.999785,-227.9999)"
        sodipodi:type="arc" />
   </g>
