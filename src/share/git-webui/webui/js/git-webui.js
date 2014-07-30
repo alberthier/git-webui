@@ -710,14 +710,14 @@ webui.ChangedFilesView = function(workspaceView, type, label) {
                 var status = line[col];
                 if (col == 0 && status != " " && status != "?" || col == 1 && status != " ") {
                     ++self.filesCount;
-                    var li = $('<li>').appendTo(fileList)[0];
-                    li.model = line.substr(3);
-                    li.appendChild(document.createTextNode(li.model));
-                    $(li).click(self.select);
+                    var item = $('<a class="list-group-item">').appendTo(fileList)[0];
+                    item.model = line.substr(3);
+                    item.appendChild(document.createTextNode(item.model));
+                    $(item).click(self.select);
                     if (col == 0) {
-                        $(li).dblclick(self.unstage);
+                        $(item).dblclick(self.unstage);
                     } else {
-                        $(li).dblclick(self.stage);
+                        $(item).dblclick(self.stage);
                     }
                 }
             });
@@ -729,7 +729,7 @@ webui.ChangedFilesView = function(workspaceView, type, label) {
             }
             if (selectedIndex !== null) {
                 var selectedNode = fileList.children[selectedIndex];
-                $(selectedNode).addClass("selected");
+                $(selectedNode).addClass("active");
                 self.refreshDiff(selectedNode);
             }
         });
@@ -748,17 +748,17 @@ webui.ChangedFilesView = function(workspaceView, type, label) {
                 var to = clickedIndex;
             }
             for (var i = from; i <= to; ++i) {
-                $(fileList.children[i]).addClass("selected");
+                $(fileList.children[i]).addClass("active");
             }
             selectedIndex = clickedIndex;
         } else if (event.ctrlKey) {
-            $(clicked).toggleClass("selected");
+            $(clicked).toggleClass("active");
             selectedIndex = webui.getNodeIndex(clicked);
         } else {
             for (var i = 0; i < fileList.childElementCount; ++i) {
-                $(fileList.children[i]).removeClass("selected");
+                $(fileList.children[i]).removeClass("active");
             }
-            $(clicked).addClass("selected");
+            $(clicked).addClass("active");
             selectedIndex = webui.getNodeIndex(clicked);
         }
         if (type == "working-copy") {
@@ -783,7 +783,7 @@ webui.ChangedFilesView = function(workspaceView, type, label) {
 
     self.unselect = function() {
         if (selectedIndex !== null) {
-            $(fileList.children[selectedIndex]).removeClass("selected");
+            $(fileList.children[selectedIndex]).removeClass("active");
             selectedIndex = null;
         }
     };
@@ -792,7 +792,7 @@ webui.ChangedFilesView = function(workspaceView, type, label) {
         var files = "";
         for (var i = 0; i < fileList.childElementCount; ++i) {
             var child = fileList.children[i];
-            if ($(child).hasClass("selected")) {
+            if ($(child).hasClass("active")) {
                 files += '"' + (child.textContent) + '" ';
             }
         }
@@ -826,19 +826,26 @@ webui.ChangedFilesView = function(workspaceView, type, label) {
         }
     }
 
-    if (type == "working-copy") {
-        //var buttons = new webui.ButtonBox([["Stage", self.stage], ["Cancel", self.cancel]]);
-    } else {
-        //var buttons = new webui.ButtonBox([["Unstage", self.unstage]]);
-    }
-    self.element = $(   '<div id="' + type + '-view" class="workspace-editor-box">' +
-                            '<div class="workspace-editor-box-header"><span>'+ label + '</span></div>' +
-                            '<div id="' + type + '-file-list" class="file-list">' +
-                                '<ul id="' + type + '-file-list-content" class="file-list"></ul>' +
+    self.element = $(   '<div id="' + type + '-view" class="panel panel-default">' +
+                            '<div class="panel-heading">' +
+                                '<h3>'+ label + '</h3>' +
+                                '<div class="btn-group"></div>' +
+                            '</div>' +
+                            '<div class="file-list-container">' +
+                                '<div class="list-group"></div>' +
                             '</div>' +
                         '</div>')[0];
-    $(".workspace-editor-box-header", self.element)[0].appendChild(buttons.element);
-    var fileList = $("#" + type + "-file-list-content", self.element)[0];
+    if (type == "working-copy") {
+        var buttons = [{ name: "Stage", callback: self.stage }, { name: "Cancel", callback: self.cancel }];
+    } else {
+        var buttons = [{ name: "Unstage", callback: self.unstage }];
+    }
+    var btnGroup = $(".btn-group", self.element);
+    buttons.forEach(function (btnData) {
+        var btn = $('<button type="button" class="btn btn-default">' + btnData.name + '</button>').appendTo(btnGroup)[0];
+        btn.onclick = btnData.callback;
+    });
+    var fileList = $(".list-group", self.element)[0];
     var selectedIndex = null;
 
     self.filesCount = 0;
@@ -852,7 +859,7 @@ webui.CommitMessageView = function(workspaceView) {
     var self = this;
 
     self.onAmend = function() {
-        if (amend.checked && textArea.value.length == 0) {
+        if (!$(amend).hasClass("active") && textArea.value.length == 0) {
             webui.git("log --pretty=format:%s -n 1", function(data) {
                 textArea.value = data;
             });
@@ -881,18 +888,20 @@ webui.CommitMessageView = function(workspaceView) {
     self.update = function() {
     }
 
-    self.element = $(   '<div id="commit-message-view" class="workspace-editor-box">' +
-                            '<div class="workspace-editor-box-header"><span>Message</span></div>' +
-                            '<textarea id="commit-message-textarea"></textarea>' +
-                            '<div id="commit-controls">' +
-                                '<input id="amend" type="checkbox"><label for="amend">Amend</label>' +
-                                '<button type="button">Commit</button>' +
+    self.element = $(   '<div id="commit-message-view" class="panel panel-default">' +
+                            '<div class="panel-heading">' +
+                                '<h3>Message</h3>' +
+                                '<div class="btn-group">' +
+                                    '<button type="button" class="btn btn-default commit-message-amend" data-toggle="button">Amend</button>' +
+                                    '<button type="button" class="btn btn-default commit-message-commit">Commit</button>' +
+                                '</div>' +
                             '</div>' +
+                            '<textarea></textarea>' +
                         '</div>')[0];
-    var textArea = $("#commit-message-textarea", self.element)[0];
-    var amend = $("input", self.element)[0];
-    amend.onchange = self.onAmend;
-    $("button", self.element)[0].onclick = self.onCommit;
+    var textArea = $("textarea", self.element)[0];
+    var amend = $(".commit-message-amend", self.element)[0];
+    amend.onclick = self.onAmend;
+    $(".commit-message-commit", self.element)[0].onclick = self.onCommit;
 };
 
 

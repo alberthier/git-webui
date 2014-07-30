@@ -374,100 +374,80 @@ body {
 
     #workspace-diff-view {
         display: flex;
-        flex: 2 0 0;
+        flex: 2;
         overflow: auto;
     }
 
     #workspace-editor {
         .no-select();
 
-        flex: 1 0 0;
+        flex: 1;
         display: flex;
         align-items: stretch;
         border: solid @medium_gray;
         border-width: 1px 0 0 0;
         cursor: default;
 
-        .workspace-editor-box {
-            display: flex;
-            flex-direction: column;
-            align-items: stretch;
-            div:first-child {
-                margin: 0;
-                padding: 0.3em;
-                background-color: @light_gray;
-                border: solid @medium_gray;
-                border-width: 0 0 1px 0;
+        #working-copy-view, #staging-area-view {
+            flex: 2;
 
-                span:first-child {
-                    padding: 0.3em;
+            .file-list-container {
+                flex: 1;
+                overflow: auto;
+
+                .list-group {
+                    display: table;
+                    margin: 0;
+                    width: 100%;
+
+                    .list-group-item:first-child {
+                        border-top: 0;
+                    }
+
+                    .list-group-item {
+                        padding: @padding-small-vertical @padding-small-horizontal;
+                        border-left: 0;
+                        border-right: 0;
+                    }
                 }
             }
-        }
-
-        .workspace-editor-box-header {
-            display: flex;
-            align-items: stretch;
-
-            span:first-child {
-                flex: 1 0 0;
-            }
-        }
-
-        #working-copy-view {
-            flex: 2 0 0;
         }
 
         #commit-message-view {
-            flex: 3 0 0;
-            border: solid @medium_gray;
-            border-width: 0 1px 0 1px;
+            flex: 3;
 
-            #commit-message-textarea {
-                flex: 1 0 0;
+            textarea {
+                flex: 1;
                 resize: none;
                 margin: 0;
                 border: 0;
+                outline: none;
                 padding: 0.3em;
             }
+        }
 
-            #commit-controls {
+        .panel {
+            display: flex;
+            flex-direction: column;
+            margin: 0;
+            border-width: 0 1px 0 0;
+            border-style: solid;
+            border-color: @separator-line;
+
+            .panel-heading {
+                padding: @padding-small-vertical @padding-small-horizontal;
                 display: flex;
                 align-items: center;
-                background-color: @light_gray;
-                border: solid @medium_gray;
-                border-width: 1px 0 0 0;
-                padding: 0.3em;
 
-                button {
-                    margin-left: auto;
+                h3 {
+                    flex: 1;
+                    margin: 0;
                 }
             }
         }
 
-        #staging-area-view {
-            flex: 2 0 0;
+        .panel:last-child {
+            border-width: 0;
         }
-    }
-}
-
-.file-list {
-    flex: 1 0 0;
-    overflow: auto;
-    .no-select();
-
-    ul {
-        display: table;
-        margin: 0;
-        padding: 0;
-        width: 100%;
-    }
-
-    li {
-        list-style: none;
-        margin: 0;
-        padding: 0.3em;
-        cursor: default;
-        white-space: nowrap;
     }
 }
