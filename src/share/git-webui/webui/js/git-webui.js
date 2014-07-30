@@ -303,7 +303,7 @@ webui.LogView = function(historyView) {
 
     self.historyView = historyView;
     self.element = $('<div id="log-view" class="list-group">')[0];
-    var currentSelection = -1;
+    var currentSelection = null;
 };
 
 /*
