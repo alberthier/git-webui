@@ -20,6 +20,8 @@
 @medium_red:    #ff4444;
 @dark_red:      #cc0000;
 
+@separator-line: @list-group-border;
+
 .no-select() {
   -webkit-touch-callout: none;
   -webkit-user-select: none;
@@ -180,6 +182,7 @@ body {
     overflow-y: auto;
     cursor: default;
     margin-bottom: 0;
+    border-right: 1px @separator-line solid;
 
     .log-entry:first-child {
         border-top-width: 0;
@@ -306,7 +309,7 @@ body {
 
     .breadcrumb {
         margin-bottom: 0;
-        border-bottom: 1px @list-group-border solid;
+        border-bottom: 1px @separator-line solid;
     }
 
     #tree-view-tree-content {
