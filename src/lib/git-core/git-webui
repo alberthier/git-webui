@@ -5,6 +5,7 @@ import codecs
 import os
 import posixpath
 import shlex
+import socket
 import subprocess
 import sys
 import webbrowser
@@ -35,11 +36,9 @@ class WebUiRequestHandler(SimpleHTTPRequestHandler):
 
 
     @classmethod
-    def start_daemon(cls, rw):
+    def start_daemon(cls):
         WebUiRequestHandler.stop_daemon()
         cmd = [ "git", "daemon", "--reuseaddr", "--strict-paths", "--export-all", "--base-path=" + WebUiRequestHandler.REPO_ROOT, "--enable=upload-pack", "--enable=upload-archive" ]
-        if rw:
-            cmd.append("--enable=receive-pack")
         cmd.append(WebUiRequestHandler.REPO_ROOT + "/.git")
         WebUiRequestHandler.DAEMON = subprocess.Popen(cmd)
 
@@ -84,24 +83,26 @@ class WebUiRequestHandler(SimpleHTTPRequestHandler):
         elif self.path == "/dirname":
             wc = os.path.split(WebUiRequestHandler.REPO_ROOT)[1]
             self.send_text(200, codecs.encode(wc, "utf-8"))
+        elif self.path == "/hostname":
+            self.send_text(200, codecs.encode(socket.gethostname(), "utf-8"))
         elif self.path == "/viewonly":
             t = "1" if self.is_view_only() else "0"
             self.send_text(200, codecs.encode(t, "utf-8"))
-        elif self.path == "/daemon-start-rw":
-            self.start_daemon(True)
-            self.send_text(200, b"")
-        elif self.path == "/daemon-start-ro":
-            WebUiRequestHandler.start_daemon(False)
-            self.send_text(200, b"")
-        elif self.path == "/daemon-stop":
-            WebUiRequestHandler.stop_daemon()
-            self.send_text(200, b"")
-        elif self.path == "/daemon-status":
-            if WebUiRequestHandler.DAEMON is not None:
-                port = b"9418"
+        elif not self.is_view_only():
+            if self.path == "/daemon-start":
+                WebUiRequestHandler.start_daemon()
+                self.send_text(200, b"")
+            elif self.path == "/daemon-stop":
+                WebUiRequestHandler.stop_daemon()
+                self.send_text(200, b"")
+            elif self.path == "/daemon-status":
+                if WebUiRequestHandler.DAEMON is not None:
+                    port = b"9418"
+                else:
+                    port = b"0"
+                self.send_text(200, port)
             else:
-                port = b"0"
-            self.send_text(200, port)
+                SimpleHTTPRequestHandler.do_GET(self)
         else:
             SimpleHTTPRequestHandler.do_GET(self)
 
