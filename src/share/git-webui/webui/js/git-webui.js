@@ -112,7 +112,7 @@ webui.SideBarView = function(mainView) {
 
         $(daemonElement).click(function (event) {
             self.select(daemonElement);
-            //self.mainView.daemonView.update();
+            self.mainView.daemonView.update();
         });
 
         var workspace = $(  '<div id="sidebar-workspace">' +
@@ -904,6 +904,67 @@ webui.CommitMessageView = function(workspaceView) {
     $(".commit-message-commit", self.element)[0].onclick = self.onCommit;
 };
 
+webui.DaemonView = function(mainView) {
+
+    var self = this;
+
+    self.show = function() {
+        $(mainView.element).empty();
+        mainView.element.appendChild(self.element);
+    };
+
+    self.update = function() {
+        self.show();
+        $.get("/daemon-status", function (port) {
+            var button = $("button", self.element);
+            if (port != "0") {
+                button.removeClass("btn-primary");
+                button.addClass("btn-danger");
+                $(".git-access", self.element).show();
+                button.text("Disable")
+                $.get("/hostname", function (hostname) {
+                    var mport = port == "9418" ? "" : ":" + port
+                    var clone = "git clone git://" + hostname + mport + "/.git " + webui.repo;
+                    var pull = "git pull git://" + hostname + mport + "/.git";
+                    $(".git-clone", self.element).text(clone);
+                    $(".git-pull", self.element).text(pull);
+                });
+            } else {
+                button.removeClass("btn-danger");
+                button.addClass("btn-primary");
+                $(".git-access", self.element).hide();
+                button.text("Enable")
+            }
+        });
+    };
+
+    self.toggleDaemon = function() {
+        var button = $("button", self.element);
+        if (button.hasClass("btn-primary")) {
+            $.get("/daemon-start", function (data) {
+                self.update();
+            });
+        } else {
+            $.get("/daemon-stop", function (data) {
+                self.update();
+            });
+        }
+    }
+
+    self.element = $(   '<div class="jumbotron">' +
+                            '<h1>Daemon</h1>' +
+                            '<p>Git daemon allows other people to clone and pull from your repository.</p>' +
+                            '<div class="git-access">' +
+                                '<p>Other people can clone your repository:</p>' +
+                                '<pre class="git-clone"></pre>' +
+                                '<p>Or to pull from your repository:</p>' +
+                                '<pre class="git-pull"></pre>' +
+                            '</div>' +
+                            '<button type="button" class="btn"></button>' +
+                        '</div>')[0];
+    $("button", self.element)[0].onclick = self.toggleDaemon;
+    $(".git-access", self.element).hide();
+};
 
 /*
  *  == Initialization =========================================================
@@ -930,6 +991,7 @@ function MainUi() {
             self.historyView = new webui.HistoryView(self);
             if (!webui.viewonly) {
                 self.workspaceView = new webui.WorkspaceView(self);
+                self.daemonView = new webui.DaemonView(self);
             }
         });
     });
