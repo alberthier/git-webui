@@ -69,7 +69,7 @@ webui.SideBarView = function(mainView) {
     var self = this;
 
     self.select = function(node) {
-        var selected = $(".selected", contentElement);
+        var selected = $(".active", contentElement);
         if (selected.length > 0) {
             selected = selected[0];
         } else {
@@ -77,9 +77,9 @@ webui.SideBarView = function(mainView) {
         }
         if (selected != node) {
             if (selected != undefined) {
-                $(selected).toggleClass("selected");
+                $(selected).toggleClass("active");
             }
-            $(node).toggleClass("selected");
+            $(node).toggleClass("active");
             if (node.tagName == "LI") {
                 // TODO: find a better way to distinguish history viewer and working copy nodes
                 self.mainView.historyView.update(node.name);
@@ -92,11 +92,11 @@ webui.SideBarView = function(mainView) {
                             '<img id="sidebar-logo" src="/img/git-logo.png">' +
                             '<div id="sidebar-content">' +
                                 '<div id="sidebar-branches" style="display: none;">' +
-                                    '<h1>Branches</h1>' +
+                                    '<h4>Branches</h4>' +
                                     '<ul></ul>' +
                                 '</div>' +
                                 '<div id="sidebar-tags" style="display: none;">' +
-                                    '<h1>Tags</h1>' +
+                                    '<h4>Tags</h4>' +
                                     '<ul></ul>' +
                                 '</div>' +
                             '</div>' +
@@ -105,10 +105,10 @@ webui.SideBarView = function(mainView) {
 
     if (!webui.viewonly) {
         var daemon = $( '<div id="sidebar-daemon">' +
-                            '<h1>Daemon</h1>' +
+                            '<h4>Daemon</h4>' +
                         '</div>')[0];
         contentElement.insertBefore(daemon, contentElement.firstChild);
-        var daemonElement = $("h1", daemon)[0];
+        var daemonElement = $("h4", daemon)[0];
 
         $(daemonElement).click(function (event) {
             self.select(daemonElement);
@@ -116,10 +116,10 @@ webui.SideBarView = function(mainView) {
         });
 
         var workspace = $(  '<div id="sidebar-workspace">' +
-                                '<h1>Workspace</h1>' +
+                                '<h4>Workspace</h4>' +
                             '</div>')[0];
         contentElement.insertBefore(workspace, contentElement.firstChild);
-        var workspaceElement = $("h1", workspace)[0];
+        var workspaceElement = $("h4", workspace)[0];
 
         $(workspaceElement).click(function (event) {
             self.select(workspaceElement);
@@ -828,7 +828,7 @@ webui.ChangedFilesView = function(workspaceView, type, label) {
 
     self.element = $(   '<div id="' + type + '-view" class="panel panel-default">' +
                             '<div class="panel-heading">' +
-                                '<h3>'+ label + '</h3>' +
+                                '<h5>'+ label + '</h5>' +
                                 '<div class="btn-group"></div>' +
                             '</div>' +
                             '<div class="file-list-container">' +
@@ -890,7 +890,7 @@ webui.CommitMessageView = function(workspaceView) {
 
     self.element = $(   '<div id="commit-message-view" class="panel panel-default">' +
                             '<div class="panel-heading">' +
-                                '<h3>Message</h3>' +
+                                '<h5>Message</h5>' +
                                 '<div class="btn-group">' +
                                     '<button type="button" class="btn btn-default commit-message-amend" data-toggle="button">Amend</button>' +
                                     '<button type="button" class="btn btn-default commit-message-commit">Commit</button>' +

@@ -1,81 +1,24 @@
 // Theme
 @import "variables.less";
 
-@light_gray:    #f0f0f0;
-@medium_gray:   #d0d0d0;
-@dark_gray:     #313131;
-@light_blue:    #8ad5f0;
-@medium_blue:   #33b5e5;
-@dark_blue:     #0099cc;
-@light_violet:  #d6adeb;
-@medium_violet: #aa66cc;
-@dark_violet:   #9933cc;
-@light_green:   #c5e26d;
-@medium_green:  #99cc00;
-@dark_green:    #669900;
-@light_orange:  #ffd980;
-@medium_orange: #ffbb33;
-@dark_orange:   #FF8800;
-@light_red:     #ff9494;
-@medium_red:    #ff4444;
-@dark_red:      #cc0000;
-
-@separator-line: @list-group-border;
-
-.no-select() {
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-}
+@diff-offset-light:  #d6adeb;
+@diff-offset-dark:   #9933cc;
+@diff-added-light:   #c5e26d;
+@diff-added-dark:    #669900;
+@diff-removed-light: #ff9494;
+@diff-removed-dark:  #cc0000;
+@separator-line:     @list-group-border;
 
 html, body {
     height: 100%;
     width: 100%;
-    font: 10pt sans-serif;
-    color: @dark_gray;
-}
-
-h1 {
-    font-size: 1.15em;
-}
-
-h2 {
-    font-size: 1.1em;
-}
-
-h3 {
-    font-size: 1.05em;
 }
 
 body {
     display: flex;
     align-items: stretch;
     margin: 0;
-}
-
-.button-box {
-    .no-select();
-
-    display: flex;
-    text-align: center;
-    background-color: @light_gray;
-    cursor: default;
-
-    a {
-        flex: 1 0 0;
-        padding: 0.3em;
-    }
-
-    a:hover {
-        background-color: @medium_gray;
-    }
-
-    a:active, .button-box-current {
-        background-color: @medium_blue;
-    }
+    font: 10pt sans-serif;
 }
 
 #sidebar {
@@ -95,47 +38,48 @@ body {
     }
 
     #sidebar-content {
-        flex: 1 0 0;
+        flex: 1;
         width: 100%;
         overflow-x: hidden;
         overflow-y: auto;
         cursor: default;
-        border-top: 1px solid darken(@dark_gray, 10%);
+        border-top: 1px solid darken(@gray-dark, 10%);
 
         > :first-child {
-            border-top: 1px solid darken(@medium_gray, 50%);
+            border-top: 1px solid darken(@separator-line, 50%);
         }
 
-        h1:before {
+        h4:before {
             vertical-align: middle;
             margin: @padding-base-horizontal;
         }
 
-        h1 {
+        h4 {
             vertical-align: baseline;
             margin: 0.5em 0 0 0;
         }
 
         > div {
-            h1 {
+            h4 {
+                font-size: 125%;
                 cursor: pointer;
                 padding: @padding-large-vertical 0;
             }
         }
 
-        #sidebar-workspace h1:before {
+        #sidebar-workspace h4:before {
             content: url(/img/computer.svg);
         }
 
-        #sidebar-daemon h1:before {
+        #sidebar-daemon h4:before {
             content: url(/img/daemon.svg);
         }
 
-        #sidebar-branches h1:before {
+        #sidebar-branches h4:before {
             content: url(/img/branch.svg);
         }
 
-        #sidebar-tags h1:before {
+        #sidebar-tags h4:before {
             content: url(/img/tag.svg);
         }
 
@@ -157,16 +101,16 @@ body {
         .branch-current {
             font-weight: bold;
         }
+
+        .active {
+            background-color: @brand-primary;
+        }
     }
 }
 
 #main-view {
-    flex: 1 0 0;
+    flex: 1;
     height: 100%;
-}
-
-.selected {
-    background-color: @brand-primary;
 }
 
 #history-view {
@@ -228,7 +172,7 @@ body {
 
     #commit-view-content {
         display: flex;
-        flex: 1 0 0;
+        flex: 1;
         flex-direction: column;
         width: 100%;
         height: 100%;
@@ -241,7 +185,7 @@ body {
     flex: 1;
 
     .diff-view:last-child {
-        border: solid @medium_gray;
+        border: solid @separator-line;
         border-width: 0 0 0 1px;
     }
 }
@@ -259,43 +203,42 @@ body {
             padding: 0 0.3em 0 0.3em;
             background-color: white;
             border: 0;
-            line-height: inherit;
         }
 
         .diff-line-header {
             font-weight: bold;
-            background-color: @light_gray;
+            background-color: @gray-lighter;
         }
 
         .diff-line-phantom {
-            background-color: @light_gray;
+            background-color: @gray-lighter;
         }
 
         .diff-line-header.diff-line-add {
-            background-color: @light_gray;
-            color: @dark_green;
+            background-color: @gray-lighter;
+            color: @diff-added-dark;
         }
 
         .diff-line-header.diff-line-del {
-            background-color: @light_gray;
-            color: @dark_red;
+            background-color: @gray-lighter;
+            color: @diff-removed-dark;
         }
 
         .diff-line-header.diff-line-offset {
-            background-color: @light_gray;
-            color: @dark_violet;
+            background-color: @gray-lighter;
+            color: @diff-offset-dark;
         }
 
         .diff-line-add {
-            background-color: @light_green;
+            background-color: @diff-added-light;
         }
 
         .diff-line-del {
-            background-color: @light_red;
+            background-color: @diff-removed-light;
         }
 
         .diff-line-offset {
-            background-color: @light_violet;
+            background-color: @diff-offset-light;
         }
     }
 }
@@ -303,7 +246,7 @@ body {
 #tree-view {
     width: 100%;
     height: 100%;
-    flex: 1 0 0;
+    flex: 1;
     flex-direction: column;
     display: flex;
 
@@ -316,7 +259,7 @@ body {
         width: 100%;
         height: 100%;
         overflow: auto;
-        flex: 1 0 0;
+        flex: 1;
     }
 
     #tree-view-blob-content {
@@ -326,7 +269,7 @@ body {
         height: 100%;
 
         iframe {
-            flex: 1 0 0;
+            flex: 1;
             width: 100%;
             height: 100%;
             border: 0;
@@ -341,7 +284,7 @@ body {
     }
 
     .list-group-item > :first-child {
-        flex: 1 0 0;
+        flex: 1;
     }
 
     .list-group-item > :last-child {
@@ -379,12 +322,12 @@ body {
     }
 
     #workspace-editor {
-        .no-select();
+        user-select: none;
 
         flex: 1;
         display: flex;
         align-items: stretch;
-        border: solid @medium_gray;
+        border: solid @separator-line;
         border-width: 1px 0 0 0;
         cursor: default;
 
@@ -439,7 +382,7 @@ body {
                 display: flex;
                 align-items: center;
 
-                h3 {
+                h5 {
                     flex: 1;
                     margin: 0;
                 }
