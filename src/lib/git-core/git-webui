@@ -132,15 +132,10 @@ class WebUiRequestHandler(CGIHTTPRequestHandler):
 
 
     def process(self, cmd):
-        git = subprocess.Popen(cmd, stdout = subprocess.PIPE, stderr = subprocess.PIPE, cwd = WebUiRequestHandler.REPO_ROOT)
-        stdout, stderr = git.communicate()
-        if git.returncode == 0:
-            http_status = 200
-            result = stdout
-        else:
-            http_status = 500
-            result = stderr
-        self.send_text(http_status, result)
+        self.send_response(200)
+        self.end_headers()
+        git = subprocess.Popen(cmd, stdout = self.wfile, stderr = self.wfile, cwd = WebUiRequestHandler.REPO_ROOT)
+        git.wait()
 
 
     def send_text(self, http_status, text):
