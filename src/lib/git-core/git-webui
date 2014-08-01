@@ -11,51 +11,57 @@ import sys
 import webbrowser
 
 if sys.version > '3':
-    from http.server import SimpleHTTPRequestHandler, HTTPServer
+    from http.server import CGIHTTPRequestHandler, HTTPServer
     from urllib.parse import unquote
 else:
-    from SimpleHTTPServer import SimpleHTTPRequestHandler
+    from CGIHTTPServer import CGIHTTPRequestHandler
     from BaseHTTPServer import HTTPServer
     from urllib import unquote
 
 
 
 
-class WebUiRequestHandler(SimpleHTTPRequestHandler):
+def which(cmd, path):
+    for d in path:
+        f = os.path.join(d, cmd)
+        if os.path.exists(f) and os.access(f, os.F_OK | os.X_OK):
+            return f
+    return None
+
+
+
+
+class WebUiRequestHandler(CGIHTTPRequestHandler):
+
+    cgi_directories = []
 
     WEB_ROOT = None
     REPO_ROOT = None
-    DAEMON = None
+    GIT_HTTP_BACKEND_DIR = None
 
     @classmethod
-    def setup_paths(cls, repo_root):
+    def initialize(cls, repo_root):
         web_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(sys.argv[0]))))
         web_root = os.path.join(web_root, "share", "git-webui", "webui")
         WebUiRequestHandler.WEB_ROOT = web_root
         WebUiRequestHandler.REPO_ROOT = repo_root
 
-
-    @classmethod
-    def start_daemon(cls):
-        WebUiRequestHandler.stop_daemon()
-        cmd = [ "git", "daemon", "--reuseaddr", "--strict-paths", "--export-all", "--base-path=" + WebUiRequestHandler.REPO_ROOT, "--enable=upload-pack", "--enable=upload-archive" ]
-        cmd.append(WebUiRequestHandler.REPO_ROOT + "/.git")
-        WebUiRequestHandler.DAEMON = subprocess.Popen(cmd)
-
-
-    @classmethod
-    def stop_daemon(cls):
-        if WebUiRequestHandler.DAEMON is not None:
-            WebUiRequestHandler.DAEMON.terminate()
-            WebUiRequestHandler.DAEMON = None
+        path = os.environ.get("PATH", os.defpath).split(os.pathsep)
+        git_http_backend = which("git-http-backend", path)
+        if git_http_backend is None:
+            git_prefix = os.path.dirname(os.path.dirname(which("git", path)))
+            candidates = [ os.path.join(git_prefix, "libexec", "git-core"),
+                           os.path.join(git_prefix, "lib", "git-core") ]
+            git_http_backend = which("git-http-backend", candidates)
+        if git_http_backend is not None:
+            WebUiRequestHandler.GIT_HTTP_BACKEND_DIR = os.path.dirname(git_http_backend)
+        os.environ["GIT_PROJECT_ROOT"] = repo_root + "/.git"
+        os.environ["GIT_HTTP_EXPORT_ALL"] = ""
 
 
     def translate_path(self, path):
-        if path.startswith("/repo"):
-            root = WebUiRequestHandler.REPO_ROOT
-            path = path[5:]
-        else:
-            root = WebUiRequestHandler.WEB_ROOT
+        if self.is_git_request():
+            return path
 
         # abandon query parameters
         path = path.split('?',1)[0]
@@ -65,7 +71,7 @@ class WebUiRequestHandler(SimpleHTTPRequestHandler):
         path = posixpath.normpath(unquote(path))
         words = path.split('/')
         words = filter(None, words)
-        path = root
+        path = WebUiRequestHandler.WEB_ROOT
         for word in words:
             drive, word = os.path.splitdrive(word)
             head, word = os.path.split(word)
@@ -86,25 +92,10 @@ class WebUiRequestHandler(SimpleHTTPRequestHandler):
         elif self.path == "/hostname":
             self.send_text(200, codecs.encode(socket.gethostname(), "utf-8"))
         elif self.path == "/viewonly":
-            t = "1" if self.is_view_only() else "0"
-            self.send_text(200, codecs.encode(t, "utf-8"))
-        elif not self.is_view_only():
-            if self.path == "/daemon-start":
-                WebUiRequestHandler.start_daemon()
-                self.send_text(200, b"")
-            elif self.path == "/daemon-stop":
-                WebUiRequestHandler.stop_daemon()
-                self.send_text(200, b"")
-            elif self.path == "/daemon-status":
-                if WebUiRequestHandler.DAEMON is not None:
-                    port = b"9418"
-                else:
-                    port = b"0"
-                self.send_text(200, port)
-            else:
-                SimpleHTTPRequestHandler.do_GET(self)
+            vo = "1" if self.is_view_only() else "0"
+            self.send_text(200, codecs.encode(vo, "utf-8"))
         else:
-            SimpleHTTPRequestHandler.do_GET(self)
+            CGIHTTPRequestHandler.do_GET(self)
 
 
     def do_POST(self):
@@ -113,18 +104,31 @@ class WebUiRequestHandler(SimpleHTTPRequestHandler):
             args = codecs.decode(self.rfile.read(content_length), "utf-8")
             cmd = shlex.split("git " + args)
             action = cmd[1]
-            print(args)
             if not self.is_view_only() or args in ["branch", "tag"] or action in ["show", "status", "log", "ls-tree"]:
                 self.process(cmd)
             else:
                 self.send_error(403)
         else:
-            self.send_error(404)
+            CGIHTTPRequestHandler.do_POST(self)
 
 
     def is_view_only(self):
-        host = self.headers["Host"].split(":")[0]
+        host = self.headers.get("Host", "").split(":")[0]
         return host not in ["127.0.0.1", "localhost"]
+
+
+    def is_cgi(self):
+        """
+        This overrides CGIHTTPRequestHandler.is_cgi to consider any request having 'git/*' as User-Agent as a CGI request
+        """
+        if self.is_git_request():
+            self.cgi_info = WebUiRequestHandler.GIT_HTTP_BACKEND_DIR, "git-http-backend" + self.path
+            return True
+        return False
+
+
+    def is_git_request(self):
+        return self.headers.get("User-Agent", "").startswith("git/")
 
 
     def process(self, cmd):
@@ -168,7 +172,7 @@ if __name__ == '__main__':
     if args.repo_root is None or '.git' not in os.listdir(args.repo_root):
         print("No git repository found")
         sys.exit(1)
-    WebUiRequestHandler.setup_paths(args.repo_root)
+    WebUiRequestHandler.initialize(args.repo_root)
 
     httpd = HTTPServer(("", args.port), WebUiRequestHandler)
 
@@ -180,5 +184,4 @@ if __name__ == '__main__':
         httpd.serve_forever()
     except KeyboardInterrupt:
         httpd.server_close()
-        WebUiRequestHandler.stop_daemon()
         sys.exit(0)

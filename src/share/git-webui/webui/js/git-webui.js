@@ -104,8 +104,8 @@ webui.SideBarView = function(mainView) {
     var contentElement = $("#sidebar-content", self.element)[0];
 
     if (!webui.viewonly) {
-        var daemon = $( '<div id="sidebar-daemon">' +
-                            '<h4>Daemon</h4>' +
+        var daemon = $( '<div id="sidebar-remote">' +
+                            '<h4>Remote access</h4>' +
                         '</div>')[0];
         contentElement.insertBefore(daemon, contentElement.firstChild);
         var daemonElement = $("h4", daemon)[0];
@@ -915,44 +915,10 @@ webui.DaemonView = function(mainView) {
 
     self.update = function() {
         self.show();
-        $.get("/daemon-status", function (port) {
-            var button = $("button", self.element);
-            if (port != "0") {
-                button.removeClass("btn-primary");
-                button.addClass("btn-danger");
-                $(".git-access", self.element).show();
-                button.text("Disable")
-                $.get("/hostname", function (hostname) {
-                    var mport = port == "9418" ? "" : ":" + port
-                    var clone = "git clone git://" + hostname + mport + "/.git " + webui.repo;
-                    var pull = "git pull git://" + hostname + mport + "/.git";
-                    $(".git-clone", self.element).text(clone);
-                    $(".git-pull", self.element).text(pull);
-                });
-            } else {
-                button.removeClass("btn-danger");
-                button.addClass("btn-primary");
-                $(".git-access", self.element).hide();
-                button.text("Enable")
-            }
-        });
     };
 
-    self.toggleDaemon = function() {
-        var button = $("button", self.element);
-        if (button.hasClass("btn-primary")) {
-            $.get("/daemon-start", function (data) {
-                self.update();
-            });
-        } else {
-            $.get("/daemon-stop", function (data) {
-                self.update();
-            });
-        }
-    }
-
     self.element = $(   '<div class="jumbotron">' +
-                            '<h1>Daemon</h1>' +
+                            '<h1>Remote access</h1>' +
                             '<p>Git daemon allows other people to clone and pull from your repository.</p>' +
                             '<div class="git-access">' +
                                 '<p>Other people can clone your repository:</p>' +
@@ -960,10 +926,9 @@ webui.DaemonView = function(mainView) {
                                 '<p>Or to pull from your repository:</p>' +
                                 '<pre class="git-pull"></pre>' +
                             '</div>' +
-                            '<button type="button" class="btn"></button>' +
                         '</div>')[0];
-    $("button", self.element)[0].onclick = self.toggleDaemon;
-    $(".git-access", self.element).hide();
+    $(".git-clone", self.element).text("git clone http://" + webui.hostname + ":" + document.location.port + "/ " + webui.repo);
+    $(".git-pull", self.element).text("git pull http://" + webui.hostname + ":" + document.location.port + "/");
 };
 
 /*
@@ -979,20 +944,23 @@ function MainUi() {
         title.textContent = "Git - " + webui.repo;
         $.get("/viewonly", function (data) {
             webui.viewonly = data == "1";
+            $.get("/hostname", function (data) {
+                webui.hostname = data
 
-            var body = $("body")[0];
+                var body = $("body")[0];
 
-            self.sideBarView = new webui.SideBarView(self);
-            body.appendChild(self.sideBarView.element);
+                self.sideBarView = new webui.SideBarView(self);
+                body.appendChild(self.sideBarView.element);
 
-            self.element = $('<div id="main-view">')[0];
-            body.appendChild(self.element);
+                self.element = $('<div id="main-view">')[0];
+                body.appendChild(self.element);
 
-            self.historyView = new webui.HistoryView(self);
-            if (!webui.viewonly) {
-                self.workspaceView = new webui.WorkspaceView(self);
-                self.daemonView = new webui.DaemonView(self);
-            }
+                self.historyView = new webui.HistoryView(self);
+                if (!webui.viewonly) {
+                    self.workspaceView = new webui.WorkspaceView(self);
+                    self.daemonView = new webui.DaemonView(self);
+                }
+            });
         });
     });
 }
