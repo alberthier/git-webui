@@ -172,8 +172,20 @@ webui.LogView = function(historyView) {
 
     self.update = function(ref) {
         $(self.element).empty();
-        webui.git("log --pretty=raw --decorate=full " + ref, function(data) {
+        self.nextRef = ref;
+        self.populate();
+    };
+
+    self.populate = function() {
+        var maxCount = 1000;
+        if (self.element.childElementCount != 0) {
+            // The last node is the 'Show more commits placeholder'. Remove it.
+            self.element.removeChild(self.element.lastElementChild);
+        }
+        webui.git("log --pretty=raw --decorate=full --max-count=" + (maxCount + 1) + " " + self.nextRef, function(data) {
             var start = 0;
+            var count = 0;
+            self.nextRef = undefined;
             while (true) {
                 var end = data.indexOf("\ncommit ", start);
                 if (end != -1) {
@@ -182,14 +194,26 @@ webui.LogView = function(historyView) {
                     var len = undefined;
                 }
                 var entry = new Entry(self, data.substr(start, len));
-                self.element.appendChild(entry.element);
-                if (!currentSelection) {
-                    entry.select();
+                if (count < maxCount) {
+                    self.element.appendChild(entry.element);
+                    if (!currentSelection) {
+                        entry.select();
+                    }
+                } else {
+                    self.nextRef = entry.commit;
+                    break;
                 }
                 if (len == undefined) {
                     break;
                 }
                 start = end + 1;
+                ++count;
+            }
+            if (self.nextRef != undefined) {
+                var moreTag = $('<a class="log-entry log-entry-more list-group-item">')[0];
+                $('<a class="list-group-item-text">Show previous commits</a>').appendTo(moreTag);
+                moreTag.onclick = self.populate;
+                self.element.appendChild(moreTag);
             }
         });
     };
