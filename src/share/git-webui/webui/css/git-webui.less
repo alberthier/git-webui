@@ -37,7 +37,6 @@ body {
     height: 100%;
     width: 14em;
     background-color: @gray-dark;
-    color: @gray-lighter;
 
     #sidebar-logo {
         display: block;
@@ -53,6 +52,7 @@ body {
         overflow-y: auto;
         cursor: default;
         border-top: 1px solid darken(@gray-dark, 10%);
+        color: @gray-lighter;
 
         > :first-child {
             border-top: 1px solid darken(@separator-line, 50%);
@@ -68,7 +68,7 @@ body {
             margin: 0.5em 0 0 0;
         }
 
-        > div {
+        > section {
             h4 {
                 font-size: 125%;
                 cursor: pointer;
@@ -113,6 +113,13 @@ body {
 
         .active {
             background-color: @brand-primary;
+        }
+    }
+
+    .modal-dialog {
+
+        .list-group-item {
+            border: 0;
         }
     }
 }
@@ -174,7 +181,6 @@ body {
             .log-entry-date {
                 margin-left: auto;
             }
-
         }
     }
 

@@ -68,99 +68,151 @@ webui.SideBarView = function(mainView) {
 
     var self = this;
 
-    self.select = function(node) {
-        var selected = $(".active", contentElement);
+    self.selectRef = function(refName) {
+        var selected = $(".active", self.element);
         if (selected.length > 0) {
-            selected = selected[0];
-        } else {
-            selected = undefined;
-        }
-        if (selected != node) {
-            if (selected != undefined) {
-                $(selected).toggleClass("active");
-            }
-            $(node).toggleClass("active");
-            if (node.tagName == "LI") {
-                // TODO: find a better way to distinguish history viewer and working copy nodes
-                self.mainView.historyView.update(node.name);
+            if (selected[0].refName != refName) {
+                selected.toggleClass("active");
+            } else {
+                return;
             }
         }
+        var tags = $("li", self.element);
+        for (var i = 0; i < tags.length; ++i) {
+            var li = tags[i];
+            if (li.refName == refName) {
+                $(li).toggleClass("active");
+                break;
+            }
+        }
+        self.mainView.historyView.update(refName);
+    };
+
+    self.addPopup = function(title, id, refs, isBranch) {
+        var popup = $(  '<div class="modal fade" id="' + id + '" role="dialog">' +
+                            '<div class="modal-dialog modal-sm">' +
+                                '<div class="modal-content">' +
+                                    '<div class="modal-header">' +
+                                        '<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>' +
+                                        '<h4 class="modal-title">' + title + '</h4>' +
+                                    '</div>' +
+                                    '<div class="modal-body"><div class="list-group"></div></div>' +
+                                '</div>' +
+                            '</div>' +
+                        '</div>')[0];
+        self.element.appendChild(popup);
+        var popupContent = $(".list-group", popup)[0];
+        refs.forEach(function(ref) {
+            var link = $('<a class="list-group-item">')[0];
+            if (isBranch) {
+                link.refName = ref.substr(2);
+                $(link).css("font-weight", "bold");
+            } else {
+                link.refName = ref;
+            }
+            $(link).text(link.refName);
+            popupContent.appendChild(link);
+            link.onclick = function (event) {
+                $(popup).modal('hide');
+                self.selectRef(event.target.refName);
+            }
+        });
+        return popup;
+    };
+
+    self.fetchSection = function(section, title, id, gitCommand, isBranch) {
+        webui.git(gitCommand, function(data) {
+            var refs = webui.splitLines(data);
+            if (refs.length > 0) {
+                var ul = $("<ul>").appendTo(section)[0];
+                refs = refs.sort(function(a, b) {
+                    if (!isBranch) {
+                        return -a.localeCompare(b);
+                    } else if (a[0] == "*") {
+                        return -1;
+                    } else if (b[0] == "*") {
+                        return 1;
+                    } else {
+                        return a.localeCompare(b);
+                    }
+                });
+
+                var maxRefsCount = 15;
+                for (var i = 0; i < refs.length && i < maxRefsCount; ++i) {
+                    var ref = refs[i];
+                    var li = $("<li>").appendTo(ul)[0];
+                    if (isBranch) {
+                        li.refName = ref.substr(2);
+                        if (ref[0] == "*") {
+                            $(li).addClass("branch-current")
+                            window.setTimeout(function() {
+                                var current = $(".branch-current", self.element)[0];
+                                if (current) {
+                                    self.selectRef(current.refName);
+                                }
+                            }, 0);
+                        }
+                    } else {
+                        li.refName = ref;
+                    }
+                    $(li).text(li.refName);
+                    li.onclick = function (event) {
+                        self.selectRef(event.target.refName);
+                    };
+                }
+
+                if (refs.length > maxRefsCount) {
+                    var li = $("<li>More ...</li>").appendTo(ul)[0];
+                    var popup = self.addPopup(title, id + "-popup", refs, isBranch);
+                    li.onclick = function() {
+                        $(popup).modal();
+                    };
+                }
+            } else {
+                $(section).remove();
+            }
+        });
     };
 
     self.mainView = mainView;
     self.element = $(   '<div id="sidebar">' +
                             '<img id="sidebar-logo" src="/img/git-logo.png">' +
                             '<div id="sidebar-content">' +
-                                '<div id="sidebar-branches" style="display: none;">' +
+                                '<section id="sidebar-workspace">' +
+                                    '<h4>Workspace</h4>' +
+                                '</section>' +
+                                '<section id="sidebar-remote">' +
+                                    '<h4>Remote access</h4>' +
+                                '</section>' +
+                                '<section id="sidebar-branches">' +
                                     '<h4>Branches</h4>' +
-                                    '<ul></ul>' +
-                                '</div>' +
-                                '<div id="sidebar-tags" style="display: none;">' +
+                                '</section>' +
+                                '<section id="sidebar-tags">' +
                                     '<h4>Tags</h4>' +
-                                    '<ul></ul>' +
-                                '</div>' +
+                                '</section>' +
                             '</div>' +
                         '</div>')[0];
-    var contentElement = $("#sidebar-content", self.element)[0];
 
-    if (!webui.viewonly) {
-        var daemon = $( '<div id="sidebar-remote">' +
-                            '<h4>Remote access</h4>' +
-                        '</div>')[0];
-        contentElement.insertBefore(daemon, contentElement.firstChild);
-        var daemonElement = $("h4", daemon)[0];
-
-        $(daemonElement).click(function (event) {
-            self.select(daemonElement);
-            self.mainView.daemonView.update();
-        });
-
-        var workspace = $(  '<div id="sidebar-workspace">' +
-                                '<h4>Workspace</h4>' +
-                            '</div>')[0];
-        contentElement.insertBefore(workspace, contentElement.firstChild);
-        var workspaceElement = $("h4", workspace)[0];
-
-        $(workspaceElement).click(function (event) {
-            self.select(workspaceElement);
+    if (webui.viewonly) {
+        $("#sidebar-workspace", self.element).remove();
+    } else {
+        var workspaceElement = $("#sidebar-workspace h4", self.element)[0];
+        workspaceElement.onclick = function (event) {
+            $("*", self.element).removeClass("active");
+            $(workspaceElement).addClass("active");
             self.mainView.workspaceView.update();
-        });
+        };
     }
 
-    webui.git("branch", function(data) {
-        var branches = webui.splitLines(data);
-        if (branches.length > 0) {
-            var branchesElement = $("#sidebar-branches", self.element)[0];
-            branchesElement.style.display = "block";
-            var ul = $("ul", branchesElement)[0];
-            branches.forEach(function (branch) {
-                var name = branch.substr(2);
-                var li = $("<li>" + name + "</li>").appendTo(ul)[0];
-                li.name = name;
-                $(li).click(function (event) { self.select(li); });
-                if (branch.substr(0, 1) == "*") {
-                    $(li).addClass("branch-current")
-                    window.setTimeout(function() {
-                        self.select(li);
-                    }, 0);
-                }
-            });
-        }
-    });
+    var remoteElement = $("#sidebar-remote h4", self.element)[0];
+    remoteElement.onclick = function (event) {
+        $("*", self.element).removeClass("active");
+        $(remoteElement).addClass("active");
+        self.mainView.daemonView.update();
+    };
 
-    webui.git("tag", function(data) {
-        var tags = webui.splitLines(data);
-        if (tags.length > 0) {
-            var tagsElement = $("#sidebar-tags", self.element)[0];
-            tagsElement.style.display = "block";
-            var ul = $("ul", tagsElement)[0];
-            tags.forEach(function (tag) {
-                var li = $("<li>" + tag + "</li>").appendTo(ul)[0];
-                li.name = tag;
-                $(li).click(function (event) { self.select(li); });
-            });
-        }
-    });
+    self.fetchSection($("#sidebar-branches", self.element)[0], "Branches", "branches", "branch", true);
+    self.fetchSection($("#sidebar-tags", self.element)[0], "Tags", "tags", "tag", false);
 };
 
 /*
@@ -980,9 +1032,9 @@ function MainUi() {
                 body.appendChild(self.element);
 
                 self.historyView = new webui.HistoryView(self);
+                self.daemonView = new webui.DaemonView(self);
                 if (!webui.viewonly) {
                     self.workspaceView = new webui.WorkspaceView(self);
-                    self.daemonView = new webui.DaemonView(self);
                 }
             });
         });
