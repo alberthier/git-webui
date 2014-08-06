@@ -77,18 +77,27 @@ webui.SideBarView = function(mainView) {
                 return;
             }
         }
-        var tags = $("li", self.element);
-        for (var i = 0; i < tags.length; ++i) {
-            var li = tags[i];
-            if (li.refName == refName) {
-                $(li).toggleClass("active");
-                break;
+        var refElements = $(".sidebar-ref", self.element);
+        var moreTag = undefined;
+        for (var i = 0; i < refElements.length; ++i) {
+            var refElement = refElements[i];
+            if (refElement.refName == refName) {
+                $(refElement).toggleClass("active");
+                if (refElement.tagName == "LI") {
+                    moreTag = null;
+                } else if (moreTag !== null) {
+                    moreTag = $(".sidebar-more", refElement.section);
+                }
             }
+        }
+        console.log(moreTag);
+        if (moreTag && moreTag.length) {
+            moreTag.toggleClass("active");
         }
         self.mainView.historyView.update(refName);
     };
 
-    self.addPopup = function(title, id, refs, isBranch) {
+    self.addPopup = function(section, title, id, refs, isBranch) {
         var popup = $(  '<div class="modal fade" id="' + id + '" role="dialog">' +
                             '<div class="modal-dialog modal-sm">' +
                                 '<div class="modal-content">' +
@@ -103,10 +112,13 @@ webui.SideBarView = function(mainView) {
         self.element.appendChild(popup);
         var popupContent = $(".list-group", popup)[0];
         refs.forEach(function(ref) {
-            var link = $('<a class="list-group-item">')[0];
+            var link = $('<a class="list-group-item sidebar-ref">')[0];
+            link.section = section;
             if (isBranch) {
                 link.refName = ref.substr(2);
-                $(link).css("font-weight", "bold");
+                if (ref[0] == "*") {
+                    $(link).addClass("branch-current");
+                }
             } else {
                 link.refName = ref;
             }
@@ -140,11 +152,11 @@ webui.SideBarView = function(mainView) {
                 var maxRefsCount = 15;
                 for (var i = 0; i < refs.length && i < maxRefsCount; ++i) {
                     var ref = refs[i];
-                    var li = $("<li>").appendTo(ul)[0];
+                    var li = $('<li class="sidebar-ref">').appendTo(ul)[0];
                     if (isBranch) {
                         li.refName = ref.substr(2);
                         if (ref[0] == "*") {
-                            $(li).addClass("branch-current")
+                            $(li).addClass("branch-current");
                             window.setTimeout(function() {
                                 var current = $(".branch-current", self.element)[0];
                                 if (current) {
@@ -162,8 +174,8 @@ webui.SideBarView = function(mainView) {
                 }
 
                 if (refs.length > maxRefsCount) {
-                    var li = $("<li>More ...</li>").appendTo(ul)[0];
-                    var popup = self.addPopup(title, id + "-popup", refs, isBranch);
+                    var li = $('<li class="sidebar-more">More ...</li>').appendTo(ul)[0];
+                    var popup = self.addPopup(section, title, id + "-popup", refs, isBranch);
                     li.onclick = function() {
                         $(popup).modal();
                     };
