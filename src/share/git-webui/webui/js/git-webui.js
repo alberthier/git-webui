@@ -208,7 +208,7 @@ webui.SideBarView = function(mainView) {
     remoteElement.onclick = function (event) {
         $("*", self.element).removeClass("active");
         $(remoteElement).addClass("active");
-        self.mainView.daemonView.update();
+        self.mainView.remoteView.update();
     };
 
     self.fetchSection($("#sidebar-branches", self.element)[0], "Branches", "branches", "branch", true);
@@ -980,7 +980,7 @@ webui.CommitMessageView = function(workspaceView) {
     $(".commit-message-commit", self.element)[0].onclick = self.onCommit;
 };
 
-webui.DaemonView = function(mainView) {
+webui.RemoteView = function(mainView) {
 
     var self = this;
 
@@ -995,7 +995,7 @@ webui.DaemonView = function(mainView) {
 
     self.element = $(   '<div class="jumbotron">' +
                             '<h1>Remote access</h1>' +
-                            '<p>Git daemon allows other people to clone and pull from your repository.</p>' +
+                            '<p>Git webui allows other people to clone and pull from your repository.</p>' +
                             '<div class="git-access">' +
                                 '<p>Other people can clone your repository:</p>' +
                                 '<pre class="git-clone"></pre>' +
@@ -1032,7 +1032,7 @@ function MainUi() {
                 body.appendChild(self.element);
 
                 self.historyView = new webui.HistoryView(self);
-                self.daemonView = new webui.DaemonView(self);
+                self.remoteView = new webui.RemoteView(self);
                 if (!webui.viewonly) {
                     self.workspaceView = new webui.WorkspaceView(self);
                 }
