@@ -90,7 +90,6 @@ webui.SideBarView = function(mainView) {
                 }
             }
         }
-        console.log(moreTag);
         if (moreTag && moreTag.length) {
             moreTag.toggleClass("active");
         }
@@ -401,14 +400,35 @@ webui.DiffView = function(sideBySide, parent) {
 
     var self = this;
 
-    self.update = function(diff) {
+    self.update = function(cmd) {
+        if (cmd) {
+            self.cmd = cmd;
+        }
+        if (self.cmd.length) {
+            var fullCmd = self.cmd.slice();
+            if (self.complete) {
+                var context = 999999999;
+            } else {
+                var context = self.context;
+            }
+            fullCmd.splice(1, 0, "--unified=" + context);
+            webui.git(fullCmd.join(" "), function(diff) {
+                self.refresh(diff);
+            });
+        } else {
+            self.refresh("");
+        }
+    };
+
+    self.refresh = function(diff) {
+        $("span", self.element).text('Context: ' + self.context);
         if (sideBySide) {
             self.updateSplitView(leftLines, diff, '-');
             self.updateSplitView(rightLines, diff, '+');
         } else {
-            self.updateSimpleView(single, diff);
+            self.updateSimpleView(singleLines, diff);
         }
-    };
+    }
 
     self.updateSimpleView = function(view, diff) {
         $(view).empty();
@@ -494,34 +514,68 @@ webui.DiffView = function(sideBySide, parent) {
         }
         if (current.prevScrollTop != current.scrollTop) {
             // Vertical scrolling
-            other.scrollTop = current.scrollTop
+            other.scrollTop = current.scrollTop;
             current.prevScrollTop = current.scrollTop;
         } else {
             // Horizontal scrolling
-            other.scrollLeft = current.scrollLeft
+            other.scrollLeft = current.scrollLeft;
             current.prevScrollLeft = current.scrollLeft;
         }
     }
 
+    self.addContext = function() {
+        self.context += 3;
+        self.update();
+    }
+
+    self.removeContext = function() {
+        if (self.context > 3) {
+            self.context -= 3;
+            self.update();
+        }
+    }
+
+    self.allContext = function() {
+        self.complete = !self.complete;
+        self.update();
+    }
+
+    self.element = $(   '<div class="diff-view-container panel panel-default">' +
+                            '<div class="panel-heading btn-toolbar" role="toolbar">' +
+                                '<button type="button" class="btn btn-default diff-context-all" data-toggle="button">Complete file</button>' +
+                                '<div class="btn-group">' +
+                                    '<button type="button" class="btn btn-default diff-context-remove">-</button>' +
+                                    '<button type="button" class="btn btn-default diff-context-add">+</button>' +
+                                    '<span></span>' +
+                                '</div>' +
+                            '</div>' +
+                            '<div class="panel-body"></div>' +
+                        '</div>')[0];
+    var panelBody = $(".panel-body", self.element)[0];
     if (sideBySide) {
-        self.element = $('<div class="diff-view-container">')[0];
         var left = $('<div class="diff-view"><div class="diff-view-lines"></div></div>')[0];
-        self.element.appendChild(left);
+        panelBody.appendChild(left);
         var leftLines = left.firstChild;
         left.onscroll = self.diffViewScrolled;
         left.prevScrollTop = left.scrollTop;
         left.prevScrollLeft = left.scrollLeft;
         var right = $('<div class="diff-view"><div class="diff-view-lines"></div></div>')[0];
-        self.element.appendChild(right);
+        panelBody.appendChild(right);
         var rightLines = right.firstChild;
         right.onscroll = self.diffViewScrolled;
         right.prevScrollTop = right.scrollTop;
         right.prevScrollLeft = right.scrollLeft;
     } else {
-        self.element = $('<div class="diff-view"><div class="diff-view-lines"></div></div>')[0];
-        var single = self.element.firstChild;
+        var single = $('<div class="diff-view"><div class="diff-view-lines"></div></div>')[0];
+        panelBody.appendChild(single);
+        var singleLines = single.firstChild;
     }
 
+    $(".diff-context-remove", self.element)[0].onclick = self.removeContext;
+    $(".diff-context-add", self.element)[0].onclick = self.addContext;
+    $(".diff-context-all", self.element)[0].onclick = self.allContext;
+    self.context = 3;
+    self.complete = false;
 };
 
 /*
@@ -693,9 +747,7 @@ webui.CommitView = function(historyView) {
         currentCommit = entry.commit;
         self.showDiff();
         buttonBox.select(0);
-        webui.git("show " + entry.commit, function(data) {
-            diffView.update(data);
-        });
+        diffView.update(["show", entry.commit]);
         treeView.update(entry.tree);
     };
 
@@ -760,7 +812,7 @@ webui.WorkspaceView = function(mainView) {
 
     self.update = function() {
         self.show();
-        self.diffView.update("");
+        self.diffView.update([]);
         self.workingCopyView.update();
         self.stagingAreaView.update();
         self.commitMessageView.update();
@@ -858,15 +910,12 @@ webui.ChangedFilesView = function(workspaceView, type, label) {
     };
 
     self.refreshDiff = function(element) {
-        var gitCmd = "diff "
+        var gitCmd = [ "diff" ];
         if (type == "staging-area") {
-            gitCmd += " --cached "
+            gitCmd.push("--cached");
         }
-        var filename = element.textContent;
-        webui.git(gitCmd + filename, function(data) {
-            workspaceView.diffView.update(data);
-        });
-
+        gitCmd.push(element.textContent);
+        workspaceView.diffView.update(gitCmd);
     };
 
     self.unselect = function() {
