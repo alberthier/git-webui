@@ -542,8 +542,8 @@ webui.DiffView = function(sideBySide, parent) {
 
     self.element = $(   '<div class="diff-view-container panel panel-default">' +
                             '<div class="panel-heading btn-toolbar" role="toolbar">' +
-                                '<button type="button" class="btn btn-default diff-context-all" data-toggle="button">Complete file</button>' +
-                                '<div class="btn-group">' +
+                                '<button type="button" class="btn btn-sm btn-default diff-context-all" data-toggle="button">Complete file</button>' +
+                                '<div class="btn-group btn-group-sm">' +
                                     '<button type="button" class="btn btn-default diff-context-remove">-</button>' +
                                     '<button type="button" class="btn btn-default diff-context-add">+</button>' +
                                     '<span></span>' +
@@ -966,7 +966,7 @@ webui.ChangedFilesView = function(workspaceView, type, label) {
     self.element = $(   '<div id="' + type + '-view" class="panel panel-default">' +
                             '<div class="panel-heading">' +
                                 '<h5>'+ label + '</h5>' +
-                                '<div class="btn-group"></div>' +
+                                '<div class="btn-group btn-group-sm"></div>' +
                             '</div>' +
                             '<div class="file-list-container">' +
                                 '<div class="list-group"></div>' +
@@ -1028,7 +1028,7 @@ webui.CommitMessageView = function(workspaceView) {
     self.element = $(   '<div id="commit-message-view" class="panel panel-default">' +
                             '<div class="panel-heading">' +
                                 '<h5>Message</h5>' +
-                                '<div class="btn-group">' +
+                                '<div class="btn-group btn-group-sm">' +
                                     '<button type="button" class="btn btn-default commit-message-amend" data-toggle="button">Amend</button>' +
                                     '<button type="button" class="btn btn-default commit-message-commit">Commit</button>' +
                                 '</div>' +
