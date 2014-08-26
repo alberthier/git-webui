@@ -421,6 +421,7 @@ webui.DiffView = function(sideBySide, parent) {
     };
 
     self.refresh = function(diff) {
+        self.diffHeader = "";
         $("span", self.element).text('Context: ' + self.context);
         if (sideBySide) {
             self.updateSplitView(leftLines, diff, '-');
@@ -490,8 +491,14 @@ webui.DiffView = function(sideBySide, parent) {
         pre.appendChild(document.createTextNode(line));
         if (c == '+') {
             $(pre).addClass("diff-line-add");
+            pre.onclick = function(event) {
+                self.applyPatch(event.target, false);
+            };
         } else if (c == '-') {
             $(pre).addClass("diff-line-del");
+            pre.onclick = function(event) {
+                self.applyPatch(event.target, false);
+            };
         } else if (c == '@') {
             $(pre).addClass("diff-line-offset");
             inHeader = false;
@@ -500,8 +507,47 @@ webui.DiffView = function(sideBySide, parent) {
         }
         if (inHeader) {
             $(pre).addClass("diff-line-header");
+            if (c == "+") {
+                self.diffHeader += line + "\n";
+            } else if (c == "-") {
+                self.diffHeader += line + "\n";
+            }
         }
         return inHeader;
+    }
+
+    self.applyPatch = function(element, reverse) {
+        // Find the context line
+        var context = element.previousElementSibling;
+        var offset = 0;
+        while (context) {
+            var c = context.textContent[0];
+            if (c == " " || c == "-") {
+                offset += 1;
+            } else if (c == "@") {
+                break;
+            }
+            context = context.previousElementSibling;
+        }
+        context = context.textContent;
+        var lineno = Math.abs(context.split(" ")[1].split(",")[0]) + offset;
+        var diffLine = element.textContent;
+        if (reverse) {
+            if (diffLine[0] == "+") {
+                diffLine = "-" + diffLine.substr(1);
+            } else if (diffLine[0] == "-") {
+                diffLine = "+" + diffLine.substr(1);
+            }
+        }
+        if (diffLine[0] == "+") {
+            var prevLineCount = 0;
+            var newLineCount = 1;
+        } else if (diffLine[0] == "-") {
+            var prevLineCount = 1;
+            var newLineCount = 0;
+        }
+        var patch = self.diffHeader + "@@ -" + lineno + "," + prevLineCount +" +" + lineno + "," + newLineCount + " @@\n" + diffLine;
+        console.log(patch);
     }
 
     self.diffViewScrolled = function(event) {
@@ -576,6 +622,7 @@ webui.DiffView = function(sideBySide, parent) {
     $(".diff-context-all", self.element)[0].onclick = self.allContext;
     self.context = 3;
     self.complete = false;
+    self.diffHeader = "";
 };
 
 /*
@@ -622,7 +669,6 @@ webui.TreeView = function(commitView) {
         start = end + 1;
         self.name = line.substr(start);
     }
-
 
     self.update = function(treeRef) {
         self.stack = [ { name: webui.repo, object: treeRef } ];
