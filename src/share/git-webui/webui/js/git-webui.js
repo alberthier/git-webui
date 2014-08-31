@@ -4,18 +4,42 @@ var webui = webui || {};
 
 webui.repo = "/";
 
-webui.git = function(cmd, callback) {
+webui.git = function(cmd, arg1, arg2) {
+    // cmd = git command line arguments
+    // other arguments = optional stdin content and a callback function:
+    // ex:
+    // git("log", mycallback)
+    // git("commit -F -", "my commit message", mycallback)
+    if (typeof(arg1) == "function") {
+        var callback = arg1;
+    } else {
+        // Convention : first line = git arguments, rest = process stdin
+        cmd += "\n" + arg1;
+        var callback = arg2;
+    }
     $.post("git", cmd, function(data, status, xhr) {
         if (xhr.status == 200) {
-            if (callback) {
-                callback(data);
+            // Convention : last line = git process exit code
+            var rcodeIndex = data.lastIndexOf("\n");
+            var output = data.substr(0, rcodeIndex);
+            var rcode = parseInt(data.substr(rcodeIndex + 1));
+            if (rcode == 0) {
+                if (callback) {
+                    callback(output);
+                }
+                $("#error-modal .alert").text("");
+            } else {
+                $("#error-modal .alert").text(output);
+                $("#error-modal").modal('show');
             }
         } else {
-            console.log(status + " " + data);
+            $("#error-modal .alert").text(data);
+            $("#error-modal").modal('show');
         }
     }, "text")
     .fail(function(xhr, status, error) {
-        console.log(status + " "  + error);
+        $("#error-modal .alert").text(error);
+        $("#error-modal").modal('show');
     });
 };
 
@@ -1059,8 +1083,8 @@ webui.CommitMessageView = function(workspaceView) {
             if (amend.checked) {
                 cmd += "--amend ";
             }
-            cmd += '-m "' + textArea.value + '"'
-            webui.git(cmd, function(data) {
+            cmd += "--file=-";
+            webui.git(cmd, textArea.value, function(data) {
                 textArea.value = "";
                 amend.checked = false;
                 workspaceView.update();
