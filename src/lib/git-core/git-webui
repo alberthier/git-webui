@@ -139,7 +139,7 @@ class WebUiRequestHandler(CGIHTTPRequestHandler):
         return self.headers.get("User-Agent", "").startswith("git/")
 
 
-    def process(self, cmd, stdin):
+    def process(self, cmd, stdin = b""):
         self.send_response(200)
         self.end_headers()
         # Convention : send first all git output. Last line is always the git process exit code
