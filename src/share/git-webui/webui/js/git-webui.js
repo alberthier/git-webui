@@ -38,7 +38,7 @@ webui.git = function(cmd, arg1, arg2) {
         }
     }, "text")
     .fail(function(xhr, status, error) {
-        $("#error-modal .alert").text(error);
+        $("#error-modal .alert").text("Git webui server not running");
         $("#error-modal").modal('show');
     });
 };
