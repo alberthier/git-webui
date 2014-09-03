@@ -924,11 +924,7 @@ webui.ChangedFilesView = function(workspaceView, type, label) {
                     item.model = line.substr(3);
                     item.appendChild(document.createTextNode(item.model));
                     $(item).click(self.select);
-                    if (col == 0) {
-                        $(item).dblclick(self.unstage);
-                    } else {
-                        $(item).dblclick(self.stage);
-                    }
+                    $(item).dblclick(self.process);
                 }
             });
             if (selectedIndex !== null && selectedIndex >= fileList.childElementCount) {
@@ -942,6 +938,7 @@ webui.ChangedFilesView = function(workspaceView, type, label) {
                 $(selectedNode).addClass("active");
                 self.refreshDiff(selectedNode);
             }
+            fileListContainer.scrollTop = prevScrollTop;
         });
     };
 
@@ -1006,25 +1003,19 @@ webui.ChangedFilesView = function(workspaceView, type, label) {
         return files;
     }
 
-    self.stage = function() {
+    self.process = function() {
+        prevScrollTop = fileListContainer.scrollTop;
         var files = self.getFileList();
         if (files.length != 0) {
-            webui.git("add -- " + files, function(data) {
-                workspaceView.update();
-            });
-        }
-    };
-
-    self.unstage = function() {
-        var files = self.getFileList();
-        if (files.length != 0) {
-            webui.git("reset -- " + files, function(data) {
+            var cmd = type == "working-copy" ? "add" : "reset";
+            webui.git(cmd + " -- " + files, function(data) {
                 workspaceView.update();
             });
         }
     };
 
     self.cancel = function() {
+        prevScrollTop = fileListContainer.scrollTop;
         var files = self.getFileList();
         if (files.length != 0) {
             webui.git("checkout -- " + files, function(data) {
@@ -1043,16 +1034,18 @@ webui.ChangedFilesView = function(workspaceView, type, label) {
                             '</div>' +
                         '</div>')[0];
     if (type == "working-copy") {
-        var buttons = [{ name: "Stage", callback: self.stage }, { name: "Cancel", callback: self.cancel }];
+        var buttons = [{ name: "Stage", callback: self.process }, { name: "Cancel", callback: self.cancel }];
     } else {
-        var buttons = [{ name: "Unstage", callback: self.unstage }];
+        var buttons = [{ name: "Unstage", callback: self.process }];
     }
     var btnGroup = $(".btn-group", self.element);
     buttons.forEach(function (btnData) {
         var btn = $('<button type="button" class="btn btn-default">' + btnData.name + '</button>').appendTo(btnGroup)[0];
         btn.onclick = btnData.callback;
     });
-    var fileList = $(".list-group", self.element)[0];
+    var fileListContainer = $(".file-list-container", self.element)[0];
+    var prevScrollTop = fileListContainer.scrollTop;
+    var fileList = $(".list-group", fileListContainer)[0];
     var selectedIndex = null;
 
     self.filesCount = 0;
