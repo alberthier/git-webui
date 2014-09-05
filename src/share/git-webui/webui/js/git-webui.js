@@ -1060,7 +1060,7 @@ webui.CommitMessageView = function(workspaceView) {
 
     self.onAmend = function() {
         if (!$(amend).hasClass("active") && textArea.value.length == 0) {
-            webui.git("log --pretty=format:%s -n 1", function(data) {
+            webui.git("log --pretty=format:%B -n 1", function(data) {
                 textArea.value = data;
             });
         }
@@ -1073,7 +1073,7 @@ webui.CommitMessageView = function(workspaceView) {
             console.log("Enter a commit message first");
         } else {
             var cmd = "commit ";
-            if (amend.checked) {
+            if ($(amend).hasClass("active")) {
                 cmd += "--amend ";
             }
             cmd += "--file=-";
@@ -1081,6 +1081,7 @@ webui.CommitMessageView = function(workspaceView) {
                 textArea.value = "";
                 amend.checked = false;
                 workspaceView.update();
+                $(amend).removeClass("active");
             });
         }
     }
