@@ -85,7 +85,7 @@ class WebUiRequestHandler(CGIHTTPRequestHandler):
     def do_GET(self):
         if self.path.startswith("/git/cat-file/"):
             obj = self.path[14:]
-            self.process(["git", "cat-file", "-p", obj])
+            self.process(["git", "cat-file", "-p", obj], b"", False)
         elif self.path == "/dirname":
             wc = os.path.split(WebUiRequestHandler.REPO_ROOT)[1]
             self.send_text(200, codecs.encode(wc, "utf-8"))
@@ -113,7 +113,7 @@ class WebUiRequestHandler(CGIHTTPRequestHandler):
             cmd = shlex.split("git " + codecs.decode(args, "utf-8"))
             action = cmd[1]
             if not self.is_view_only() or args in ["branch", "tag"] or action in ["show", "status", "log", "ls-tree"]:
-                self.process(cmd, stdin)
+                self.process(cmd, stdin, True)
             else:
                 self.send_error(403)
         else:
@@ -139,13 +139,14 @@ class WebUiRequestHandler(CGIHTTPRequestHandler):
         return self.headers.get("User-Agent", "").startswith("git/")
 
 
-    def process(self, cmd, stdin = b""):
+    def process(self, cmd, stdin, addstatus):
         self.send_response(200)
         self.end_headers()
         # Convention : send first all git output. Last line is always the git process exit code
         git = subprocess.Popen(cmd, stdin = subprocess.PIPE, stdout = self.wfile, stderr = self.wfile, cwd = WebUiRequestHandler.REPO_ROOT)
         git.communicate(stdin)
-        self.wfile.write(codecs.encode("\n" + str(git.returncode), "utf-8"))
+        if addstatus:
+            self.wfile.write(codecs.encode("\n" + str(git.returncode), "utf-8"))
 
 
     def send_text(self, http_status, text):
