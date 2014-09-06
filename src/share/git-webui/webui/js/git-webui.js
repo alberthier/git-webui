@@ -235,7 +235,7 @@ webui.SideBarView = function(mainView) {
         workspaceElement.onclick = function (event) {
             $("*", self.element).removeClass("active");
             $(workspaceElement).addClass("active");
-            self.mainView.workspaceView.update();
+            self.mainView.workspaceView.update("stage");
         };
     }
 
@@ -424,7 +424,8 @@ webui.DiffView = function(sideBySide, parent) {
 
     var self = this;
 
-    self.update = function(cmd) {
+    self.update = function(cmd, mode) {
+        gitApplyType = mode;
         if (cmd) {
             self.cmd = cmd;
         }
@@ -515,14 +516,22 @@ webui.DiffView = function(sideBySide, parent) {
         pre.appendChild(document.createTextNode(line));
         if (c == '+') {
             $(pre).addClass("diff-line-add");
-            pre.onclick = function(event) {
-                self.applyPatch(event.target, false);
-            };
+            if (gitApplyType != undefined) {
+                pre.onclick = function(event) {
+                    if (event.ctrlKey) {
+                        self.applyPatch(event.target, true, gitApplyType != "stage");
+                    }
+                };
+            }
         } else if (c == '-') {
             $(pre).addClass("diff-line-del");
-            pre.onclick = function(event) {
-                self.applyPatch(event.target, false);
-            };
+            if (gitApplyType != undefined) {
+                pre.onclick = function(event) {
+                    if (event.ctrlKey) {
+                        self.applyPatch(event.target, true, gitApplyType != "stage");
+                    }
+                };
+            }
         } else if (c == '@') {
             $(pre).addClass("diff-line-offset");
             inHeader = false;
@@ -540,7 +549,7 @@ webui.DiffView = function(sideBySide, parent) {
         return inHeader;
     }
 
-    self.applyPatch = function(element, reverse) {
+    self.applyPatch = function(element, cached, reverse) {
         // Find the context line
         var context = element.previousElementSibling;
         var offset = 0;
@@ -570,8 +579,14 @@ webui.DiffView = function(sideBySide, parent) {
             var prevLineCount = 1;
             var newLineCount = 0;
         }
-        var patch = self.diffHeader + "@@ -" + lineno + "," + prevLineCount +" +" + lineno + "," + newLineCount + " @@\n" + diffLine;
-        console.log(patch);
+        var patch = self.diffHeader + "@@ -" + lineno + "," + prevLineCount +" +" + lineno + "," + newLineCount + " @@\n" + diffLine + "\n";
+        var cmd = "apply --unidiff-zero"
+        if (cached) {
+            cmd += " --cached";
+        }
+        webui.git(cmd, patch, function (data) {
+            parent.update();
+        });
     }
 
     self.diffViewScrolled = function(event) {
@@ -647,6 +662,7 @@ webui.DiffView = function(sideBySide, parent) {
     self.context = 3;
     self.complete = false;
     self.diffHeader = "";
+    var gitApplyType = "stage";
 };
 
 /*
@@ -880,9 +896,9 @@ webui.WorkspaceView = function(mainView) {
         mainView.element.appendChild(self.element);
     };
 
-    self.update = function() {
+    self.update = function(mode) {
         self.show();
-        self.diffView.update([]);
+        self.diffView.update([], mode);
         self.workingCopyView.update();
         self.stagingAreaView.update();
         self.commitMessageView.update();
@@ -982,7 +998,7 @@ webui.ChangedFilesView = function(workspaceView, type, label) {
             gitCmd.push("--cached");
         }
         gitCmd.push(element.textContent);
-        workspaceView.diffView.update(gitCmd);
+        workspaceView.diffView.update(gitCmd, type == "working-copy" ? "stage" : "unstage");
     };
 
     self.unselect = function() {
@@ -1009,7 +1025,7 @@ webui.ChangedFilesView = function(workspaceView, type, label) {
         if (files.length != 0) {
             var cmd = type == "working-copy" ? "add" : "reset";
             webui.git(cmd + " -- " + files, function(data) {
-                workspaceView.update();
+                workspaceView.update(type == "working-copy" ? "stage" : "unstage");
             });
         }
     };
@@ -1019,7 +1035,7 @@ webui.ChangedFilesView = function(workspaceView, type, label) {
         var files = self.getFileList();
         if (files.length != 0) {
             webui.git("checkout -- " + files, function(data) {
-                workspaceView.update();
+                workspaceView.update("stage");
             });
         }
     }
@@ -1080,7 +1096,7 @@ webui.CommitMessageView = function(workspaceView) {
             webui.git(cmd, textArea.value, function(data) {
                 textArea.value = "";
                 amend.checked = false;
-                workspaceView.update();
+                workspaceView.update("stage");
                 $(amend).removeClass("active");
             });
         }
