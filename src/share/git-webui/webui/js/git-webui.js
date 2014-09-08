@@ -459,48 +459,58 @@ webui.DiffView = function(sideBySide, parent) {
     self.updateSimpleView = function(view, diff) {
         $(view).empty();
 
-        var inHeader = true;
+        var context = { inHeader: true };
         var diffLines = diff.split("\n");
         for (var i = 0; i < diffLines.length; ++i) {
             var line = diffLines[i];
-            inHeader = self.addDiffLine(view, inHeader, line);
+            context = self.addDiffLine(view, line, context);
         }
     }
 
     self.updateSplitView = function(view, diff, operation) {
         $(view).empty();
 
-        var inHeader = true;
         var diffLines = diff.split("\n");
-        var addedLines = [];
-        var removedLines = [];
+        var context = { inHeader: true,
+                        addedLines: [],
+                        removedLines: [],
+                        diffHeader: '' };
         for (var i = 0; i < diffLines.length; ++i) {
             var line = diffLines[i];
             var c = line[0];
             if (c == '+') {
-                addedLines.push(line);
+                context.addedLines.push(line);
+                if (context.inHeader) {
+                    context.diffHeader += line + '\n';
+                }
             } else if (c == '-') {
-                removedLines.push(line);
+                context.removedLines.push(line);
+                if (context.inHeader) {
+                    context.diffHeader += line + '\n';
+                }
             } else {
-                self.flushAddedRemovedLines(view, inHeader, operation, addedLines, removedLines);
-                addedLines = [];
-                removedLines = [];
-                inHeader = self.addDiffLine(view, inHeader, line);
+                context = self.flushAddedRemovedLines(view, operation, context);
+                context.addedLines = [];
+                context.removedLines = [];
+                context = self.addDiffLine(view, line, context);
+                if (c == '@') {
+                    context.diffHeader = '';
+                }
             }
         }
-        self.flushAddedRemovedLines(view, inHeader, operation, addedLines, removedLines);
+        self.flushAddedRemovedLines(view, operation, context);
     }
 
-    self.flushAddedRemovedLines = function(view, inHeader, operation, addedLines, removedLines) {
+    self.flushAddedRemovedLines = function(view, operation, context) {
         if (operation == '+') {
-            var lines = addedLines;
-            var offset = removedLines.length - addedLines.length;
+            var lines = context.addedLines;
+            var offset = context.removedLines.length - context.addedLines.length;
         } else {
-            var lines = removedLines;
-            var offset = addedLines.length - removedLines.length;
+            var lines = context.removedLines;
+            var offset = context.addedLines.length - context.removedLines.length;
         }
         lines.forEach(function(line) {
-            self.addDiffLine(view, inHeader, line);
+            context = self.addDiffLine(view, line, context);
         });
         if (offset > 0) {
             for (var i = 0; i < offset; ++i) {
@@ -508,9 +518,10 @@ webui.DiffView = function(sideBySide, parent) {
                 pre.appendChild(document.createTextNode(" "));
             }
         }
+        return context;
     }
 
-    self.addDiffLine = function(view, inHeader, line) {
+    self.addDiffLine = function(view, line, context) {
         var c = line[0];
         var pre = $('<pre class="diff-view-line">').appendTo(view)[0];
         pre.appendChild(document.createTextNode(line));
@@ -534,19 +545,15 @@ webui.DiffView = function(sideBySide, parent) {
             }
         } else if (c == '@') {
             $(pre).addClass("diff-line-offset");
-            inHeader = false;
+            pre.diffHeader = context.diffHeader;
+            context.inHeader = false;
         } else if (c == 'd') {
-            inHeader = true;
+            context.inHeader = true;
         }
-        if (inHeader) {
+        if (context.inHeader) {
             $(pre).addClass("diff-line-header");
-            if (c == "+") {
-                self.diffHeader += line + "\n";
-            } else if (c == "-") {
-                self.diffHeader += line + "\n";
-            }
         }
-        return inHeader;
+        return context;
     }
 
     self.applyPatch = function(element, cached, reverse) {
@@ -562,6 +569,7 @@ webui.DiffView = function(sideBySide, parent) {
             }
             context = context.previousElementSibling;
         }
+        var diffHeader = context.diffHeader;
         context = context.textContent;
         var lineno = Math.abs(context.split(" ")[1].split(",")[0]) + offset;
         var diffLine = element.textContent;
@@ -579,7 +587,7 @@ webui.DiffView = function(sideBySide, parent) {
             var prevLineCount = 1;
             var newLineCount = 0;
         }
-        var patch = self.diffHeader + "@@ -" + lineno + "," + prevLineCount +" +" + lineno + "," + newLineCount + " @@\n" + diffLine + "\n";
+        var patch = diffHeader + "@@ -" + lineno + "," + prevLineCount +" +" + lineno + "," + newLineCount + " @@\n" + diffLine + "\n";
         var cmd = "apply --unidiff-zero"
         if (cached) {
             cmd += " --cached";
@@ -661,7 +669,6 @@ webui.DiffView = function(sideBySide, parent) {
     $(".diff-context-all", self.element)[0].onclick = self.allContext;
     self.context = 3;
     self.complete = false;
-    self.diffHeader = "";
     var gitApplyType = "stage";
 };
 
