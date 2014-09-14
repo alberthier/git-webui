@@ -449,8 +449,9 @@ webui.DiffView = function(sideBySide, parent) {
         self.diffHeader = "";
         $("span", self.element).text('Context: ' + self.context);
         if (sideBySide) {
-            self.updateSplitView(leftLines, diff, '-');
-            self.updateSplitView(rightLines, diff, '+');
+            var diffLines = diff.split("\n");
+            self.updateSplitView(leftLines, diffLines, '-');
+            self.updateSplitView(rightLines, diffLines, '+');
         } else {
             self.updateSimpleView(singleLines, diff);
         }
@@ -467,14 +468,14 @@ webui.DiffView = function(sideBySide, parent) {
         }
     }
 
-    self.updateSplitView = function(view, diff, operation) {
+    self.updateSplitView = function(view, diffLines, operation) {
         $(view).empty();
 
-        var diffLines = diff.split("\n");
         var context = { inHeader: true,
                         addedLines: [],
                         removedLines: [],
-                        diffHeader: '' };
+                        diffHeader: '',
+                        diffHunk: [] };
         for (var i = 0; i < diffLines.length; ++i) {
             var line = diffLines[i];
             var c = line[0];
@@ -482,18 +483,25 @@ webui.DiffView = function(sideBySide, parent) {
                 context.addedLines.push(line);
                 if (context.inHeader) {
                     context.diffHeader += line + '\n';
+                } else {
+                    context.diffHunk.push(line);
                 }
             } else if (c == '-') {
                 context.removedLines.push(line);
                 if (context.inHeader) {
                     context.diffHeader += line + '\n';
+                } else {
+                    context.diffHunk.push(line);
                 }
             } else {
+                if (c == ' ') {
+                    context.diffHunk.push(line);
+                }
                 context = self.flushAddedRemovedLines(view, operation, context);
                 context.addedLines = [];
                 context.removedLines = [];
                 context = self.addDiffLine(view, line, context);
-                if (c == '@') {
+                if (c == 'd') {
                     context.diffHeader = '';
                 }
             }
@@ -530,7 +538,7 @@ webui.DiffView = function(sideBySide, parent) {
             if (gitApplyType != undefined) {
                 pre.onclick = function(event) {
                     if (event.ctrlKey) {
-                        self.applyPatch(event.target, true, gitApplyType != "stage");
+                        self.applyLinePatch(event.target, true, gitApplyType != "stage");
                     }
                 };
             }
@@ -539,7 +547,7 @@ webui.DiffView = function(sideBySide, parent) {
             if (gitApplyType != undefined) {
                 pre.onclick = function(event) {
                     if (event.ctrlKey) {
-                        self.applyPatch(event.target, true, gitApplyType != "stage");
+                        self.applyLinePatch(event.target, true, gitApplyType != "stage");
                     }
                 };
             }
@@ -547,6 +555,15 @@ webui.DiffView = function(sideBySide, parent) {
             $(pre).addClass("diff-line-offset");
             pre.diffHeader = context.diffHeader;
             context.inHeader = false;
+            if (gitApplyType != undefined) {
+                pre.onclick = function(event) {
+                    if (event.ctrlKey) {
+                        self.applyHunkPatch(event.target, true, gitApplyType != "stage");
+                    }
+                };
+            }
+            pre.diffHunk = [];
+            context.diffHunk = pre.diffHunk;
         } else if (c == 'd') {
             context.inHeader = true;
         }
@@ -556,7 +573,20 @@ webui.DiffView = function(sideBySide, parent) {
         return context;
     }
 
-    self.applyPatch = function(element, cached, reverse) {
+    self.reverseLine = function(line) {
+        switch (line[0]) {
+            case '-':
+                return '+' + line.substr(1);
+            case '+':
+                return '-' + line.substr(1);
+                break;
+            default:
+                return line;
+                break;
+        }
+    }
+
+    self.applyLinePatch = function(element, cached, reverse) {
         // Find the context line
         var context = element.previousElementSibling;
         var offset = 0;
@@ -574,11 +604,7 @@ webui.DiffView = function(sideBySide, parent) {
         var lineno = Math.abs(context.split(" ")[1].split(",")[0]) + offset;
         var diffLine = element.textContent;
         if (reverse) {
-            if (diffLine[0] == "+") {
-                diffLine = "-" + diffLine.substr(1);
-            } else if (diffLine[0] == "-") {
-                diffLine = "+" + diffLine.substr(1);
-            }
+            diffLine = self.reverseLine(line);
         }
         if (diffLine[0] == "+") {
             var prevLineCount = 0;
@@ -588,7 +614,65 @@ webui.DiffView = function(sideBySide, parent) {
             var newLineCount = 0;
         }
         var patch = diffHeader + "@@ -" + lineno + "," + prevLineCount +" +" + lineno + "," + newLineCount + " @@\n" + diffLine + "\n";
-        var cmd = "apply --unidiff-zero"
+        var cmd = "apply --unidiff-zero";
+        if (cached) {
+            cmd += " --cached";
+        }
+        webui.git(cmd, patch, function (data) {
+            parent.update();
+        });
+    }
+
+    self.applyHunkPatch = function(element, cached, reverse) {
+        // Find the current operation
+        var operation = null;
+        for (var elt = element.nextElementSibling; elt && operation == null; elt = elt.nextElementSibling) {
+            var c = elt.textContent[0];
+            if (c == '+' || c == '-') {
+                operation = c;
+                break;
+            }
+        }
+
+        // Parse diff context line
+        var splittedContext = element.textContent.split(" ");
+        var lineNo = Math.abs(splittedContext[reverse ? 2 : 1].split(",")[0]);
+
+        var patchContent = "";
+        var diffLinesCount = 0;
+        var contextLinesCount = 0;
+        for (var i = 0; i < element.diffHunk.length; ++i) {
+            var line = element.diffHunk[i];
+            var c = line[0];
+            if (c == operation) {
+                if (reverse) {
+                    line = self.reverseLine(line);
+                }
+                ++diffLinesCount
+            } else if ((operation == '+' && !reverse) || (operation == '-' && reverse)) {
+                line = ' ' + line.substr(1);
+                ++contextLinesCount;
+            } else if (c == ' ') {
+                ++contextLinesCount;
+            } else if (c == '@') {
+                break;
+            } else {
+                line = null;
+            }
+            if (line != null) {
+                patchContent += line + "\n";
+            }
+        }
+
+        var patch = element.diffHeader;
+        if ((operation == '+' || reverse) && !(operation == '+' && reverse)){
+            patch += "@@ -" + lineNo + "," + contextLinesCount +" +" + lineNo + "," + (contextLinesCount + diffLinesCount) + " @@\n";
+        } else {
+            patch += "@@ -" + lineNo + "," + (contextLinesCount + diffLinesCount) + " +" + lineNo + "," + contextLinesCount + " @@\n";
+        }
+        patch += patchContent;
+
+        var cmd = "apply";
         if (cached) {
             cmd += " --cached";
         }
