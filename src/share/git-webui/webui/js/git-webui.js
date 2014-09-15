@@ -1028,7 +1028,12 @@ webui.ChangedFilesView = function(workspaceView, type, label) {
                 if (col == 0 && status != " " && status != "?" || col == 1 && status != " ") {
                     ++self.filesCount;
                     var item = $('<a class="list-group-item">').appendTo(fileList)[0];
-                    item.model = line.substr(3);
+                    item.status = status;
+                    if (status == "R") {
+                        item.model = line.split(" -> ")[1];
+                    } else {
+                        item.model = line.substr(3);
+                    }
                     item.appendChild(document.createTextNode(item.model));
                     $(item).click(self.select);
                     $(item).dblclick(self.process);
@@ -1088,7 +1093,8 @@ webui.ChangedFilesView = function(workspaceView, type, label) {
         if (type == "staging-area") {
             gitCmd.push("--cached");
         }
-        gitCmd.push(element.textContent);
+        gitCmd.push("--");
+        gitCmd.push(element.model);
         workspaceView.diffView.update(gitCmd, type == "working-copy" ? "stage" : "unstage");
     };
 
@@ -1099,11 +1105,13 @@ webui.ChangedFilesView = function(workspaceView, type, label) {
         }
     };
 
-    self.getFileList = function() {
+    self.getFileList = function(including, excluding) {
         var files = "";
         for (var i = 0; i < fileList.childElementCount; ++i) {
             var child = fileList.children[i];
-            if ($(child).hasClass("active")) {
+            var included = including == undefined || including.indexOf(child.status) != -1;
+            var excluded = excluding != undefined && excluding.indexOf(child.status) != -1;
+            if ($(child).hasClass("active") && included && !excluded) {
                 files += '"' + (child.textContent) + '" ';
             }
         }
@@ -1112,10 +1120,22 @@ webui.ChangedFilesView = function(workspaceView, type, label) {
 
     self.process = function() {
         prevScrollTop = fileListContainer.scrollTop;
-        var files = self.getFileList();
+        var files = self.getFileList(undefined, "D");
+        var rmFiles = self.getFileList("D");
         if (files.length != 0) {
             var cmd = type == "working-copy" ? "add" : "reset";
             webui.git(cmd + " -- " + files, function(data) {
+                if (rmFiles.length != 0) {
+                    webui.git("rm -- " + rmFiles, function(data) {
+                        workspaceView.update(type == "working-copy" ? "stage" : "unstage");
+                    });
+                } else {
+                    workspaceView.update(type == "working-copy" ? "stage" : "unstage");
+                }
+            });
+        } else if (rmFiles.length != 0) {
+            var cmd = type == "working-copy" ? "rm" : "reset";
+            webui.git(cmd + " -- " + rmFiles, function(data) {
                 workspaceView.update(type == "working-copy" ? "stage" : "unstage");
             });
         }
