@@ -24,6 +24,15 @@ module.exports = function(grunt) {
                 src: ['libexec/**', 'share/**', '!**/less', '!**/*.less'],
                 dest: 'dist',
             },
+            release: {
+                options: {
+                    mode: true,
+                },
+                expand: true,
+                cwd: 'dist',
+                src: '**',
+                dest: 'release',
+            },
         },
 
         less: {
@@ -65,6 +74,8 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-shell');
     grunt.loadNpmTasks('grunt-contrib-watch');
 
-    grunt.registerTask('default', ['copy', 'less']);
+    grunt.registerTask('copytodist', ['copy:jquery', 'copy:bootstrap', 'copy:git_webui']);
+    grunt.registerTask('default', ['copytodist', 'less']);
     grunt.registerTask('serve', ['default', 'shell:serve']);
+    grunt.registerTask('release', ['default', 'copy:release']);
 };
