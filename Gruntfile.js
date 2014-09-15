@@ -21,7 +21,7 @@ module.exports = function(grunt) {
                 },
                 expand: true,
                 cwd: 'src',
-                src: ['lib/**', 'share/**', '!**/less', '!**/*.less'],
+                src: ['libexec/**', 'share/**', '!**/less', '!**/*.less'],
                 dest: 'dist',
             },
         },
@@ -41,13 +41,13 @@ module.exports = function(grunt) {
 
         shell: {
             serve: {
-                command: './dist/lib/git-core/git-webui'
+                command: './dist/libexec/git-core/git-webui'
             },
         },
 
         watch: {
             scripts: {
-                files: ['src/lib/**/*', 'src/share/**/*.js'],
+                files: ['src/libexec/**/*', 'src/share/**/*.js'],
                 tasks: 'copy:git_webui'
             },
             css: {
