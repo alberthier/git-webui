@@ -466,6 +466,7 @@ webui.DiffView = function(sideBySide, parent) {
             var line = diffLines[i];
             context = self.addDiffLine(view, line, context);
         }
+        view.parentElement.scrollTop = view.parentElement.prevScrollTop;
     }
 
     self.updateSplitView = function(view, diffLines, operation) {
@@ -507,6 +508,7 @@ webui.DiffView = function(sideBySide, parent) {
             }
         }
         self.flushAddedRemovedLines(view, operation, context);
+        view.parentElement.scrollTop = view.parentElement.prevScrollTop;
     }
 
     self.flushAddedRemovedLines = function(view, operation, context) {
