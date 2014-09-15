@@ -78,10 +78,10 @@ webui.TabBox = function(buttons) {
 
     for (var i = 0; i < buttons.length; ++i) {
         var item = buttons[i];
-        var li = $('<li><a href="#">' + item[0] + '</a></li>')[0];
-        self.element.appendChild(li);
-        li.callback = item[1];
-        li.onclick = self.itemClicked;
+        var li = $('<li><a href="#">' + item[0] + '</a></li>');
+        li.appendTo(self.element);
+        li.click(self.itemClicked);
+        li[0].callback = item[1];
     }
 };
 
@@ -147,10 +147,10 @@ webui.SideBarView = function(mainView) {
             }
             $(link).text(link.refName);
             popupContent.appendChild(link);
-            link.onclick = function (event) {
+            $(link).click(function (event) {
                 $(popup).modal('hide');
                 self.selectRef(event.target.refName);
-            }
+            });
         });
         return popup;
     };
@@ -191,17 +191,17 @@ webui.SideBarView = function(mainView) {
                         li.refName = ref;
                     }
                     $(li).text(li.refName);
-                    li.onclick = function (event) {
+                    $(li).click(function (event) {
                         self.selectRef(event.target.refName);
-                    };
+                    });
                 }
 
                 if (refs.length > maxRefsCount) {
-                    var li = $('<li class="sidebar-more">More ...</li>').appendTo(ul)[0];
+                    var li = $('<li class="sidebar-more">More ...</li>').appendTo(ul);
                     var popup = self.addPopup(section, title, id + "-popup", refs, isBranch);
-                    li.onclick = function() {
+                    li.click(function() {
                         $(popup).modal();
-                    };
+                    });
                 }
             } else {
                 $(section).remove();
@@ -231,20 +231,20 @@ webui.SideBarView = function(mainView) {
     if (webui.viewonly) {
         $("#sidebar-workspace", self.element).remove();
     } else {
-        var workspaceElement = $("#sidebar-workspace h4", self.element)[0];
-        workspaceElement.onclick = function (event) {
+        var workspaceElement = $("#sidebar-workspace h4", self.element);
+        workspaceElement.click(function (event) {
             $("*", self.element).removeClass("active");
-            $(workspaceElement).addClass("active");
+            workspaceElement.addClass("active");
             self.mainView.workspaceView.update("stage");
-        };
+        });
     }
 
-    var remoteElement = $("#sidebar-remote h4", self.element)[0];
-    remoteElement.onclick = function (event) {
+    var remoteElement = $("#sidebar-remote h4", self.element);
+    remoteElement.click(function (event) {
         $("*", self.element).removeClass("active");
         $(remoteElement).addClass("active");
         self.mainView.remoteView.update();
-    };
+    });
 
     self.fetchSection($("#sidebar-branches", self.element)[0], "Branches", "branches", "branch", true);
     self.fetchSection($("#sidebar-tags", self.element)[0], "Tags", "tags", "tag", false);
@@ -297,10 +297,10 @@ webui.LogView = function(historyView) {
                 ++count;
             }
             if (self.nextRef != undefined) {
-                var moreTag = $('<a class="log-entry log-entry-more list-group-item">')[0];
-                $('<a class="list-group-item-text">Show previous commits</a>').appendTo(moreTag);
-                moreTag.onclick = self.populate;
-                self.element.appendChild(moreTag);
+                var moreTag = $('<a class="log-entry log-entry-more list-group-item">');
+                $('<a class="list-group-item-text">Show previous commits</a>').appendTo(moreTag[0]);
+                moreTag.click(self.populate);
+                moreTag.appendTo(self.element);
             }
         });
     };
@@ -536,31 +536,31 @@ webui.DiffView = function(sideBySide, parent) {
         if (c == '+') {
             $(pre).addClass("diff-line-add");
             if (gitApplyType != undefined) {
-                pre.onclick = function(event) {
+                $(pre).click(function(event) {
                     if (event.ctrlKey) {
                         self.applyLinePatch(event.target, true, gitApplyType != "stage");
                     }
-                };
+                });
             }
         } else if (c == '-') {
             $(pre).addClass("diff-line-del");
             if (gitApplyType != undefined) {
-                pre.onclick = function(event) {
+                $(pre).click(function(event) {
                     if (event.ctrlKey) {
                         self.applyLinePatch(event.target, true, gitApplyType != "stage");
                     }
-                };
+                });
             }
         } else if (c == '@') {
             $(pre).addClass("diff-line-offset");
             pre.diffHeader = context.diffHeader;
             context.inHeader = false;
             if (gitApplyType != undefined) {
-                pre.onclick = function(event) {
+                $(pre).click(function(event) {
                     if (event.ctrlKey) {
                         self.applyHunkPatch(event.target, true, gitApplyType != "stage");
                     }
-                };
+                });
             }
             pre.diffHunk = [];
             context.diffHunk = pre.diffHunk;
@@ -604,7 +604,7 @@ webui.DiffView = function(sideBySide, parent) {
         var lineno = Math.abs(context.split(" ")[1].split(",")[0]) + offset;
         var diffLine = element.textContent;
         if (reverse) {
-            diffLine = self.reverseLine(line);
+            diffLine = self.reverseLine(diffLine);
         }
         if (diffLine[0] == "+") {
             var prevLineCount = 0;
@@ -665,7 +665,7 @@ webui.DiffView = function(sideBySide, parent) {
         }
 
         var patch = element.diffHeader;
-        if ((operation == '+' || reverse) && !(operation == '+' && reverse)){
+        if ((operation == '+' || reverse) && !(operation == '+' && reverse)) {
             patch += "@@ -" + lineNo + "," + contextLinesCount +" +" + lineNo + "," + (contextLinesCount + diffLinesCount) + " @@\n";
         } else {
             patch += "@@ -" + lineNo + "," + (contextLinesCount + diffLinesCount) + " +" + lineNo + "," + contextLinesCount + " @@\n";
@@ -733,13 +733,13 @@ webui.DiffView = function(sideBySide, parent) {
         var left = $('<div class="diff-view"><div class="diff-view-lines"></div></div>')[0];
         panelBody.appendChild(left);
         var leftLines = left.firstChild;
-        left.onscroll = self.diffViewScrolled;
+        $(left).scroll(self.diffViewScrolled);
         left.prevScrollTop = left.scrollTop;
         left.prevScrollLeft = left.scrollLeft;
         var right = $('<div class="diff-view"><div class="diff-view-lines"></div></div>')[0];
         panelBody.appendChild(right);
         var rightLines = right.firstChild;
-        right.onscroll = self.diffViewScrolled;
+        $(right).scroll(self.diffViewScrolled);
         right.prevScrollTop = right.scrollTop;
         right.prevScrollLeft = right.scrollLeft;
     } else {
@@ -748,9 +748,9 @@ webui.DiffView = function(sideBySide, parent) {
         var singleLines = single.firstChild;
     }
 
-    $(".diff-context-remove", self.element)[0].onclick = self.removeContext;
-    $(".diff-context-add", self.element)[0].onclick = self.addContext;
-    $(".diff-context-all", self.element)[0].onclick = self.allContext;
+    $(".diff-context-remove", self.element).click(self.removeContext);
+    $(".diff-context-add", self.element).click(self.addContext);
+    $(".diff-context-all", self.element).click(self.allContext);
     self.context = 3;
     self.complete = false;
     var gitApplyType = "stage";
@@ -814,12 +814,12 @@ webui.TreeView = function(commitView) {
             if (!last) {
                 name = '<a href="#">' + name + '</a>';
             }
-            var li = $('<li>' + name + '</li>')[0];
-            breadcrumb.appendChild(li);
+            var li = $('<li>' + name + '</li>');
+            li.appendTo(breadcrumb);
             if (!last) {
-                li.onclick = self.breadcrumbClicked;
+                li.click(self.breadcrumbClicked);
             } else {
-                $(li).addClass("active");
+                li.addClass("active");
             }
         }
     }
@@ -845,12 +845,12 @@ webui.TreeView = function(commitView) {
                                 '<span class="tree-item-tree">..</span> ' +
                                 '<span></span> ' +
                                 '<span></span> ' +
-                            '</a>')[0];
-                elt.onclick = function() {
+                            '</a>');
+                elt.click(function() {
                     self.stack.pop();
                     self.showTree();
-                };
-                treeViewTreeContent.appendChild(elt);
+                });
+                elt.appendTo(treeViewTreeContent);
             }
             webui.splitLines(data).forEach(function(line) {
                 var entry = new Entry(line);
@@ -868,16 +868,16 @@ webui.TreeView = function(commitView) {
                 }
                 if (entry.type == "tree") {
                     trees.push(elt);
-                    elt.onclick = function() {
+                    $(elt).click(function() {
                         self.stack.push({ name: elt.model.name, object: elt.model.object});
                         self.showTree();
-                    };
+                    });
                 } else {
                     blobs.push(elt);
-                    elt.onclick = function() {
+                    $(elt).click(function() {
                         self.stack.push({ name: elt.model.name, object: elt.model.object});
                         self.showBlob();
-                    };
+                    });
                 }
             });
             var compare = function(a, b) {
@@ -959,8 +959,7 @@ webui.HistoryView = function(mainView) {
     var self = this;
 
     self.show = function() {
-        $(mainView.element).empty();
-        mainView.element.appendChild(self.element);
+        mainView.switchTo(self.element);
     };
 
     self.update = function(ref) {
@@ -983,8 +982,7 @@ webui.WorkspaceView = function(mainView) {
     var self = this;
 
     self.show = function() {
-        $(mainView.element).empty();
-        mainView.element.appendChild(self.element);
+        mainView.switchTo(self.element);
     };
 
     self.update = function(mode) {
@@ -1147,8 +1145,9 @@ webui.ChangedFilesView = function(workspaceView, type, label) {
     }
     var btnGroup = $(".btn-group", self.element);
     buttons.forEach(function (btnData) {
-        var btn = $('<button type="button" class="btn btn-default">' + btnData.name + '</button>').appendTo(btnGroup)[0];
-        btn.onclick = btnData.callback;
+        var btn = $('<button type="button" class="btn btn-default">' + btnData.name + '</button>')
+        btn.appendTo(btnGroup);
+        btn.click(btnData.callback);
     });
     var fileListContainer = $(".file-list-container", self.element)[0];
     var prevScrollTop = fileListContainer.scrollTop;
@@ -1166,7 +1165,7 @@ webui.CommitMessageView = function(workspaceView) {
     var self = this;
 
     self.onAmend = function() {
-        if (!$(amend).hasClass("active") && textArea.value.length == 0) {
+        if (!amend.hasClass("active") && textArea.value.length == 0) {
             webui.git("log --pretty=format:%B -n 1", function(data) {
                 textArea.value = data;
             });
@@ -1180,15 +1179,14 @@ webui.CommitMessageView = function(workspaceView) {
             console.log("Enter a commit message first");
         } else {
             var cmd = "commit ";
-            if ($(amend).hasClass("active")) {
+            if (amend.hasClass("active")) {
                 cmd += "--amend ";
             }
             cmd += "--file=-";
             webui.git(cmd, textArea.value, function(data) {
                 textArea.value = "";
-                amend.checked = false;
                 workspaceView.update("stage");
-                $(amend).removeClass("active");
+                amend.removeClass("active");
             });
         }
     }
@@ -1207,9 +1205,9 @@ webui.CommitMessageView = function(workspaceView) {
                             '<textarea></textarea>' +
                         '</div>')[0];
     var textArea = $("textarea", self.element)[0];
-    var amend = $(".commit-message-amend", self.element)[0];
-    amend.onclick = self.onAmend;
-    $(".commit-message-commit", self.element)[0].onclick = self.onCommit;
+    var amend = $(".commit-message-amend", self.element);
+    amend.click(self.onAmend);
+    $(".commit-message-commit", self.element).click(self.onCommit);
 };
 
 webui.RemoteView = function(mainView) {
@@ -1217,8 +1215,7 @@ webui.RemoteView = function(mainView) {
     var self = this;
 
     self.show = function() {
-        $(mainView.element).empty();
-        mainView.element.appendChild(self.element);
+        mainView.switchTo(self.element);
     };
 
     self.update = function() {
@@ -1245,6 +1242,13 @@ webui.RemoteView = function(mainView) {
 function MainUi() {
 
     var self = this;
+
+    self.switchTo = function(element) {
+        for (var i = 0; i < self.element.childElementCount; ++i) {
+            $(self.element.children[i]).detach();
+        }
+        self.element.appendChild(element);
+    }
 
     $.get("/dirname", function (data) {
         webui.repo = data;
