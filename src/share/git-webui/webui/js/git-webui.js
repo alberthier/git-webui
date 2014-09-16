@@ -1045,12 +1045,14 @@ webui.ChangedFilesView = function(workspaceView, type, label) {
                     ++self.filesCount;
                     var item = $('<a class="list-group-item">').appendTo(fileList)[0];
                     item.status = status;
-                    if (status == "R") {
-                        item.model = line.split(" -> ")[1];
+                    line = line.substr(3);
+                    var splitted = line.split(" -> ");
+                    if (splitted.length > 1) {
+                        item.model = splitted[1];
                     } else {
-                        item.model = line.substr(3);
+                        item.model = line
                     }
-                    item.appendChild(document.createTextNode(item.model));
+                    item.appendChild(document.createTextNode(line));
                     $(item).click(self.select);
                     $(item).dblclick(self.process);
                 }
@@ -1128,7 +1130,7 @@ webui.ChangedFilesView = function(workspaceView, type, label) {
             var included = including == undefined || including.indexOf(child.status) != -1;
             var excluded = excluding != undefined && excluding.indexOf(child.status) != -1;
             if ($(child).hasClass("active") && included && !excluded) {
-                files += '"' + (child.textContent) + '" ';
+                files += '"' + (child.model) + '" ';
             }
         }
         return files;
