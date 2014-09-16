@@ -1,12 +1,17 @@
 # Git WebUI
 
-This git extension offers a web-based user interface for a repository.
-It provides history and tree browsing. You may also use this interface to commit
+This git extension intends to become your everyday git companion. Run it from
+any of your repositories and it will provide you a web based user interface for it.
+
+It comes with history and tree browsing. You may also use this interface to commit
 as it comes with a diff review UI and the ability to stage / unstage code.
 
 Moreover as git-webui is also a web server, your repository is accessible to
 other people on the same network. They can clone or pull your code using the
 same URL.
+
+It has very few dependencies, you probably already have them on your
+Mac / Linux : git, python, and a web browser
 
 ## Installation
 
@@ -46,6 +51,9 @@ When selecting a revision the diff of this specific commit is displayed in the r
 On top of the right panel, you can choose 'Tree' to display the versionned content at the specific
 revision selected in the left panel. You can browse through directories and display file contents.
 
+![Image of log commit](https://bitbucket.org/alberthier/git-webui/raw/master/doc/img/log-commit.png)
+![Image of log tree](https://bitbucket.org/alberthier/git-webui/raw/master/doc/img/log-tree.png)
+
 ### Remote access
 
 Other people on your network have read-only access to your repository: they may clone or pull
@@ -74,6 +82,8 @@ Commits can only be made from localhost.
 The diff view lets you review the differences of the selected file. In this view:
 - Ctrl+Click on an added or removed line stages/unstages the line
 - Ctrl+Click on an hunk header (purple lines) stages/unstages the complete hunk
+
+![Image of log tree](https://bitbucket.org/alberthier/git-webui/raw/master/doc/img/workspace.png)
 
 ## Dependencies
 
