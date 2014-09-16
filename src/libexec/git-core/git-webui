@@ -2,6 +2,7 @@
 
 import argparse
 import codecs
+import datetime
 import os
 import posixpath
 import shlex
@@ -159,7 +160,40 @@ class WebUiRequestHandler(CGIHTTPRequestHandler):
 
 
 
+def auto_update():
+    repo_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(sys.argv[0])))))
+    dot_git = os.path.join(repo_root, ".git")
+    if not os.path.exists(dot_git):
+        return
+    fetch_head = os.path.join(dot_git, "FETCH_HEAD")
+    if not os.path.exists(fetch_head):
+        fetch_head_mtime = 0.0
+    else:
+        fetch_head_mtime = os.stat(fetch_head).st_mtime
+    delta = datetime.datetime.now() - datetime.datetime.fromtimestamp(fetch_head_mtime)
+    if delta > datetime.timedelta(14):
+        # Check if update is allowed
+        git = subprocess.Popen(["git", "config", "--get", "webui.autoupdate"], stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+        out =  codecs.decode(git.communicate()[0], "utf-8")
+        if git.returncode != 0:
+            # The webui.autoupdate key doesn't exist
+            allow_autoupdate = False
+        else:
+            allow_autoupdate = out.strip() == "true"
+        if not allow_autoupdate:
+            return
+
+        print("Checking for update...")
+        # Update the repository
+        subprocess.call(["git", "pull"])
+        # Replace the current process with the updated one
+        os.execl(sys.argv[0], *sys.argv)
+
+
+
+
 if __name__ == '__main__':
+    auto_update()
     parser = argparse.ArgumentParser(description = "Simple HTTP server for git webui")
     parser.add_argument("--port", type = int, help = "server port")
     parser.add_argument("--repo-root", help = "repository root path. By default goes up a dir until a '.git' directory is found")
