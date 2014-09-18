@@ -56,7 +56,7 @@ module.exports = function(grunt) {
 
         watch: {
             scripts: {
-                files: ['src/libexec/**/*', 'src/share/**/*.js'],
+                files: ['src/libexec/**/*', 'src/share/**/*.js', 'src/share/**/*.html'],
                 tasks: 'copy:git_webui'
             },
             css: {
