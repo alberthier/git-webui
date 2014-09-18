@@ -83,7 +83,7 @@ The diff view lets you review the differences of the selected file. In this view
 - Ctrl+Click on an added or removed line stages/unstages the line
 - Ctrl+Click on an hunk header (purple lines) stages/unstages the complete hunk
 
-![Image of log tree](https://bitbucket.org/alberthier/git-webui/raw/master/doc/img/workspace.png)
+![Image of the workspace](https://bitbucket.org/alberthier/git-webui/raw/master/doc/img/workspace.png)
 
 ## Dependencies
 
