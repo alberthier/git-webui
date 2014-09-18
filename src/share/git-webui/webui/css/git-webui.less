@@ -41,7 +41,7 @@ html, body {
 
 body {
     display: flex;
-    align-items: stretch;
+    flex-direction: column;
     margin: 0;
     font: 10pt sans-serif;
 }
@@ -56,8 +56,6 @@ body {
 #sidebar {
     display: flex;
     flex-direction: column;
-    align-items: stretch;
-    height: 100%;
     width: 14em;
     background-color: @gray-dark;
 
@@ -74,7 +72,6 @@ body {
 
     #sidebar-content {
         flex: 1;
-        width: 100%;
         overflow-x: hidden;
         overflow-y: auto;
         cursor: default;
@@ -148,11 +145,11 @@ body {
 }
 
 #main-view {
+    display: flex;
     flex: 1;
-    height: 100%;
 
     .jumbotron {
-        height: 100%;
+        flex: 1;
         margin: 0;
 
         h1 {
@@ -164,14 +161,11 @@ body {
 
 #history-view {
     display: flex;
-    align-items: stretch;
-    height: 100%;
-    width: 100%;
+    flex: 1;
 }
 
 #log-view {
-    height: 100%;
-    width: 100%;
+    flex: 1;
     overflow-y: auto;
     cursor: default;
     margin-bottom: 0;
@@ -212,7 +206,6 @@ body {
 
         a {
             display: block;
-            width: 100%;
             text-align: center;
         }
     }
@@ -221,8 +214,7 @@ body {
 #commit-view {
     display: flex;
     flex-direction: column;
-    height: 100%;
-    width: 100%;
+    flex: 1;
 
     #commit-view-header {
         border: solid @list-group-border;
@@ -233,7 +225,6 @@ body {
         display: flex;
         flex: 1;
         flex-direction: column;
-        width: 100%;
     }
 }
 
@@ -278,8 +269,8 @@ body {
             }
 
             .diff-view-lines {
-                width: 100%;
                 display: table;
+                width: 100%;
 
                 .diff-view-line {
                     margin: 0;
@@ -329,8 +320,6 @@ body {
 }
 
 #tree-view {
-    width: 100%;
-    height: 100%;
     flex: 1;
     flex-direction: column;
     display: flex;
@@ -342,23 +331,18 @@ body {
     }
 
     #tree-view-tree-content {
-        width: 100%;
-        height: 100%;
         overflow: auto;
         flex: 1;
+        margin: 0;
     }
 
     #tree-view-blob-content {
         display: flex;
         flex-direction: column;
-        width: 100%;
-        height: 100%;
         flex: 1;
 
         iframe {
             flex: 1;
-            width: 100%;
-            height: 100%;
             border: 0;
         }
     }
@@ -398,9 +382,7 @@ body {
 #workspace-view {
     display: flex;
     flex-direction: column;
-    align-items: stretch;
-    height: 100%;
-    width: 100%;
+    flex: 1;
 
     #workspace-diff-view {
         display: flex;
