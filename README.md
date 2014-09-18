@@ -51,8 +51,8 @@ When selecting a revision the diff of this specific commit is displayed in the r
 On top of the right panel, you can choose 'Tree' to display the versionned content at the specific
 revision selected in the left panel. You can browse through directories and display file contents.
 
-![Image of log commit](https://bitbucket.org/alberthier/git-webui/raw/master/doc/img/log-commit.png)
-![Image of log tree](https://bitbucket.org/alberthier/git-webui/raw/master/doc/img/log-tree.png)
+![Image of log commit](https://bitbucket.org/alberthier/git-webui/raw/master/src/share/git-webui/webui/img/doc/log-commit.png)
+![Image of log tree](https://bitbucket.org/alberthier/git-webui/raw/master/src/share/git-webui/webui/img/doc/log-tree.png)
 
 ### Remote access
 
@@ -83,7 +83,7 @@ The diff view lets you review the differences of the selected file. In this view
 - Ctrl+Click on an added or removed line stages/unstages the line
 - Ctrl+Click on an hunk header (purple lines) stages/unstages the complete hunk
 
-![Image of the workspace](https://bitbucket.org/alberthier/git-webui/raw/master/doc/img/workspace.png)
+![Image of the workspace](https://bitbucket.org/alberthier/git-webui/raw/master/src/share/git-webui/webui/img/doc/workspace.png)
 
 ## Dependencies
 
