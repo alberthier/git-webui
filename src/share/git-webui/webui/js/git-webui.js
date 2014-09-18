@@ -59,6 +59,12 @@ webui.git = function(cmd, arg1, arg2) {
     });
 };
 
+webui.detachChildren = function(element) {
+    for (var i = 0; i < element.childElementCount; ++i) {
+        $(element.children[i]).detach();
+    }
+}
+
 webui.splitLines = function(data) {
     return data.split("\n").filter(function(s) { return s.length > 0; });
 };
@@ -947,12 +953,12 @@ webui.CommitView = function(historyView) {
     };
 
     self.showDiff = function() {
-        $(commitViewContent).empty();
+        webui.detachChildren(commitViewContent);
         commitViewContent.appendChild(diffView.element);
     };
 
     self.showTree = function() {
-        $(commitViewContent).empty();
+        webui.detachChildren(commitViewContent);
         commitViewContent.appendChild(treeView.element);
     };
 
@@ -1284,9 +1290,7 @@ function MainUi() {
     var self = this;
 
     self.switchTo = function(element) {
-        for (var i = 0; i < self.element.childElementCount; ++i) {
-            $(self.element.children[i]).detach();
-        }
+        webui.detachChildren(self.element);
         self.element.appendChild(element);
     }
 
