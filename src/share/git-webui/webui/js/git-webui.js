@@ -59,15 +59,26 @@ webui.git = function(cmd, arg1, arg2) {
                     callback(output);
                 }
                 // Return code is 0 but there is stderr output: this is a warning message
-                $("#warning-banner").text(message);
                 if (message.length > 0) {
+                    console.log(message);
+                    var messageBox = $("#message-box");
+                    messageBox.empty();
+                    $(  '<div class="alert alert-warning alert-dismissible" role="alert">' +
+                            '<button type="button" class="close" data-dismiss="alert">' +
+                                '<span aria-hidden="true">&times;</span>' +
+                                '<span class="sr-only">Close</span>' +
+                            '</button>' +
+                            message +
+                        '</div>').appendTo(messageBox);
                 }
                 $("#error-modal .alert").text("");
             } else {
+                console.log(message);
                 $("#error-modal .alert").text(message);
                 $("#error-modal").modal('show');
             }
         } else {
+            console.log(data);
             $("#error-modal .alert").text(data);
             $("#error-modal").modal('show');
         }
@@ -1309,8 +1320,8 @@ function MainUi() {
     var self = this;
 
     self.switchTo = function(element) {
-        webui.detachChildren(self.element);
-        self.element.appendChild(element);
+        webui.detachChildren(self.mainView);
+        self.mainView.appendChild(element);
     }
 
     $.get("/dirname", function (data) {
@@ -1323,12 +1334,14 @@ function MainUi() {
                 webui.hostname = data
 
                 var body = $("body")[0];
+                $('<div id="message-box">').appendTo(body);
+                var globalContainer = $('<div id="global-container">').appendTo(body)[0];
 
                 self.sideBarView = new webui.SideBarView(self);
-                body.appendChild(self.sideBarView.element);
+                globalContainer.appendChild(self.sideBarView.element);
 
-                self.element = $('<div id="main-view">')[0];
-                body.appendChild(self.element);
+                self.mainView = $('<div id="main-view">')[0];
+                globalContainer.appendChild(self.mainView);
 
                 self.historyView = new webui.HistoryView(self);
                 self.remoteView = new webui.RemoteView(self);
