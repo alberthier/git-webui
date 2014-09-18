@@ -227,7 +227,7 @@ webui.SideBarView = function(mainView) {
 
     self.mainView = mainView;
     self.element = $(   '<div id="sidebar">' +
-                            '<img id="sidebar-logo" src="/img/git-logo.png">' +
+                            '<div><img id="sidebar-logo" src="/img/git-logo.png"></div>' +
                             '<div id="sidebar-content">' +
                                 '<section id="sidebar-workspace">' +
                                     '<h4>Workspace</h4>' +
@@ -423,7 +423,7 @@ webui.LogView = function(historyView) {
             }
         });
 
-        self.message = self.message.trimRight();
+        self.message = self.message.trim();
 
         self.createElement();
     };
@@ -849,7 +849,7 @@ webui.TreeView = function(commitView) {
     }
 
     self.showTree = function() {
-        self.element.lastElementChild.remove();
+        $(self.element.lastElementChild).remove();
         var treeViewTreeContent = $('<div id="tree-view-tree-content" class="list-group">')[0];
         self.element.appendChild(treeViewTreeContent);
         self.createBreadcrumb();
@@ -914,7 +914,7 @@ webui.TreeView = function(commitView) {
 
     self.showBlob = function(blobRef) {
         self.createBreadcrumb();
-        self.element.lastElementChild.remove();
+        $(self.element.lastElementChild).remove();
         $(  '<div id="tree-view-blob-content">' +
                 '<iframe src="/git/cat-file/' + self.stack[self.stack.length - 1].object + '"></iframe>' +
             '</div>').appendTo(self.element);
