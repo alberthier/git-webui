@@ -169,25 +169,29 @@ class WebUiRequestHandler(CGIHTTPRequestHandler):
     def process(self, cmd, stdin, addstatus):
         self.send_response(200)
         self.end_headers()
-        # Convention : send first all git output. Last line is always the git process exit code
+        # Convention : send first all git output, then stderr.
+        # Finially we add footers: a blank line followed by key / value pairs as in HTTP headers
         if is_windows():
             # On windows we cannot pipe the process output directly to the socket.
             git = subprocess.Popen(cmd, stdin = subprocess.PIPE, stdout = subprocess.PIPE, stderr = subprocess.PIPE, cwd = WebUiRequestHandler.REPO_ROOT)
             git.stdin.write(stdin)
             git.stdin.close()
             bufferlen = 64 * 1024
-            for f in (git.stdout, git.stderr):
-                while True:
-                    data = f.read(bufferlen)
-                    self.wfile.write(data)
-                    if len(data) < bufferlen:
-                        break
+            while True:
+                data = git.stdout.read(bufferlen)
+                self.wfile.write(data)
+                if len(data) < bufferlen:
+                    break
+            stderr = git.stderr.read()
             git.wait()
         else:
-            git = subprocess.Popen(cmd, stdin = subprocess.PIPE, stdout = self.wfile, stderr = self.wfile, cwd = WebUiRequestHandler.REPO_ROOT)
-            git.communicate(stdin)
+            git = subprocess.Popen(cmd, stdin = subprocess.PIPE, stdout = self.wfile, stderr = subprocess.PIPE, cwd = WebUiRequestHandler.REPO_ROOT)
+            stdout, stderr = git.communicate(stdin)
         if addstatus:
-            self.wfile.write(codecs.encode("\n" + str(git.returncode), "utf-8"))
+            self.wfile.write(stderr)
+            self.wfile.write(b"\r\n")
+            self.wfile.write(codecs.encode("\r\nGit-Stderr-Length: " + str(len(stderr)), "utf-8"))
+            self.wfile.write(codecs.encode("\r\nGit-Return-Code: " + str(git.returncode), "utf-8"))
 
 
     def send_text(self, http_status, text):

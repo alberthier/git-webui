@@ -35,17 +35,36 @@ webui.git = function(cmd, arg1, arg2) {
     }
     $.post("git", cmd, function(data, status, xhr) {
         if (xhr.status == 200) {
-            // Convention : last line = git process exit code
-            var rcodeIndex = data.lastIndexOf("\n");
-            var output = data.substr(0, rcodeIndex);
-            var rcode = parseInt(data.substr(rcodeIndex + 1));
+            // Convention : last lines are footer meta data like headers. An empty line marks the start if the footers
+            var footers = {};
+            var fIndex = data.length;
+            while (true) {
+                var oldFIndex = fIndex;
+                var fIndex = data.lastIndexOf("\r\n", fIndex - 1);
+                var line = data.substring(fIndex + 2, oldFIndex);
+                if (line.length > 0) {
+                    var footer = line.split(": ");
+                    footers[footer[0]] = footer[1];
+                } else {
+                    break;
+                }
+            }
+
+            var messageStartIndex = fIndex - parseInt(footers["Git-Stderr-Length"]);
+            var message = data.substring(messageStartIndex, fIndex);
+            var output = data.substring(0, messageStartIndex);
+            var rcode = parseInt(footers["Git-Return-Code"]);
             if (rcode == 0) {
                 if (callback) {
                     callback(output);
                 }
+                // Return code is 0 but there is stderr output: this is a warning message
+                $("#warning-banner").text(message);
+                if (message.length > 0) {
+                }
                 $("#error-modal .alert").text("");
             } else {
-                $("#error-modal .alert").text(output);
+                $("#error-modal .alert").text(message);
                 $("#error-modal").modal('show');
             }
         } else {
