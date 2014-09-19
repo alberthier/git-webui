@@ -52,12 +52,12 @@ The toolbar on the left shows your branches and tags. The log of the currently s
 
 When selecting a revision the diff of this specific commit is displayed in the right panel.
 
-![Image of log commit](https://bitbucket.org/alberthier/git-webui/raw/master/src/share/git-webui/webui/img/doc/log-commit.png)
+![Image of log commit](https://raw.githubusercontent.com/alberthier/git-webui/master/src/share/git-webui/webui/img/doc/log-commit.png)
 
 On top of the right panel, you can choose 'Tree' to display the versioned content at the specific
 revision selected in the left panel. You can browse through directories and display file contents.
 
-![Image of log tree](https://bitbucket.org/alberthier/git-webui/raw/master/src/share/git-webui/webui/img/doc/log-tree.png)
+![Image of log tree](https://raw.githubusercontent.com/alberthier/git-webui/master/src/share/git-webui/webui/img/doc/log-tree.png)
 
 ### Remote access
 
@@ -79,7 +79,7 @@ $ git pull http://<ip_of_the_computer_running_webui>:8000/
 
 Commits can only be made from localhost.
 
-![Image of the workspace](https://bitbucket.org/alberthier/git-webui/raw/master/src/share/git-webui/webui/img/doc/workspace.png)
+![Image of the workspace](https://raw.githubusercontent.com/alberthier/git-webui/master/src/share/git-webui/webui/img/doc/workspace.png)
 
 - **Working copy** lists the modified files (compared to the staging area) in your working directory
 - **Message** lets you enter a commit message
@@ -94,11 +94,13 @@ In this view you can stage/unstage code in more fine grained way:
 ## Dependencies
 
 ### Runtime
+
 - git (of course :) )
 - python 2.7+ or python 3.0+ (Generally already installed on your Mac / Linux)
 - An up-to-date modern browser
 
 ### Development
+
 - Runtime dependencies and ...
 - node.js
 - grunt-cli
@@ -114,6 +116,10 @@ Using wget (Linux):
 ```
 wget -O - https://raw.github.com/alberthier/git-webui/install/uninstaller.sh | bash
 ```
+
+## Contributing
+
+You can clone the source code of [git-webui on GitHub](https://github.com/alberthier/git-webui)
 
 ## Author
 

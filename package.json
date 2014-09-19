@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@bitbucket.org:alberthier/git-webui.git"
+    "url": "git@github.com:alberthier/git-webui.git"
   },
   "keywords": [
     "git",
