@@ -16,7 +16,7 @@
 
 cd $HOME
 echo "Removing \$HOME/.git-webui"
-rm -rf .git-webui 2>&1 > /dev/null
+rm -rf .git-webui > /dev/null 2>&1
 echo "Cleaning up global gitconfig file"
 git config --global --unset-all alias.webui
 git config --global --remove-section webui

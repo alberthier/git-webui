@@ -14,11 +14,33 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+if [ "$OS" = "Windows_NT" ]; then
+    # We are on windows, check if Python is installed
+    python -V > /dev/null 2>&1
+    if [ $? -eq 0 ]; then
+        PYTHON=python
+    else
+        reg query "HKLM\SOFTWARE\Python\PythonCore" > /dev/null 2>&1
+        if [ $? -ne 0 ]; then
+            echo "Please install Python first"
+            echo "You can download it from http://python.org/downloads/"
+            exit 1
+        fi
+        PYTHON_REG_PATH=`reg query "HKLM\SOFTWARE\Python\PythonCore" | grep HKEY | sort | tail -n 1`
+        PYTHON_ROOT=/`reg query "${PYTHON_REG_PATH}\InstallPath" -ve | grep REG_SZ | sed -e "s/.*REG_SZ\s\+\(.*\)/\1/" | sed -e "s/://" | sed -e "s/\\\\\/\//g"`
+        PYTHON=${PYTHON_ROOT}python.exe
+    fi
+fi
+
 cd $HOME
-rm -rf .git-webui 2>&1 > /dev/null
+rm -rf .git-webui > /dev/null 2>&1
 echo "Cloning git-webui repository"
-git clone git@bitbucket.org:alberthier/git-webui.git .git-webui
-echo "Installing 'webui' alias"
-git config --global --replace-all alias.webui !$HOME/.git-webui/release/libexec/git-core/git-webui
+git clone https://alberthier@bitbucket.org/alberthier/git-webui.git .git-webui
 echo "Enabling auto update"
 git config --global --replace-all webui.autoupdate true
+echo "Installing 'webui' alias"
+if [ "$OS" = "Windows_NT" ]; then
+    git config --global --replace-all alias.webui "!${PYTHON} $HOME/.git-webui/release/libexec/git-core/git-webui"
+else
+    git config --global --replace-all alias.webui !$HOME/.git-webui/release/libexec/git-core/git-webui
+fi
