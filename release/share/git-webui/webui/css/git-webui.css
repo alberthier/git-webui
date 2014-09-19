@@ -1,0 +1,386 @@
+/*
+ * Copyright 2015 Eric ALBER
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+html,
+body {
+  height: 100%;
+  width: 100%;
+}
+body {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  font: 10pt sans-serif;
+}
+#error-modal .modal-body {
+  margin-bottom: 0;
+}
+#help-modal img {
+  display: block;
+  margin: 0 auto;
+  border: 1px solid #dddddd;
+}
+#message-box .alert {
+  margin: 0;
+}
+#global-container {
+  display: flex;
+  flex: 1;
+}
+#sidebar {
+  display: flex;
+  flex-direction: column;
+  width: 14em;
+  background-color: #333333;
+}
+#sidebar #sidebar-logo {
+  display: block;
+  margin: 8px auto 8px auto;
+  height: 2em;
+  text-align: center;
+}
+#sidebar .branch-current {
+  font-weight: bold;
+}
+#sidebar #sidebar-content {
+  flex: 1;
+  overflow-x: hidden;
+  overflow-y: auto;
+  cursor: default;
+  border-top: 1px solid #1a1a1a;
+  color: #eeeeee;
+}
+#sidebar #sidebar-content > :first-child {
+  border-top: 1px solid #5e5e5e;
+}
+#sidebar #sidebar-content h4:before {
+  vertical-align: middle;
+  margin: 12px;
+}
+#sidebar #sidebar-content h4 {
+  vertical-align: baseline;
+  margin: 0.5em 0 0 0;
+}
+#sidebar #sidebar-content > section h4 {
+  font-size: 125%;
+  cursor: pointer;
+  padding: 10px 0;
+}
+#sidebar #sidebar-content #sidebar-workspace h4:before {
+  content: url(/img/computer.svg);
+}
+#sidebar #sidebar-content #sidebar-remote h4:before {
+  content: url(/img/daemon.svg);
+}
+#sidebar #sidebar-content #sidebar-branches h4:before {
+  content: url(/img/branch.svg);
+}
+#sidebar #sidebar-content #sidebar-tags h4:before {
+  content: url(/img/tag.svg);
+}
+#sidebar #sidebar-content ul {
+  margin: 0;
+  padding: 0;
+}
+#sidebar #sidebar-content li:before {
+  content: "\2022";
+  margin: 12px;
+}
+#sidebar #sidebar-content li {
+  cursor: pointer;
+  padding: 6px 0 6px 1em;
+}
+#sidebar #sidebar-content .active {
+  background-color: #428bca;
+}
+#sidebar .modal-dialog .list-group-item {
+  border: 0;
+}
+#main-view {
+  display: flex;
+  flex: 1;
+}
+#main-view .jumbotron {
+  flex: 1;
+  margin: 0;
+}
+#main-view .jumbotron h1 {
+  font-size: 36pt;
+  margin-top: 0;
+}
+#history-view {
+  display: flex;
+  flex: 1;
+}
+#log-view {
+  flex: 1;
+  overflow-y: auto;
+  cursor: default;
+  margin-bottom: 0;
+  border-right: 1px #dddddd solid;
+}
+#log-view .log-entry:first-child {
+  border-top-width: 0;
+}
+#log-view .log-entry {
+  padding: 5px 10px;
+}
+#log-view .log-entry header {
+  display: flex;
+  align-items: baseline;
+}
+#log-view .log-entry header h6 {
+  font-weight: bold;
+  margin-top: 0;
+}
+#log-view .log-entry header h6 a {
+  color: inherit;
+}
+#log-view .log-entry header .badge {
+  font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+}
+#log-view .log-entry header .log-entry-date {
+  margin-left: auto;
+}
+#log-view .log-entry-more {
+  padding: 10px 16px;
+}
+#log-view .log-entry-more a {
+  display: block;
+  text-align: center;
+}
+#commit-view {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+#commit-view #commit-view-header {
+  border: solid #dddddd;
+  border-width: 0 0 1px 0;
+}
+#commit-view #commit-view-content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+.diff-view-container {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  border: 0;
+  margin: 0;
+}
+.diff-view-container .panel-heading {
+  margin: 0;
+  padding: 5px 16px;
+  display: flex;
+}
+.diff-view-container .panel-heading .btn-group {
+  display: flex;
+  align-items: baseline;
+}
+.diff-view-container .panel-heading .btn-group span {
+  padding-left: 5px;
+}
+.diff-view-container .panel-body {
+  display: flex;
+  flex: 1;
+  padding: 0;
+}
+.diff-view-container .panel-body:before {
+  display: block;
+}
+.diff-view-container .panel-body .diff-view {
+  flex: 1;
+  overflow: auto;
+}
+.diff-view-container .panel-body .diff-view:nth-child(2) {
+  border: solid #dddddd;
+  border-width: 0 0 0 1px;
+}
+.diff-view-container .panel-body .diff-view .diff-view-lines {
+  display: table;
+  width: 100%;
+}
+.diff-view-container .panel-body .diff-view .diff-view-lines .diff-view-line {
+  margin: 0;
+  padding: 0 0.3em 0 0.3em;
+  background-color: white;
+  border: 0;
+}
+.diff-view-container .panel-body .diff-view .diff-view-lines .diff-line-header {
+  font-weight: bold;
+  background-color: #eeeeee;
+}
+.diff-view-container .panel-body .diff-view .diff-view-lines .diff-line-phantom {
+  background-color: #eeeeee;
+}
+.diff-view-container .panel-body .diff-view .diff-view-lines .diff-line-header.diff-line-add {
+  background-color: #eeeeee;
+  color: #669900;
+}
+.diff-view-container .panel-body .diff-view .diff-view-lines .diff-line-header.diff-line-del {
+  background-color: #eeeeee;
+  color: #cc0000;
+}
+.diff-view-container .panel-body .diff-view .diff-view-lines .diff-line-header.diff-line-offset {
+  background-color: #eeeeee;
+  color: #9933cc;
+}
+.diff-view-container .panel-body .diff-view .diff-view-lines .diff-line-add {
+  background-color: #c5e26d;
+}
+.diff-view-container .panel-body .diff-view .diff-view-lines .diff-line-del {
+  background-color: #ff9494;
+}
+.diff-view-container .panel-body .diff-view .diff-view-lines .diff-line-offset {
+  background-color: #d6adeb;
+}
+#tree-view {
+  flex: 1;
+  flex-direction: column;
+  display: flex;
+}
+#tree-view .breadcrumb {
+  padding: 10px 16px;
+  margin-bottom: 0;
+  border-bottom: 1px #dddddd solid;
+}
+#tree-view #tree-view-tree-content {
+  overflow: auto;
+  flex: 1;
+  margin: 0;
+}
+#tree-view #tree-view-blob-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  width: 100%;
+}
+#tree-view #tree-view-blob-content iframe {
+  flex: 1;
+  border: 0;
+}
+#tree-view .list-group-item {
+  display: flex;
+  cursor: pointer;
+  border: 0;
+  padding: 5px 10px;
+}
+#tree-view .list-group-item > :first-child {
+  flex: 1;
+}
+#tree-view .list-group-item > :last-child {
+  width: 2em;
+}
+#tree-view .tree-item-tree:before {
+  content: url(/img/folder.svg);
+  vertical-align: middle;
+  margin: 0.3em;
+}
+#tree-view .tree-item-blob:before {
+  content: url(/img/file.svg);
+  vertical-align: middle;
+  margin: 0.3em;
+}
+#tree-view .tree-item-symlink {
+  font-style: italic;
+}
+#workspace-view {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+#workspace-view #workspace-diff-view {
+  display: flex;
+  flex: 2;
+  overflow: auto;
+}
+#workspace-view #workspace-editor {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  flex: 1;
+  display: flex;
+  align-items: stretch;
+  border: solid #dddddd;
+  border-width: 1px 0 0 0;
+  cursor: default;
+}
+#workspace-view #workspace-editor #working-copy-view,
+#workspace-view #workspace-editor #staging-area-view {
+  flex: 2;
+}
+#workspace-view #workspace-editor #working-copy-view .file-list-container,
+#workspace-view #workspace-editor #staging-area-view .file-list-container {
+  flex: 1;
+  overflow: auto;
+}
+#workspace-view #workspace-editor #working-copy-view .file-list-container .list-group,
+#workspace-view #workspace-editor #staging-area-view .file-list-container .list-group {
+  display: table;
+  margin: 0;
+  width: 100%;
+}
+#workspace-view #workspace-editor #working-copy-view .file-list-container .list-group .list-group-item:first-child,
+#workspace-view #workspace-editor #staging-area-view .file-list-container .list-group .list-group-item:first-child {
+  border-top: 0;
+}
+#workspace-view #workspace-editor #working-copy-view .file-list-container .list-group .list-group-item,
+#workspace-view #workspace-editor #staging-area-view .file-list-container .list-group .list-group-item {
+  padding: 5px 10px;
+  border-left: 0;
+  border-right: 0;
+  white-space: nowrap;
+}
+#workspace-view #workspace-editor #commit-message-view {
+  flex: 3;
+}
+#workspace-view #workspace-editor #commit-message-view textarea {
+  flex: 1;
+  resize: none;
+  margin: 0;
+  border: 0;
+  outline: none;
+  padding: 0.3em;
+}
+#workspace-view #workspace-editor .panel {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  border-width: 0 1px 0 0;
+  border-style: solid;
+  border-color: #dddddd;
+}
+#workspace-view #workspace-editor .panel .panel-heading {
+  padding: 5px 10px;
+  display: flex;
+  align-items: center;
+}
+#workspace-view #workspace-editor .panel .panel-heading h5 {
+  flex: 1;
+  margin: 0;
+}
+#workspace-view #workspace-editor .panel:last-child {
+  border-width: 0;
+}
+#workspace-view .diff-line-add,
+#workspace-view .diff-line-del,
+#workspace-view .diff-line-offset {
+  cursor: pointer;
+}
