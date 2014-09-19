@@ -22,12 +22,12 @@ You need to install [Python](https://www.python.org/downloads/) first.
 
 Using curl (Mac OS X & Windows):
 ```
-curl https://raw.github.com/alberthier/git-webui/install/installer.sh | bash
+curl https://raw.githubusercontent.com/alberthier/git-webui/master/install/installer.sh | bash
 ```
 
 Using wget (Linux):
 ```
-wget -O - https://raw.github.com/alberthier/git-webui/install/installer.sh | bash
+wget -O - https://raw.githubusercontent.com/alberthier/git-webui/master/install/installer.sh | bash
 ```
 
 Upon installation git-webui will update itself automatically every couple of weeks.
@@ -109,12 +109,12 @@ In this view you can stage/unstage code in more fine grained way:
 
 Using curl (Mac OS X & Windows):
 ```
-curl https://raw.github.com/alberthier/git-webui/install/uninstaller.sh | bash
+curl https://raw.githubusercontent.com/alberthier/git-webui/master/install/uninstaller.sh | bash
 ```
 
 Using wget (Linux):
 ```
-wget -O - https://raw.github.com/alberthier/git-webui/install/uninstaller.sh | bash
+wget -O - https://raw.githubusercontent.com/alberthier/git-webui/master/install/uninstaller.sh | bash
 ```
 
 ## Contributing
