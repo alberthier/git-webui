@@ -50,13 +50,14 @@ limitations under the License.
                         <p>The toolbar on the left shows your branches and tags. The log of the currently selected one is displayed.</p>
                         <p>When selecting a revision the diff of this specific commit is displayed in the right panel.</p><br>
                         <img alt="Image of log commit" src="/img/doc/log-commit.png"><br>
-                        <p>On top of the right panel, you can choose 'Tree' to display the versionned content at the specific
-                        revision selected in the left panel. You can browse through directories and display file contents.</p><br>
+                        <p>On top of the right panel, you can choose 'Tree' to display the versioned content at the specific
+                            revision selected in the left panel. You can browse through directories and display file contents.</p><br>
                         <img alt="Image of log tree" src="/img/doc/log-tree.png">
 
                         <h4>Remote access</h4>
-                        <p>Other people on your network have read-only access to your repository: they may clone or pull
-                        from your repository through the same url:</p>
+                        <p>Other people on your network have read-only access to your repository:
+                            they may access to the web interface (without 'Workspace'), clone or pull from your repository.
+                            All this through the same url:</p>
                         <p>Clone:</p>
                         <pre>$ git clone http://<ip_of_the_computer_running_webui>:8000/ repo_name</pre>
                         <p>Pull:</p>
@@ -65,13 +66,14 @@ limitations under the License.
                         <h4>Commit</h4>
                         <p>Commits can only be made from localhost.</p>
                         <img alt="Image of the workspace" src="/img/doc/workspace.png"><br>
-                        <p><strong>Working copy</strong> lists the files modified (compared to the staging area) in your working directory</p>
-                        <p><strong>Staging area</strong> lists the files modified (compared to HEAD) in your staging area. This is the differencies that will be committed</p>
+                        <p><strong>Working copy</strong> lists the modified files (compared to the staging area) in your working directory</p>
+                        <p><strong>Staging area</strong> lists the modified files (compared to HEAD) in your staging area. These are the changes that will be committed</p>
                         <p><strong>Message</strong> lets you enter a commit message</p>
-                        <p>The diff view lets you review the differences of the selected file. In this view:
+                        <p>The diff view lets you review the differences of the selected file.
+                            In this view you can stage/unstage code in more fine grained way:
                             <ul>
                                 <li>Ctrl+Click on an added or removed line stages/unstages the line</li>
-                                <li>Ctrl+Click on an hunk header (purple lines) stages/unstages the complete hunk</li>
+                                <li>Ctrl+Click on an hunk header (purple line) stages/unstages the complete hunk</li>
                             </ul>
                         </p>
 

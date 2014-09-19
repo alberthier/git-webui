@@ -1,24 +1,26 @@
 # Git WebUI
 
-This git extension intends to become your everyday git companion. Run it from
-any of your repositories and it will provide you a web based user interface for it.
+This git extension is a standalone web based user interface for git repositories.
 
-It comes with history and tree browsing. You may also use this interface to commit
-as it comes with a diff review UI and the ability to stage / unstage code.
+It comes with history and tree browsing. You may also use it to commit
+as it comes with an UI to review local changes and the ability to stage / unstage code.
 
-Moreover as git-webui is also a web server, your repository is accessible to
+Moreover as git-webui is a web server, your repository is accessible to
 other people on the same network. They can clone or pull your code using the
 same URL.
 
 It has very few dependencies, you probably already have them on your
-Mac / Linux : git, python, and a web browser
+Mac / Linux : git, python, and a web browser.
 
 ## Installation
 
 The following command will install git-webui in `$HOME/.git-webui` and add a
-`webui` alias to your global `.gitconfig` file
+`webui` alias to your global `.gitconfig` file.
 
-Using curl (Mac OS X):
+*Note for Windows users:* These install scripts work for you too. Run them from your Git-Bash shell.
+You need to install [Python](https://www.python.org/downloads/) first.
+
+Using curl (Mac OS X & Windows):
 ```
 curl https://raw.github.com/alberthier/git-webui/install/installer.sh | bash
 ```
@@ -28,19 +30,21 @@ Using wget (Linux):
 wget -O - https://raw.github.com/alberthier/git-webui/install/installer.sh | bash
 ```
 
-Upon installation git-webui will update itself automatically every couple of weeks
+Upon installation git-webui will update itself automatically every couple of weeks.
+You can deactivate auto-update by removing the `autoupdate = true` line from the
+`webui` section of your global `.gitconfig` file.
 
 ## Usage
 
 ### Starting
 
-First cd to any of your project versionned with git
+First cd to any of your project versioned with git
 ```
 cd <my-local-git-clone>
 git webui
 ```
 
-This will start an http server and open your default browser with the GUI
+This will start an embedded HTTP server and open your default browser with the GUI.
 
 ### History Viewing
 
@@ -48,7 +52,7 @@ The toolbar on the left shows your branches and tags. The log of the currently s
 
 When selecting a revision the diff of this specific commit is displayed in the right panel.
 
-On top of the right panel, you can choose 'Tree' to display the versionned content at the specific
+On top of the right panel, you can choose 'Tree' to display the versioned content at the specific
 revision selected in the left panel. You can browse through directories and display file contents.
 
 ![Image of log commit](https://bitbucket.org/alberthier/git-webui/raw/master/src/share/git-webui/webui/img/doc/log-commit.png)
@@ -56,8 +60,9 @@ revision selected in the left panel. You can browse through directories and disp
 
 ### Remote access
 
-Other people on your network have read-only access to your repository: they may clone or pull
-from your repository through the same url:
+Other people on your network have read-only access to your repository:
+they may access to the web interface (without 'Workspace'), clone or pull from your repository.
+All this through the same url:
 
 Clone:
 ```
@@ -73,15 +78,16 @@ $ git pull http://<ip_of_the_computer_running_webui>:8000/
 
 Commits can only be made from localhost.
 
-'Working copy' lists the files modified (compared to the staging area) in your working directory
+**Working copy** lists the modified files (compared to the staging area) in your working directory
 
-'Staging area' lists the files modified (compared to HEAD) in your staging area. This is the differencies that will be committed
+**Staging area** lists the modified files (compared to HEAD) in your staging area. These are the changes that will be committed
 
-'Message' lets you enter a commit message
+**Message** lets you enter a commit message
 
-The diff view lets you review the differences of the selected file. In this view:
-- Ctrl+Click on an added or removed line stages/unstages the line
-- Ctrl+Click on an hunk header (purple lines) stages/unstages the complete hunk
+The diff view lets you review the differences of the selected file.
+In this view you can stage/unstage code in more fine grained way:
+- `Ctrl+Click` on an added or removed line stages/unstages the line
+- `Ctrl+Click` on an hunk header (purple line) stages/unstages the complete hunk
 
 ![Image of the workspace](https://bitbucket.org/alberthier/git-webui/raw/master/src/share/git-webui/webui/img/doc/workspace.png)
 
