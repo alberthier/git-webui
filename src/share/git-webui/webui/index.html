@@ -59,16 +59,18 @@ limitations under the License.
                             they may access to the web interface (without 'Workspace'), clone or pull from your repository.
                             All this through the same url:</p>
                         <p>Clone:</p>
-                        <pre>$ git clone http://<ip_of_the_computer_running_webui>:8000/ repo_name</pre>
+                        <pre>$ git clone http://&lt;ip_of_the_computer_running_webui&gt;:8000/ repo_name</pre>
                         <p>Pull:</p>
-                        <pre>$ git pull http://<ip_of_the_computer_running_webui>:8000/</pre>
+                        <pre>$ git pull http://&lt;ip_of_the_computer_running_webui&gt;:8000/</pre>
 
                         <h4>Commit</h4>
                         <p>Commits can only be made from localhost.</p>
                         <img alt="Image of the workspace" src="/img/doc/workspace.png"><br>
-                        <p><strong>Working copy</strong> lists the modified files (compared to the staging area) in your working directory</p>
-                        <p><strong>Staging area</strong> lists the modified files (compared to HEAD) in your staging area. These are the changes that will be committed</p>
-                        <p><strong>Message</strong> lets you enter a commit message</p>
+                        <ul>
+                            <li><strong>Working copy</strong> lists the modified files (compared to the staging area) in your working directory</li>
+                            <li><strong>Message</strong> lets you enter a commit message</li>
+                            <li><strong>Staging area</strong> lists the modified files (compared to HEAD) in your staging area. These are the changes that will be committed</li>
+                        </ul>
                         <p>The diff view lets you review the differences of the selected file.
                             In this view you can stage/unstage code in more fine grained way:
                             <ul>

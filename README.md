@@ -52,10 +52,11 @@ The toolbar on the left shows your branches and tags. The log of the currently s
 
 When selecting a revision the diff of this specific commit is displayed in the right panel.
 
+![Image of log commit](https://bitbucket.org/alberthier/git-webui/raw/master/src/share/git-webui/webui/img/doc/log-commit.png)
+
 On top of the right panel, you can choose 'Tree' to display the versioned content at the specific
 revision selected in the left panel. You can browse through directories and display file contents.
 
-![Image of log commit](https://bitbucket.org/alberthier/git-webui/raw/master/src/share/git-webui/webui/img/doc/log-commit.png)
 ![Image of log tree](https://bitbucket.org/alberthier/git-webui/raw/master/src/share/git-webui/webui/img/doc/log-tree.png)
 
 ### Remote access
@@ -78,18 +79,17 @@ $ git pull http://<ip_of_the_computer_running_webui>:8000/
 
 Commits can only be made from localhost.
 
-**Working copy** lists the modified files (compared to the staging area) in your working directory
+![Image of the workspace](https://bitbucket.org/alberthier/git-webui/raw/master/src/share/git-webui/webui/img/doc/workspace.png)
 
-**Staging area** lists the modified files (compared to HEAD) in your staging area. These are the changes that will be committed
-
-**Message** lets you enter a commit message
+- **Working copy** lists the modified files (compared to the staging area) in your working directory
+- **Message** lets you enter a commit message
+- **Staging area** lists the modified files (compared to HEAD) in your staging area. These are the changes that will be committed
 
 The diff view lets you review the differences of the selected file.
 In this view you can stage/unstage code in more fine grained way:
+
 - `Ctrl+Click` on an added or removed line stages/unstages the line
 - `Ctrl+Click` on an hunk header (purple line) stages/unstages the complete hunk
-
-![Image of the workspace](https://bitbucket.org/alberthier/git-webui/raw/master/src/share/git-webui/webui/img/doc/workspace.png)
 
 ## Dependencies
 
