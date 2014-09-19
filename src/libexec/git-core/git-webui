@@ -229,9 +229,9 @@ def auto_update():
 
         print("Checking for update...")
         # Update the repository
-        subprocess.call(["git", "pull"])
+        subprocess.call(["git", "pull"], cwd = repo_root)
         # Replace the current process with the updated one
-        os.execl(sys.argv[0], *sys.argv)
+        os.execl(sys.executable, sys.executable, *sys.argv)
 
 
 
