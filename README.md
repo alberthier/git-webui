@@ -107,7 +107,7 @@ In this view you can stage/unstage code in more fine grained way:
 
 ## Uninstallation
 
-Using curl (Mac OS X):
+Using curl (Mac OS X & Windows):
 ```
 curl https://raw.github.com/alberthier/git-webui/install/uninstaller.sh | bash
 ```
