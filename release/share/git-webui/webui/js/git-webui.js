@@ -90,8 +90,8 @@ webui.git = function(cmd, arg1, arg2) {
 };
 
 webui.detachChildren = function(element) {
-    for (var i = 0; i < element.childElementCount; ++i) {
-        $(element.children[i]).detach();
+    while (element.firstChild) {
+        element.removeChild(element.firstChild);
     }
 }
 
@@ -484,12 +484,12 @@ webui.DiffView = function(sideBySide, parent) {
         if (self.cmd.length) {
             var fullCmd = self.cmd.slice();
             var opts = "";
-            if ($(".diff-context-all", self.element).hasClass("active")) {
+            if (self.complete) {
                 opts = " --unified=999999999";
             } else {
                 opts = " --unified=" + self.context.toString();
             }
-            if ($(".diff-ignore-whitespace", self.element).hasClass("active")) {
+            if (self.ignoreWhitespace) {
                 opts += " --ignore-all-space --ignore-blank-lines";
             }
             fullCmd.splice(1, 0, opts);
@@ -522,7 +522,6 @@ webui.DiffView = function(sideBySide, parent) {
             var line = diffLines[i];
             context = self.addDiffLine(view, line, context);
         }
-        view.parentElement.scrollTop = view.parentElement.prevScrollTop;
     }
 
     self.updateSplitView = function(view, diffLines, operation) {
@@ -770,6 +769,16 @@ webui.DiffView = function(sideBySide, parent) {
         }
     }
 
+    self.allContext = function() {
+        self.complete = !self.complete;
+        self.update();
+    }
+
+    self.toggleIgnoreWhitespace = function() {
+        self.ignoreWhitespace = !self.ignoreWhitespace;
+        self.update();
+    }
+
     self.element = $(   '<div class="diff-view-container panel panel-default">' +
                             '<div class="panel-heading btn-toolbar" role="toolbar">' +
                                 '<button type="button" class="btn btn-sm btn-default diff-ignore-whitespace" data-toggle="button">Ignore Whitespace</button>' +
@@ -804,9 +813,11 @@ webui.DiffView = function(sideBySide, parent) {
 
     $(".diff-context-remove", self.element).click(self.removeContext);
     $(".diff-context-add", self.element).click(self.addContext);
-    $(".diff-context-all", self.element).click(self.update);
-    $(".diff-ignore-whitespace", self.element).click(self.update);
+    $(".diff-context-all", self.element).click(self.allContext);
+    $(".diff-ignore-whitespace", self.element).click(self.toggleIgnoreWhitespace);
     self.context = 3;
+    self.complete = false;
+    self.ignoreWhitespace = true;
     var gitApplyType = "stage";
 };
 
