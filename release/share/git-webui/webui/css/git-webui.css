@@ -20,7 +20,9 @@ body {
 }
 body {
   display: flex;
+  display: -webkit-flex;
   flex-direction: column;
+  -webkit-flex-direction: column;
   margin: 0;
   font: 10pt sans-serif;
 }
@@ -37,11 +39,15 @@ body {
 }
 #global-container {
   display: flex;
+  display: -webkit-flex;
   flex: 1;
+  -webkit-flex: 1;
 }
 #sidebar {
   display: flex;
+  display: -webkit-flex;
   flex-direction: column;
+  -webkit-flex-direction: column;
   width: 14em;
   background-color: #333333;
 }
@@ -56,6 +62,7 @@ body {
 }
 #sidebar #sidebar-content {
   flex: 1;
+  -webkit-flex: 1;
   overflow-x: hidden;
   overflow-y: auto;
   cursor: default;
@@ -110,10 +117,13 @@ body {
 }
 #main-view {
   display: flex;
+  display: -webkit-flex;
   flex: 1;
+  -webkit-flex: 1;
 }
 #main-view .jumbotron {
   flex: 1;
+  -webkit-flex: 1;
   margin: 0;
 }
 #main-view .jumbotron h1 {
@@ -122,10 +132,13 @@ body {
 }
 #history-view {
   display: flex;
+  display: -webkit-flex;
   flex: 1;
+  -webkit-flex: 1;
 }
 #log-view {
   flex: 1;
+  -webkit-flex: 1;
   overflow-y: auto;
   cursor: default;
   margin-bottom: 0;
@@ -139,7 +152,9 @@ body {
 }
 #log-view .log-entry header {
   display: flex;
+  display: -webkit-flex;
   align-items: baseline;
+  -webkit-align-items: baseline;
 }
 #log-view .log-entry header h6 {
   font-weight: bold;
@@ -163,8 +178,11 @@ body {
 }
 #commit-view {
   display: flex;
+  display: -webkit-flex;
   flex-direction: column;
+  -webkit-flex-direction: column;
   flex: 1;
+  -webkit-flex: 1;
 }
 #commit-view #commit-view-header {
   border: solid #dddddd;
@@ -172,13 +190,19 @@ body {
 }
 #commit-view #commit-view-content {
   display: flex;
+  display: -webkit-flex;
   flex: 1;
+  -webkit-flex: 1;
   flex-direction: column;
+  -webkit-flex-direction: column;
 }
 .diff-view-container {
   display: flex;
+  display: -webkit-flex;
   flex: 1;
+  -webkit-flex: 1;
   flex-direction: column;
+  -webkit-flex-direction: column;
   border: 0;
   margin: 0;
 }
@@ -186,17 +210,22 @@ body {
   margin: 0;
   padding: 5px 16px;
   display: flex;
+  display: -webkit-flex;
 }
 .diff-view-container .panel-heading .btn-group {
   display: flex;
+  display: -webkit-flex;
   align-items: baseline;
+  -webkit-align-items: baseline;
 }
 .diff-view-container .panel-heading .btn-group span {
   padding-left: 5px;
 }
 .diff-view-container .panel-body {
   display: flex;
+  display: -webkit-flex;
   flex: 1;
+  -webkit-flex: 1;
   padding: 0;
 }
 .diff-view-container .panel-body:before {
@@ -204,6 +233,7 @@ body {
 }
 .diff-view-container .panel-body .diff-view {
   flex: 1;
+  -webkit-flex: 1;
   overflow: auto;
 }
 .diff-view-container .panel-body .diff-view:nth-child(2) {
@@ -250,8 +280,11 @@ body {
 }
 #tree-view {
   flex: 1;
+  -webkit-flex: 1;
   flex-direction: column;
+  -webkit-flex-direction: column;
   display: flex;
+  display: -webkit-flex;
 }
 #tree-view .breadcrumb {
   padding: 10px 16px;
@@ -261,26 +294,33 @@ body {
 #tree-view #tree-view-tree-content {
   overflow: auto;
   flex: 1;
+  -webkit-flex: 1;
   margin: 0;
 }
 #tree-view #tree-view-blob-content {
   display: flex;
+  display: -webkit-flex;
   flex-direction: column;
+  -webkit-flex-direction: column;
   flex: 1;
+  -webkit-flex: 1;
   width: 100%;
 }
 #tree-view #tree-view-blob-content iframe {
   flex: 1;
+  -webkit-flex: 1;
   border: 0;
 }
 #tree-view .list-group-item {
   display: flex;
+  display: -webkit-flex;
   cursor: pointer;
   border: 0;
   padding: 5px 10px;
 }
 #tree-view .list-group-item > :first-child {
   flex: 1;
+  -webkit-flex: 1;
 }
 #tree-view .list-group-item > :last-child {
   width: 2em;
@@ -300,12 +340,17 @@ body {
 }
 #workspace-view {
   display: flex;
+  display: -webkit-flex;
   flex-direction: column;
+  -webkit-flex-direction: column;
   flex: 1;
+  -webkit-flex: 1;
 }
 #workspace-view #workspace-diff-view {
   display: flex;
+  display: -webkit-flex;
   flex: 2;
+  -webkit-flex: 2;
   overflow: auto;
 }
 #workspace-view #workspace-editor {
@@ -316,8 +361,11 @@ body {
   -ms-user-select: none;
   user-select: none;
   flex: 1;
+  -webkit-flex: 1;
   display: flex;
+  display: -webkit-flex;
   align-items: stretch;
+  -webkit-align-items: stretch;
   border: solid #dddddd;
   border-width: 1px 0 0 0;
   cursor: default;
@@ -325,10 +373,12 @@ body {
 #workspace-view #workspace-editor #working-copy-view,
 #workspace-view #workspace-editor #staging-area-view {
   flex: 2;
+  -webkit-flex: 2;
 }
 #workspace-view #workspace-editor #working-copy-view .file-list-container,
 #workspace-view #workspace-editor #staging-area-view .file-list-container {
   flex: 1;
+  -webkit-flex: 1;
   overflow: auto;
 }
 #workspace-view #workspace-editor #working-copy-view .file-list-container .list-group,
@@ -350,9 +400,11 @@ body {
 }
 #workspace-view #workspace-editor #commit-message-view {
   flex: 3;
+  -webkit-flex: 3;
 }
 #workspace-view #workspace-editor #commit-message-view textarea {
   flex: 1;
+  -webkit-flex: 1;
   resize: none;
   margin: 0;
   border: 0;
@@ -361,7 +413,9 @@ body {
 }
 #workspace-view #workspace-editor .panel {
   display: flex;
+  display: -webkit-flex;
   flex-direction: column;
+  -webkit-flex-direction: column;
   margin: 0;
   border-width: 0 1px 0 0;
   border-style: solid;
@@ -370,10 +424,13 @@ body {
 #workspace-view #workspace-editor .panel .panel-heading {
   padding: 5px 10px;
   display: flex;
+  display: -webkit-flex;
   align-items: center;
+  -webkit-align-items: center;
 }
 #workspace-view #workspace-editor .panel .panel-heading h5 {
   flex: 1;
+  -webkit-flex: 1;
   margin: 0;
 }
 #workspace-view #workspace-editor .panel:last-child {

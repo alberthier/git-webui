@@ -37,14 +37,13 @@ else:
 
 
 
-def is_windows():
-    return 'win' in platform.system().lower()
+IS_WINDOWS = platform.system() == "Windows"
 
 
 
 
 def which(cmd, path):
-    if is_windows():
+    if IS_WINDOWS:
         cmd += ".exe"
     for d in path:
         f = os.path.join(d, cmd)
@@ -155,7 +154,7 @@ class WebUiRequestHandler(CGIHTTPRequestHandler):
         """
         if self.is_git_request():
             git_http_backend = "git-http-backend"
-            if is_windows():
+            if IS_WINDOWS:
                 git_http_backend += ".exe"
             self.cgi_info = WebUiRequestHandler.GIT_HTTP_BACKEND_DIR, git_http_backend + self.path
             return True
@@ -171,7 +170,7 @@ class WebUiRequestHandler(CGIHTTPRequestHandler):
         self.end_headers()
         # Convention : send first all git output, then stderr.
         # Finially we add footers: a blank line followed by key / value pairs as in HTTP headers
-        if is_windows():
+        if IS_WINDOWS:
             # On windows we cannot pipe the process output directly to the socket.
             git = subprocess.Popen(cmd, stdin = subprocess.PIPE, stdout = subprocess.PIPE, stderr = subprocess.PIPE, cwd = WebUiRequestHandler.REPO_ROOT)
             git.stdin.write(stdin)

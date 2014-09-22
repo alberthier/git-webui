@@ -483,12 +483,16 @@ webui.DiffView = function(sideBySide, parent) {
         }
         if (self.cmd.length) {
             var fullCmd = self.cmd.slice();
-            if (self.complete) {
-                var context = 999999999;
+            var opts = "";
+            if ($(".diff-context-all", self.element).hasClass("active")) {
+                opts = " --unified=999999999";
             } else {
-                var context = self.context;
+                opts = " --unified=" + self.context.toString();
             }
-            fullCmd.splice(1, 0, "--unified=" + context);
+            if ($(".diff-ignore-whitespace", self.element).hasClass("active")) {
+                opts += " --ignore-all-space --ignore-blank-lines";
+            }
+            fullCmd.splice(1, 0, opts);
             webui.git(fullCmd.join(" "), function(diff) {
                 self.refresh(diff);
             });
@@ -766,18 +770,14 @@ webui.DiffView = function(sideBySide, parent) {
         }
     }
 
-    self.allContext = function() {
-        self.complete = !self.complete;
-        self.update();
-    }
-
     self.element = $(   '<div class="diff-view-container panel panel-default">' +
                             '<div class="panel-heading btn-toolbar" role="toolbar">' +
+                                '<button type="button" class="btn btn-sm btn-default diff-ignore-whitespace" data-toggle="button">Ignore Whitespace</button>' +
                                 '<button type="button" class="btn btn-sm btn-default diff-context-all" data-toggle="button">Complete file</button>' +
                                 '<div class="btn-group btn-group-sm">' +
+                                    '<span></span>&nbsp;' +
                                     '<button type="button" class="btn btn-default diff-context-remove">-</button>' +
                                     '<button type="button" class="btn btn-default diff-context-add">+</button>' +
-                                    '<span></span>' +
                                 '</div>' +
                             '</div>' +
                             '<div class="panel-body"></div>' +
@@ -804,9 +804,9 @@ webui.DiffView = function(sideBySide, parent) {
 
     $(".diff-context-remove", self.element).click(self.removeContext);
     $(".diff-context-add", self.element).click(self.addContext);
-    $(".diff-context-all", self.element).click(self.allContext);
+    $(".diff-context-all", self.element).click(self.update);
+    $(".diff-ignore-whitespace", self.element).click(self.update);
     self.context = 3;
-    self.complete = false;
     var gitApplyType = "stage";
 };
 
