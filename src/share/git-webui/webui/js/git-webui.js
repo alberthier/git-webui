@@ -90,7 +90,9 @@ webui.git = function(cmd, arg1, arg2) {
 };
 
 webui.detachChildren = function(element) {
-    element.innerHTML = "";
+    while (element.firstChild) {
+        element.removeChild(element.firstChild);
+    }
 }
 
 webui.splitLines = function(data) {
