@@ -34,14 +34,34 @@
     user-select: none;
 }
 
+.display-flex() {
+    display: flex;
+    display: -webkit-flex;
+}
+
+.align-items(@value) {
+    align-items: @value;
+    -webkit-align-items: @value;
+}
+
+.flex(@value) {
+    flex: @value;
+    -webkit-flex: @value;
+}
+
+.flex-direction(@value) {
+    flex-direction: @value;
+    -webkit-flex-direction: @value;
+}
+
 html, body {
     height: 100%;
     width: 100%;
 }
 
 body {
-    display: flex;
-    flex-direction: column;
+    .display-flex();
+    .flex-direction(column);
     margin: 0;
     font: 10pt sans-serif;
 }
@@ -70,13 +90,13 @@ body {
 }
 
 #global-container {
-    display: flex;
-    flex: 1;
+    .display-flex();
+    .flex(1);
 }
 
 #sidebar {
-    display: flex;
-    flex-direction: column;
+    .display-flex();
+    .flex-direction(column);
     width: 14em;
     background-color: @gray-dark;
 
@@ -92,7 +112,7 @@ body {
     }
 
     #sidebar-content {
-        flex: 1;
+        .flex(1);
         overflow-x: hidden;
         overflow-y: auto;
         cursor: default;
@@ -166,11 +186,11 @@ body {
 }
 
 #main-view {
-    display: flex;
-    flex: 1;
+    .display-flex();
+    .flex(1);
 
     .jumbotron {
-        flex: 1;
+        .flex(1);
         margin: 0;
 
         h1 {
@@ -181,12 +201,12 @@ body {
 }
 
 #history-view {
-    display: flex;
-    flex: 1;
+    .display-flex();
+    .flex(1);
 }
 
 #log-view {
-    flex: 1;
+    .flex(1);
     overflow-y: auto;
     cursor: default;
     margin-bottom: 0;
@@ -200,8 +220,8 @@ body {
         padding: @padding-small-vertical @padding-small-horizontal;
 
         header {
-            display: flex;
-            align-items: baseline;
+            .display-flex();
+            .align-items(baseline);
 
             h6 {
                 font-weight: bold;
@@ -233,9 +253,9 @@ body {
 }
 
 #commit-view {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
+    .display-flex();
+    .flex-direction(column);
+    .flex(1);
 
     #commit-view-header {
         border: solid @list-group-border;
@@ -243,27 +263,27 @@ body {
     }
 
     #commit-view-content {
-        display: flex;
-        flex: 1;
-        flex-direction: column;
+        .display-flex();
+        .flex(1);
+        .flex-direction(column);
     }
 }
 
 .diff-view-container {
-    display: flex;
-    flex: 1;
-    flex-direction: column;
+    .display-flex();
+    .flex(1);
+    .flex-direction(column);
     border: 0;
     margin: 0;
 
     .panel-heading {
         margin: 0;
         padding: @padding-small-vertical @padding-large-horizontal;
-        display: flex;
+        .display-flex();
 
         .btn-group {
-            display: flex;
-            align-items: baseline;
+            .display-flex();
+            .align-items(baseline);
 
             span {
                 padding-left: @padding-xs-horizontal;
@@ -272,8 +292,8 @@ body {
     }
 
     .panel-body {
-        display: flex;
-        flex: 1;
+        .display-flex();
+        .flex(1);
         padding: 0;
 
         &:before {
@@ -281,7 +301,7 @@ body {
         }
 
         .diff-view {
-            flex: 1;
+            .flex(1);
             overflow: auto;
 
             &:nth-child(2) {
@@ -341,9 +361,9 @@ body {
 }
 
 #tree-view {
-    flex: 1;
-    flex-direction: column;
-    display: flex;
+    .flex(1);
+    .flex-direction(column);
+    .display-flex();
 
     .breadcrumb {
         padding: @padding-large-vertical @padding-large-horizontal;
@@ -353,31 +373,31 @@ body {
 
     #tree-view-tree-content {
         overflow: auto;
-        flex: 1;
+        .flex(1);
         margin: 0;
     }
 
     #tree-view-blob-content {
-        display: flex;
-        flex-direction: column;
-        flex: 1;
+        .display-flex();
+        .flex-direction(column);
+        .flex(1);
         width: 100%;
 
         iframe {
-            flex: 1;
+            .flex(1);
             border: 0;
         }
     }
 
     .list-group-item {
-        display: flex;
+        .display-flex();
         cursor: pointer;
         border: 0;
         padding: @padding-small-vertical @padding-small-horizontal;
     }
 
     .list-group-item > :first-child {
-        flex: 1;
+        .flex(1);
     }
 
     .list-group-item > :last-child {
@@ -402,31 +422,31 @@ body {
 }
 
 #workspace-view {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
+    .display-flex();
+    .flex-direction(column);
+    .flex(1);
 
     #workspace-diff-view {
-        display: flex;
-        flex: 2;
+        .display-flex();
+        .flex(2);
         overflow: auto;
     }
 
     #workspace-editor {
         .no-select();
 
-        flex: 1;
-        display: flex;
-        align-items: stretch;
+        .flex(1);
+        .display-flex();
+        .align-items(stretch);
         border: solid @separator-line;
         border-width: 1px 0 0 0;
         cursor: default;
 
         #working-copy-view, #staging-area-view {
-            flex: 2;
+            .flex(2);
 
             .file-list-container {
-                flex: 1;
+                .flex(1);
                 overflow: auto;
 
                 .list-group {
@@ -449,10 +469,10 @@ body {
         }
 
         #commit-message-view {
-            flex: 3;
+            .flex(3);
 
             textarea {
-                flex: 1;
+                .flex(1);
                 resize: none;
                 margin: 0;
                 border: 0;
@@ -462,8 +482,8 @@ body {
         }
 
         .panel {
-            display: flex;
-            flex-direction: column;
+            .display-flex();
+            .flex-direction(column);
             margin: 0;
             border-width: 0 1px 0 0;
             border-style: solid;
@@ -471,11 +491,11 @@ body {
 
             .panel-heading {
                 padding: @padding-small-vertical @padding-small-horizontal;
-                display: flex;
-                align-items: center;
+                .display-flex();
+                .align-items(center);
 
                 h5 {
-                    flex: 1;
+                    .flex(1);
                     margin: 0;
                 }
             }
