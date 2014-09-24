@@ -817,7 +817,7 @@ webui.DiffView = function(sideBySide, parent) {
     $(".diff-ignore-whitespace", self.element).click(self.toggleIgnoreWhitespace);
     self.context = 3;
     self.complete = false;
-    self.ignoreWhitespace = true;
+    self.ignoreWhitespace = false;
     var gitApplyType = "stage";
 };
 
