@@ -14,6 +14,8 @@ Mac / Linux : git, python, and a web browser.
 
 ## Installation
 
+### Automatic (Do you trust me ?)
+
 The following command will install git-webui in `$HOME/.git-webui` and add a
 `webui` alias to your global `.gitconfig` file.
 
@@ -33,6 +35,20 @@ wget -O - https://raw.githubusercontent.com/alberthier/git-webui/master/install/
 Upon installation git-webui will update itself automatically every couple of weeks.
 You can deactivate auto-update by removing the `autoupdate = true` line from the
 `webui` section of your global `.gitconfig` file.
+
+### Manual
+
+Simply clone the repository and install the alias
+
+```
+git clone https://github.com/alberthier/git-webui.git
+git config --global alias.webui \!$PWD/git-webui/release/libexec/git-core/git-webui
+```
+
+If you want to allow auto-update:
+```
+git config --global webui.autoupdate true
+```
 
 ## Usage
 
@@ -107,6 +123,8 @@ In this view you can stage/unstage code in more fine grained way:
 
 ## Uninstallation
 
+### Automatic
+
 Using curl (Mac OS X & Windows):
 ```
 curl https://raw.githubusercontent.com/alberthier/git-webui/master/install/uninstaller.sh | bash
@@ -117,9 +135,25 @@ Using wget (Linux):
 wget -O - https://raw.githubusercontent.com/alberthier/git-webui/master/install/uninstaller.sh | bash
 ```
 
+### Manual
+
+```
+rm -rf <git-webui-clone-path>
+git config --global --unset-all alias.webui
+git config --global --remove-section webui
+```
+
 ## Contributing
 
 You can clone the source code of [git-webui on GitHub](https://github.com/alberthier/git-webui)
+
+## Packaging
+
+If you want to build a DEB, RPM or Homebrew package for git-webui, you only need the content of the `release` folder.
+Installing git-webui globally on the system is nothing else than
+```
+cp -rf release/* /usr
+```
 
 ## Author
 
