@@ -310,16 +310,16 @@ webui.LogView = function(historyView) {
     var self = this;
 
     self.update = function(ref) {
-        $(self.element).empty();
+        $(content).empty();
         self.nextRef = ref;
         self.populate();
     };
 
     self.populate = function() {
         var maxCount = 1000;
-        if (self.element.childElementCount != 0) {
+        if (content.childElementCount > 0) {
             // The last node is the 'Show more commits placeholder'. Remove it.
-            self.element.removeChild(self.element.lastElementChild);
+            content.removeChild(content.lastElementChild);
         }
         webui.git("log --pretty=raw --decorate=full --max-count=" + (maxCount + 1) + " " + self.nextRef, function(data) {
             var start = 0;
@@ -334,7 +334,7 @@ webui.LogView = function(historyView) {
                 }
                 var entry = new Entry(self, data.substr(start, len));
                 if (count < maxCount) {
-                    self.element.appendChild(entry.element);
+                    content.appendChild(entry.element);
                     if (!currentSelection) {
                         entry.select();
                     }
@@ -348,11 +348,15 @@ webui.LogView = function(historyView) {
                 start = end + 1;
                 ++count;
             }
+            canvas.height = $(content).outerHeight();
+            canvas.width = $(content).outerWidth();
+            var ctx = canvas.getContext("2d");
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
             if (self.nextRef != undefined) {
                 var moreTag = $('<a class="log-entry log-entry-more list-group-item">');
                 $('<a class="list-group-item-text">Show previous commits</a>').appendTo(moreTag[0]);
                 moreTag.click(self.populate);
-                moreTag.appendTo(self.element);
+                moreTag.appendTo(content);
             }
         });
     };
@@ -465,7 +469,9 @@ webui.LogView = function(historyView) {
     };
 
     self.historyView = historyView;
-    self.element = $('<div id="log-view" class="list-group">')[0];
+    self.element = $('<div id="log-view" class="list-group"><canvas></canvas><div></div></div>')[0];
+    var canvas = $("canvas", self.element)[0];
+    var content = canvas.nextElementSibling;
     var currentSelection = null;
 };
 
