@@ -214,19 +214,27 @@ body {
     border-right: 1px @separator-line solid;
     position: relative;
 
-    canvas {
+    svg {
         position: absolute;
         top: 0;
         left: 0;
+
+        path {
+            stroke-width: 2;
+            fill: none;
+        }
+
+        circle {
+            stroke: none;
+            fill: @gray-dark;
+        }
     }
 
     .log-entry {
         padding: @padding-small-vertical @padding-small-horizontal;
         background-color: transparent;
-
-        &:first-child {
-            border-top-width: 0;
-        }
+        margin: 0;
+        border-top-width: 0;
 
         &:hover {
             background-color: rgba((  red(@list-group-hover-bg) - 25) / @log-view-opacity,
@@ -240,6 +248,10 @@ body {
                                    (green(@brand-primary) - 25) / @log-view-opacity,
                                    ( blue(@brand-primary) - 25) / @log-view-opacity,
                                    @log-view-opacity);
+
+            header h6 a {
+                color: @component-active-color;
+            }
         }
 
         header {
@@ -251,7 +263,7 @@ body {
                 margin-top: 0;
 
                 a {
-                    color: inherit;
+                    color: #777777;
                 }
             }
 
