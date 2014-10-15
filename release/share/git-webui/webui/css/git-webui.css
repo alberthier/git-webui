@@ -143,12 +143,35 @@ body {
   cursor: default;
   margin-bottom: 0;
   border-right: 1px #dddddd solid;
+  position: relative;
 }
-#log-view .log-entry:first-child {
-  border-top-width: 0;
+#log-view svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+#log-view svg path {
+  stroke-width: 2;
+  fill: none;
+}
+#log-view svg circle {
+  stroke: none;
+  fill: #333333;
 }
 #log-view .log-entry {
   padding: 5px 10px;
+  background-color: transparent;
+  margin: 0;
+  border-top-width: 0;
+}
+#log-view .log-entry:hover {
+  background-color: rgba(244, 244, 244, 0.9);
+}
+#log-view .log-entry.active {
+  background-color: rgba(46, 127, 197, 0.9);
+}
+#log-view .log-entry.active header h6 a {
+  color: #ffffff;
 }
 #log-view .log-entry header {
   display: flex;
@@ -161,13 +184,18 @@ body {
   margin-top: 0;
 }
 #log-view .log-entry header h6 a {
-  color: inherit;
+  color: #777777;
 }
 #log-view .log-entry header .badge {
   font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
 }
 #log-view .log-entry header .log-entry-date {
   margin-left: auto;
+}
+#log-view .log-entry .list-group-item-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 #log-view .log-entry-more {
   padding: 10px 16px;
