@@ -20,9 +20,7 @@ var webui = webui || {};
 
 webui.repo = "/";
 
-webui.COLORS = ["#412000", "#451904", "#5d1f0c", "#4a1700", "#490036", "#48036c", "#051e81", "#0b0779", "#1d295a", "#004b59", "#004800", "#164000", "#2c3500", "#463a09", "#401a02", "#000000",
-                "#542800", "#721e11", "#7a240d", "#721f00", "#66004b", "#5c0488", "#0626a5", "#201c8e", "#1d3876", "#005d6e", "#005400", "#1c5300", "#384400", "#4d3f09", "#581f05", "#252525",
-                "#763700", "#9f241e", "#982c0e", "#a81300", "#80035f", "#650d90", "#082fca", "#3531a3", "#1d4892", "#006f84", "#036b03", "#236600", "#445200", "#544509", "#702408", "#343434",
+webui.COLORS = ["#763700", "#9f241e", "#982c0e", "#a81300", "#80035f", "#650d90", "#082fca", "#3531a3", "#1d4892", "#006f84", "#036b03", "#236600", "#445200", "#544509", "#702408", "#343434",
                 "#9a5000", "#b33a20", "#b02f0f", "#c8210a", "#950f74", "#7b23a7", "#263dd4", "#4642b4", "#1d5cac", "#00849c", "#0e760e", "#287800", "#495600", "#6c5809", "#8d3a13", "#4e4e4e",
                 "#c36806", "#c85120", "#bf3624", "#df2512", "#aa2288", "#933bbf", "#444cde", "#5753c5", "#1d71c6", "#0099bf", "#188018", "#2e8c00", "#607100", "#907609", "#ab511f", "#686868",
                 "#e47b07", "#e36920", "#d34e2a", "#ec3b24", "#ba3d99", "#9d45c9", "#4f5aec", "#615dcf", "#3286cf", "#00abca", "#279227", "#3a980c", "#6c7f00", "#ab8b0a", "#b56427", "#757575",
@@ -33,9 +31,7 @@ webui.COLORS = ["#412000", "#451904", "#5d1f0c", "#4a1700", "#490036", "#48036c"
                 "#ffd84c", "#ffb946", "#ff987c", "#ff8f8f", "#fb7eda", "#ce76fa", "#90a0ff", "#9c98ff", "#74cbff", "#64e7ff", "#7ce47c", "#85e357", "#b8cc49", "#edcd4c", "#f9ad58", "#d0d0d0",
                 "#ffe651", "#ffbf51", "#ffa48b", "#ff9d9e", "#ff8de1", "#d583ff", "#97a9ff", "#a7a4ff", "#82d3ff", "#76eaff", "#85ed85", "#8deb5f", "#c2d653", "#f5d862", "#fcb75c", "#d7d7d7",
                 "#fff456", "#ffc66d", "#ffb39e", "#ffabad", "#ff9de5", "#da90ff", "#9fb2ff", "#b2afff", "#8ddaff", "#8bedff", "#99f299", "#97f569", "#cde153", "#fbe276", "#ffc160", "#e1e1e1",
-                "#fff970", "#ffd587", "#ffc2b2", "#ffb9bd", "#ffa5e7", "#de9cff", "#afbeff", "#bbb8ff", "#9fd4ff", "#9aefff", "#b3f7b3", "#a0fe72", "#dbef6c", "#fcee98", "#ffca69", "#eaeaea",
-                "#ffff90", "#ffe498", "#ffd0c3", "#ffc7ce", "#ffafea", "#e2a9ff", "#c0cbff", "#c3c1ff", "#b4e2ff", "#b1f3ff", "#c3f9c3", "#b1ff8a", "#e8fc79", "#fdf3a9", "#ffcf7e", "#f4f4f4",
-                "#ffffaa", "#ffe6ab", "#ffdad0", "#ffcade", "#ffb8ec", "#e6b6ff", "#cdd3ff", "#d3d1ff", "#c0ebff", "#c7f6ff", "#cdfccd", "#bcff9a", "#f2ffab", "#fdf3be", "#ffda96", "#ffffff"]
+                "#fff970", "#ffd587", "#ffc2b2", "#ffb9bd", "#ffa5e7", "#de9cff", "#afbeff", "#bbb8ff", "#9fd4ff", "#9aefff", "#b3f7b3", "#a0fe72", "#dbef6c", "#fcee98", "#ffca69", "#eaeaea"]
 
 
 webui.git = function(cmd, arg1, arg2) {
@@ -434,21 +430,23 @@ webui.LogView = function(historyView) {
             // Add new streams
             for (var j = 0; j < entry.parents.length; ++j) {
                 var parent = entry.parents[j];
-                var svgPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                svgPath.setAttribute("style", "stroke:" + webui.COLORS[128 + index + j + 1]);
                 var x = (index + j + 1) * xOffset;
-                if (j == 0) {
-                    svgPath.cmds = "M " + x + " " + currentY + " L " + x + " ";
-                } else {
+                if (j != 0 || streams.length == 0) {
+                    var svgPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                    ++streamColor
+                    if (streamColor == webui.COLORS.length) {
+                        streamColor = 0;
+                    }
+                    svgPath.setAttribute("style", "stroke:" + webui.COLORS[streamColor]);
                     var origX = (index + 1) * xOffset;
                     svgPath.cmds = "M " + origX + " " + currentY + " L " + x + " " + (currentY + self.lineHeight / 2) + " L " + x + " ";
+                    svg.appendChild(svgPath);
+                    var obj = {
+                        sha1: parent,
+                        path: svgPath,
+                    };
+                    streams.splice(index + j, 0, obj);
                 }
-                svg.appendChild(svgPath);
-                var obj = {
-                    sha1: parent,
-                    path: svgPath,
-                };
-                streams.splice(index + j, j == 0 ? 1 : 0, obj);
             }
             for (var j = index + j; j < streams.length; ++j) {
                 var stream = streams[j];
@@ -590,6 +588,7 @@ webui.LogView = function(historyView) {
     var currentSelection = null;
     var lineHeight = null;
     var streams = [];
+    var streamColor = 80;
 };
 
 /*
