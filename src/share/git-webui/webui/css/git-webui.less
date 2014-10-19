@@ -330,6 +330,13 @@ body {
                 padding-left: @padding-xs-horizontal;
             }
         }
+
+        .diff-selection-buttons {
+            display: flex;
+            flex: 1;
+            align-items: flex-end;
+            justify-content: flex-end;
+        }
     }
 
     .panel-body {
@@ -359,6 +366,11 @@ body {
                     padding: 0 0.3em 0 0.3em;
                     background-color: white;
                     border: 0;
+
+                    &.active {
+                        background-color: @brand-primary;
+                        color: white;
+                    }
                 }
 
                 .diff-line-header {
