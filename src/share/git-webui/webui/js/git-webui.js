@@ -759,9 +759,7 @@ webui.DiffView = function(sideBySide, parent) {
 
             if (leftCmd == "@" || (leftCmd == " " && !$(leftElt).hasClass("diff-line-phantom"))) {
                 if (hunkAddedLines.length != 0 || hunkRemovedLines.length != 0) {
-                    patch += "@@ -" + refLineNo + "," + hunkRemovedLines.length +" +" + (refLineNo + patchOffset) + "," + hunkAddedLines.length + " @@\n";
-                    hunkRemovedLines.forEach(function (line) { patch += line + "\n" });
-                    hunkAddedLines.forEach(function (line) { patch += line + "\n" });
+                    patch += self.flushSelectionPatch(hunkAddedLines, hunkRemovedLines, refLineNo, patchOffset);
                     refLineNo += hunkRemovedLines.length
                     patchOffset += hunkAddedLines.length - hunkRemovedLines.length;
                     var hunkAddedLines = [];
@@ -803,6 +801,16 @@ webui.DiffView = function(sideBySide, parent) {
                 }
             }
         }
+        if (hunkAddedLines.length != 0 || hunkRemovedLines.length != 0) {
+            patch += self.flushSelectionPatch(hunkAddedLines, hunkRemovedLines, refLineNo, patchOffset);
+        }
+        return patch;
+    }
+
+    self.flushSelectionPatch = function(hunkAddedLines, hunkRemovedLines, refLineNo, patchOffset) {
+        var patch = "@@ -" + refLineNo + "," + hunkRemovedLines.length +" +" + (refLineNo + patchOffset) + "," + hunkAddedLines.length + " @@\n";
+        hunkRemovedLines.forEach(function (line) { patch += line + "\n" });
+        hunkAddedLines.forEach(function (line) { patch += line + "\n" });
         return patch;
     }
 
