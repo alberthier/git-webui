@@ -609,27 +609,43 @@ webui.DiffView = function(sideBySide, parent) {
 
     var self = this;
 
-    self.update = function(cmd, mode) {
+    self.update = function(cmd, diffOpts, file, mode) {
         gitApplyType = mode;
         $(".diff-stage", self.element).attr("style", "display:none");
         $(".diff-cancel", self.element).attr("style", "display:none");
         $(".diff-unstage", self.element).attr("style", "display:none");
         if (cmd) {
-            self.cmd = cmd;
+            self.gitCmd = cmd;
+            self.gitDiffOpts = diffOpts;
+            if (file != self.gitFile) {
+                left.scrollTop = 0;
+                left.scrollLeft = 0;
+                right.scrollTop = 0;
+                right.scrollLeft = 0;
+                left.webuiPrevScrollTop = 0;
+                left.webuiPrevScrollLeft = 0;
+                right.webuiPrevScrollTop = 0;
+                right.webuiPrevScrollLeft = 0;
+            }
+            self.gitFile = file;
         }
-        if (self.cmd.length) {
-            var fullCmd = self.cmd.slice();
-            var opts = "";
+        if (self.gitCmd) {
+            var fullCmd = self.gitCmd;
             if (self.complete) {
-                opts = " --unified=999999999";
+                fullCmd += " --unified=999999999";
             } else {
-                opts = " --unified=" + self.context.toString();
+                fullCmd += " --unified=" + self.context.toString();
             }
             if (self.ignoreWhitespace) {
-                opts += " --ignore-all-space --ignore-blank-lines";
+                fullCmd += " --ignore-all-space --ignore-blank-lines";
             }
-            fullCmd.splice(1, 0, opts);
-            webui.git(fullCmd.join(" "), function(diff) {
+            if (self.gitDiffOpts) {
+                fullCmd += " " + self.gitDiffOpts.join(" ")
+            }
+            if (self.gitFile) {
+                fullCmd += " -- " + self.gitFile;
+            }
+            webui.git(fullCmd, function(diff) {
                 self.refresh(diff);
             });
         } else {
@@ -691,7 +707,7 @@ webui.DiffView = function(sideBySide, parent) {
             }
         }
         self.flushAddedRemovedLines(view, operation, context);
-        view.parentElement.scrollTop = view.parentElement.prevScrollTop;
+        view.parentElement.scrollTop = view.parentElement.webuiPrevScrollTop;
     }
 
     self.flushAddedRemovedLines = function(view, operation, context) {
@@ -835,14 +851,14 @@ webui.DiffView = function(sideBySide, parent) {
             var current = right;
             var other = left;
         }
-        if (current.prevScrollTop != current.scrollTop) {
+        if (current.webuiPrevScrollTop != current.scrollTop) {
             // Vertical scrolling
             other.scrollTop = current.scrollTop;
-            current.prevScrollTop = current.scrollTop;
-        } else {
+            current.webuiPrevScrollTop = current.scrollTop;
+        } else if (current.webuiPrevScrollLeft != current.scrollLeft) {
             // Horizontal scrolling
             other.scrollLeft = current.scrollLeft;
-            current.prevScrollLeft = current.scrollLeft;
+            current.webuiPrevScrollLeft = current.scrollLeft;
         }
     }
 
@@ -893,11 +909,15 @@ webui.DiffView = function(sideBySide, parent) {
         }
 
         var isActive = false
-        for (var i = 0; i < lineElt.parentElement.childElementCount; ++i) {
-            var elt = lineElt.parentElement.children[i];
-            if ($(elt).hasClass("active")) {
-                isActive = true;
-                break;
+        var lineContainers = [leftLines, rightLines];
+        for (var i = 0; i < lineContainers.length; ++i) {
+            var lineContainer = lineContainers[i];
+            for (var j = 0; j < lineContainer.childElementCount; ++j) {
+                var elt = lineContainer.children[j];
+                if ($(elt).hasClass("active")) {
+                    isActive = true;
+                    break;
+                }
             }
         }
         if (isActive) {
@@ -951,14 +971,14 @@ webui.DiffView = function(sideBySide, parent) {
         panelBody.appendChild(left);
         var leftLines = left.firstChild;
         $(left).scroll(self.diffViewScrolled);
-        left.prevScrollTop = left.scrollTop;
-        left.prevScrollLeft = left.scrollLeft;
+        left.webuiPrevScrollTop = left.scrollTop;
+        left.webuiPrevScrollLeft = left.scrollLeft;
         var right = $('<div class="diff-view"><div class="diff-view-lines"></div></div>')[0];
         panelBody.appendChild(right);
         var rightLines = right.firstChild;
         $(right).scroll(self.diffViewScrolled);
-        right.prevScrollTop = right.scrollTop;
-        right.prevScrollLeft = right.scrollLeft;
+        right.webuiPrevScrollTop = right.scrollTop;
+        right.webuiPrevScrollLeft = right.scrollLeft;
         $(left).click(self.handleClick);
         $(right).click(self.handleClick);
     } else {
@@ -1150,7 +1170,7 @@ webui.CommitView = function(historyView) {
         currentCommit = entry.commit;
         self.showDiff();
         buttonBox.select(0);
-        diffView.update(["show", entry.commit]);
+        diffView.update("show", [entry.commit]);
         treeView.update(entry.tree);
     };
 
@@ -1213,10 +1233,12 @@ webui.WorkspaceView = function(mainView) {
 
     self.update = function(mode) {
         self.show();
-        self.diffView.update([], mode);
         self.workingCopyView.update();
         self.stagingAreaView.update();
         self.commitMessageView.update();
+        if (self.workingCopyView.getSelectedItemsCount() + self.stagingAreaView.getSelectedItemsCount() == 0) {
+            self.diffView.update(undefined, undefined, undefined, mode);
+        }
     };
 
     self.element = $(   '<div id="workspace-view">' +
@@ -1315,13 +1337,11 @@ webui.ChangedFilesView = function(workspaceView, type, label) {
     };
 
     self.refreshDiff = function(element) {
-        var gitCmd = [ "diff" ];
+        var gitOpts = [];
         if (type == "staging-area") {
-            gitCmd.push("--cached");
+            gitOpts.push("--cached");
         }
-        gitCmd.push("--");
-        gitCmd.push(element.model);
-        workspaceView.diffView.update(gitCmd, type == "working-copy" ? "stage" : "unstage");
+        workspaceView.diffView.update("diff", gitOpts, element.model, type == "working-copy" ? "stage" : "unstage");
     };
 
     self.unselect = function() {
@@ -1375,6 +1395,10 @@ webui.ChangedFilesView = function(workspaceView, type, label) {
                 workspaceView.update("stage");
             });
         }
+    }
+
+    self.getSelectedItemsCount = function() {
+        return $(".active", fileList).length;
     }
 
     self.element = $(   '<div id="' + type + '-view" class="panel panel-default">' +
