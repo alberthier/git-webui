@@ -636,8 +636,8 @@ webui.DiffView = function(sideBySide, parent) {
             self.gitFile = file;
         }
         if (self.gitCmd) {
-            var fullCmd = self.gitCmd;
-            if (self.complete) {
+            var fullCmd = self.gitCmd + " --word-diff=porcelain";
+            if (self.complete2) {
                 fullCmd += " --unified=999999999";
             } else {
                 fullCmd += " --unified=" + self.context.toString();
@@ -660,101 +660,152 @@ webui.DiffView = function(sideBySide, parent) {
     };
 
     self.refresh = function(diff) {
-        self.diffHeader = "";
         $("span", self.element).text('Context: ' + self.context);
-        if (sideBySide) {
-            var diffLines = diff.split("\n");
-            self.updateSplitView(leftLines, diffLines, '-');
-            self.updateSplitView(rightLines, diffLines, '+');
-        } else {
-            self.updateSimpleView(singleLines, diff);
-        }
-    }
-
-    self.updateSimpleView = function(view, diff) {
-        $(view).empty();
-
-        var context = { inHeader: true };
         var diffLines = diff.split("\n");
-        for (var i = 0; i < diffLines.length; ++i) {
-            var line = diffLines[i];
-            context = self.addDiffLine(view, line, context);
+        if (sideBySide) {
+            self.updateView(leftLines, rightLines, diffLines);
+        } else {
+            self.updateView(singleLines, undefined, diffLines);
         }
     }
 
-    self.updateSplitView = function(view, diffLines, operation) {
-        $(view).empty();
-
+    self.updateView = function(leftView, rightView, diffLines) {
+        $(leftView).empty();
+        if (rightView) {
+            $(rightView).empty();
+        }
         var context = { inHeader: true,
                         addedLines: [],
                         removedLines: [],
+                        currentAddedLine: [],
+                        currentRemovedLine: [],
                       };
         for (var i = 0; i < diffLines.length; ++i) {
-            var line = diffLines[i];
-            var c = line[0];
-            if (c == '+') {
-                context.addedLines.push(line);
-                if (context.inHeader) {
-                    context.diffHeader += line + '\n';
-                }
-            } else if (c == '-') {
-                context.removedLines.push(line);
-                if (context.inHeader) {
-                    context.diffHeader += line + '\n';
-                }
-            } else {
-                context = self.flushAddedRemovedLines(view, operation, context);
-                context.addedLines = [];
-                context.removedLines = [];
-                context = self.addDiffLine(view, line, context);
-                if (c == 'd') {
-                    context.diffHeader = '';
-                }
-            }
+            self.addDiffLine(leftView, rightView, diffLines[i], context);
         }
-        self.flushAddedRemovedLines(view, operation, context);
-        view.parentElement.scrollTop = view.parentElement.webuiPrevScrollTop;
+        self.flushAddedRemovedLines(leftView, rightView, context);
+        leftView.parentElement.scrollTop = leftView.parentElement.webuiPrevScrollTop;
+        if (rightView) {
+            rightView.parentElement.scrollTop = rightView.parentElement.webuiPrevScrollTop;
+        }
     }
 
-    self.flushAddedRemovedLines = function(view, operation, context) {
-        if (operation == '+') {
-            var lines = context.addedLines;
-            var offset = context.removedLines.length - context.addedLines.length;
-        } else {
-            var lines = context.removedLines;
+    self.flushAddedRemovedLines = function(leftView, rightView, context) {
+        for (var i = 0; i < context.removedLines.length; ++i) {
+            leftView.appendChild(context.removedLines[i]);
+        }
+        var view = rightView || leftView;
+        for (var i = 0; i < context.addedLines.length; ++i) {
+            view.appendChild(context.addedLines[i]);
+        }
+        if (rightView) {
             var offset = context.addedLines.length - context.removedLines.length;
-        }
-        lines.forEach(function(line) {
-            context = self.addDiffLine(view, line, context);
-        });
-        if (offset > 0) {
+            view = offset < 0 ? rightView : leftView;
+            offset = Math.abs(offset);
             for (var i = 0; i < offset; ++i) {
-                var pre = $('<pre class="diff-view-line diff-line-phantom">').appendTo(view)[0];
+                var pre = document.createElement("pre");
+                pre.classList.add("diff-view-line");
+                pre.classList.add("diff-line-phantom");
                 pre.appendChild(document.createTextNode(" "));
+                view.appendChild(pre);
             }
         }
+        context.addedLines = [];
+        context.removedLines = [];
         return context;
     }
 
-    self.addDiffLine = function(view, line, context) {
+    self.addDiffLine = function(leftView, rightView, line, context) {
         var c = line[0];
-        var pre = $('<pre class="diff-view-line">').appendTo(view)[0];
-        pre.appendChild(document.createTextNode(line));
-        if (c == '+') {
-            $(pre).addClass("diff-line-add");
-        } else if (c == '-') {
-            $(pre).addClass("diff-line-del");
-        } else if (c == '@') {
-            $(pre).addClass("diff-line-offset");
-            pre.webuiActive = false;
-            context.inHeader = false;
-        } else if (c == 'd') {
-            context.inHeader = true;
-        }
+        var fragment = line.substr(1);
+
         if (context.inHeader) {
-            $(pre).addClass("diff-line-header");
+            if (c == '@') {
+                context.inHeader = false;
+            } else {
+                var pre = document.createElement("pre");
+                pre.classList.add("diff-view-line");
+                pre.appendChild(document.createTextNode(line));
+                pre.classList.add("diff-line-header");
+                if (c == '+') {
+                    pre.classList.add("diff-line-add");
+                } else if(c == '-') {
+                    pre.classList.add("diff-line-del");
+                }
+                self.addToViews(leftView, rightView, pre);
+            }
         }
+        if (!context.inHeader) {
+            if (c == '@') {
+                self.flushAddedRemovedLines(leftView, rightView, context);
+                var pre = document.createElement("pre");
+                pre.classList.add("diff-view-line");
+                pre.appendChild(document.createTextNode(line));
+                pre.classList.add("diff-line-offset");
+                pre.webuiActive = false;
+                self.addToViews(leftView, rightView, pre);
+            } else if (c == ' ') {
+                context.currentAddedLine.push(line);
+                context.currentRemovedLine.push(line);
+            } else if (c == '+') {
+                context.currentAddedLine.push(line);
+            } else if (c == '-') {
+                context.currentRemovedLine.push(line);
+            } else if (c == '~') {
+                var addedElt = self.createLineElement(context.currentAddedLine);
+                var removedElt = self.createLineElement(context.currentRemovedLine);
+                if (addedElt.firstChild.textContent != "+" && removedElt.firstChild.textContent != "-") {
+                    self.flushAddedRemovedLines(leftView, rightView, context);
+                    leftView.appendChild(removedElt);
+                    if (rightView) {
+                        rightView.appendChild(addedElt);
+                    }
+                } else {
+                    if (addedElt.firstChild.textContent == "+") {
+                        addedElt.classList.add("diff-line-add");
+                        context.addedLines.push(addedElt);
+                    }
+                    if (removedElt.firstChild.textContent == "-") {
+                        removedElt.classList.add("diff-line-del");
+                        context.removedLines.push(removedElt);
+                    }
+                }
+                context.currentAddedLine = [];
+                context.currentRemovedLine = [];
+            } else if (c == 'd') {
+                self.flushAddedRemovedLines(leftView, rightView, context);
+                context.inHeader = true;
+            }
+        }
+
         return context;
+    }
+
+    self.createLineElement = function(lineFragments) {
+        var modifs = " ";
+        var pre = document.createElement("pre");
+        pre.classList.add("diff-view-line");
+        for (var i = 0; i < lineFragments.length; ++i) {
+            var fragment = lineFragments[i];
+            var c = fragment[0];
+            if (c == ' ') {
+                pre.appendChild(document.createTextNode(fragment.substr(1)));
+            } else {
+                var b = document.createElement("b");
+                b.appendChild(document.createTextNode(fragment.substr(1)));
+                pre.appendChild(b);
+                modifs = c;
+            }
+        }
+        pre.insertBefore(document.createTextNode(modifs), pre.firstChild);
+        return pre;
+    }
+
+    self.addToViews = function(leftView, rightView, elt) {
+        leftView.appendChild(elt);
+        if (rightView) {
+            rightView.appendChild(elt.cloneNode(true));
+        }
     }
 
     self.createSelectionPatch = function (reverse) {
