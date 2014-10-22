@@ -34,6 +34,23 @@ webui.COLORS = ["#ffab1d", "#fd8c25", "#f36e4a", "#fc6148", "#d75ab6", "#b25ade"
                 "#ff911a", "#fc8120", "#e7623e", "#fa5236", "#ca4da9", "#a74fd3", "#5a68ff", "#6d69db", "#489bd9", "#00bcde", "#36a436", "#47a519", "#798d0a", "#c1a120", "#bf7730", "#8e8e8e"]
 
 
+webui.showError = function(message) {
+    $("#error-modal .alert").text(message);
+    $("#error-modal").modal('show');
+}
+
+webui.showWarning = function(message) {
+    var messageBox = $("#message-box");
+    messageBox.empty();
+    $(  '<div class="alert alert-warning alert-dismissible" role="alert">' +
+            '<button type="button" class="close" data-dismiss="alert">' +
+                '<span aria-hidden="true">&times;</span>' +
+                '<span class="sr-only">Close</span>' +
+            '</button>' +
+            message +
+        '</div>').appendTo(messageBox);
+}
+
 webui.git = function(cmd, arg1, arg2) {
     // cmd = git command line arguments
     // other arguments = optional stdin content and a callback function:
@@ -75,31 +92,20 @@ webui.git = function(cmd, arg1, arg2) {
                 // Return code is 0 but there is stderr output: this is a warning message
                 if (message.length > 0) {
                     console.log(message);
-                    var messageBox = $("#message-box");
-                    messageBox.empty();
-                    $(  '<div class="alert alert-warning alert-dismissible" role="alert">' +
-                            '<button type="button" class="close" data-dismiss="alert">' +
-                                '<span aria-hidden="true">&times;</span>' +
-                                '<span class="sr-only">Close</span>' +
-                            '</button>' +
-                            message +
-                        '</div>').appendTo(messageBox);
+                    webui.showWarning(message);
                 }
                 $("#error-modal .alert").text("");
             } else {
                 console.log(message);
-                $("#error-modal .alert").text(message);
-                $("#error-modal").modal('show');
+                webui.showError(message);
             }
         } else {
             console.log(data);
-            $("#error-modal .alert").text(data);
-            $("#error-modal").modal('show');
+            webui.showError(data);
         }
     }, "text")
     .fail(function(xhr, status, error) {
-        $("#error-modal .alert").text("Git webui server not running");
-        $("#error-modal").modal('show');
+        webui.showError("Git webui server not running");
     });
 };
 
@@ -1446,9 +1452,9 @@ webui.CommitMessageView = function(workspaceView) {
 
     self.onCommit = function() {
         if (workspaceView.stagingAreaView.filesCount == 0) {
-            console.log("No files staged for commit");
+            webui.showError("No files staged for commit");
         } else if (textArea.value.length == 0) {
-            console.log("Enter a commit message first");
+            webui.showError("Enter a commit message first");
         } else {
             var cmd = "commit ";
             if (amend.hasClass("active")) {
