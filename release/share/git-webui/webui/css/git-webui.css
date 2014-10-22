@@ -156,7 +156,7 @@ body {
 }
 #log-view svg circle {
   stroke: none;
-  fill: #333333;
+  fill: #555555;
 }
 #log-view .log-entry {
   padding: 5px 10px;
@@ -249,6 +249,12 @@ body {
 .diff-view-container .panel-heading .btn-group span {
   padding-left: 5px;
 }
+.diff-view-container .panel-heading .diff-selection-buttons {
+  display: flex;
+  flex: 1;
+  align-items: flex-end;
+  justify-content: flex-end;
+}
 .diff-view-container .panel-body {
   display: flex;
   display: -webkit-flex;
@@ -277,6 +283,10 @@ body {
   padding: 0 0.3em 0 0.3em;
   background-color: white;
   border: 0;
+}
+.diff-view-container .panel-body .diff-view .diff-view-lines .diff-view-line.active {
+  background-color: #428bca;
+  color: white;
 }
 .diff-view-container .panel-body .diff-view .diff-view-lines .diff-line-header {
   font-weight: bold;

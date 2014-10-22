@@ -20,19 +20,36 @@ var webui = webui || {};
 
 webui.repo = "/";
 
-webui.COLORS = ["#763700", "#9f241e", "#982c0e", "#a81300", "#80035f", "#650d90", "#082fca", "#3531a3", "#1d4892", "#006f84", "#036b03", "#236600", "#445200", "#544509", "#702408", "#343434",
-                "#9a5000", "#b33a20", "#b02f0f", "#c8210a", "#950f74", "#7b23a7", "#263dd4", "#4642b4", "#1d5cac", "#00849c", "#0e760e", "#287800", "#495600", "#6c5809", "#8d3a13", "#4e4e4e",
-                "#c36806", "#c85120", "#bf3624", "#df2512", "#aa2288", "#933bbf", "#444cde", "#5753c5", "#1d71c6", "#0099bf", "#188018", "#2e8c00", "#607100", "#907609", "#ab511f", "#686868",
-                "#e47b07", "#e36920", "#d34e2a", "#ec3b24", "#ba3d99", "#9d45c9", "#4f5aec", "#615dcf", "#3286cf", "#00abca", "#279227", "#3a980c", "#6c7f00", "#ab8b0a", "#b56427", "#757575",
-                "#ff911a", "#fc8120", "#e7623e", "#fa5236", "#ca4da9", "#a74fd3", "#5a68ff", "#6d69db", "#489bd9", "#00bcde", "#36a436", "#47a519", "#798d0a", "#c1a120", "#bf7730", "#8e8e8e",
-                "#ffab1d", "#fd8c25", "#f36e4a", "#fc6148", "#d75ab6", "#b25ade", "#6575ff", "#7b77e9", "#4ea8ec", "#00d0f5", "#4eb94e", "#51af23", "#8b9f1c", "#d0b02f", "#d0853a", "#a4a4a4",
+webui.COLORS = ["#ffab1d", "#fd8c25", "#f36e4a", "#fc6148", "#d75ab6", "#b25ade", "#6575ff", "#7b77e9", "#4ea8ec", "#00d0f5", "#4eb94e", "#51af23", "#8b9f1c", "#d0b02f", "#d0853a", "#a4a4a4",
                 "#ffc51f", "#fe982c", "#fd7854", "#ff705f", "#e467c3", "#bd65e9", "#7183ff", "#8985f7", "#55b6ff", "#10dcff", "#51cd51", "#5cba2e", "#9eb22f", "#debe3d", "#e19344", "#b8b8b8",
                 "#ffd03b", "#ffae38", "#ff8a6a", "#ff7e7e", "#ef72ce", "#c56df1", "#8091ff", "#918dff", "#69caff", "#3ee1ff", "#72da72", "#71cf43", "#abbf3c", "#e6c645", "#eda04e", "#c5c5c5",
                 "#ffd84c", "#ffb946", "#ff987c", "#ff8f8f", "#fb7eda", "#ce76fa", "#90a0ff", "#9c98ff", "#74cbff", "#64e7ff", "#7ce47c", "#85e357", "#b8cc49", "#edcd4c", "#f9ad58", "#d0d0d0",
                 "#ffe651", "#ffbf51", "#ffa48b", "#ff9d9e", "#ff8de1", "#d583ff", "#97a9ff", "#a7a4ff", "#82d3ff", "#76eaff", "#85ed85", "#8deb5f", "#c2d653", "#f5d862", "#fcb75c", "#d7d7d7",
                 "#fff456", "#ffc66d", "#ffb39e", "#ffabad", "#ff9de5", "#da90ff", "#9fb2ff", "#b2afff", "#8ddaff", "#8bedff", "#99f299", "#97f569", "#cde153", "#fbe276", "#ffc160", "#e1e1e1",
-                "#fff970", "#ffd587", "#ffc2b2", "#ffb9bd", "#ffa5e7", "#de9cff", "#afbeff", "#bbb8ff", "#9fd4ff", "#9aefff", "#b3f7b3", "#a0fe72", "#dbef6c", "#fcee98", "#ffca69", "#eaeaea"]
+                "#fff970", "#ffd587", "#ffc2b2", "#ffb9bd", "#ffa5e7", "#de9cff", "#afbeff", "#bbb8ff", "#9fd4ff", "#9aefff", "#b3f7b3", "#a0fe72", "#dbef6c", "#fcee98", "#ffca69", "#eaeaea",
+                "#763700", "#9f241e", "#982c0e", "#a81300", "#80035f", "#650d90", "#082fca", "#3531a3", "#1d4892", "#006f84", "#036b03", "#236600", "#445200", "#544509", "#702408", "#343434",
+                "#9a5000", "#b33a20", "#b02f0f", "#c8210a", "#950f74", "#7b23a7", "#263dd4", "#4642b4", "#1d5cac", "#00849c", "#0e760e", "#287800", "#495600", "#6c5809", "#8d3a13", "#4e4e4e",
+                "#c36806", "#c85120", "#bf3624", "#df2512", "#aa2288", "#933bbf", "#444cde", "#5753c5", "#1d71c6", "#0099bf", "#188018", "#2e8c00", "#607100", "#907609", "#ab511f", "#686868",
+                "#e47b07", "#e36920", "#d34e2a", "#ec3b24", "#ba3d99", "#9d45c9", "#4f5aec", "#615dcf", "#3286cf", "#00abca", "#279227", "#3a980c", "#6c7f00", "#ab8b0a", "#b56427", "#757575",
+                "#ff911a", "#fc8120", "#e7623e", "#fa5236", "#ca4da9", "#a74fd3", "#5a68ff", "#6d69db", "#489bd9", "#00bcde", "#36a436", "#47a519", "#798d0a", "#c1a120", "#bf7730", "#8e8e8e"]
 
+
+webui.showError = function(message) {
+    $("#error-modal .alert").text(message);
+    $("#error-modal").modal('show');
+}
+
+webui.showWarning = function(message) {
+    var messageBox = $("#message-box");
+    messageBox.empty();
+    $(  '<div class="alert alert-warning alert-dismissible" role="alert">' +
+            '<button type="button" class="close" data-dismiss="alert">' +
+                '<span aria-hidden="true">&times;</span>' +
+                '<span class="sr-only">Close</span>' +
+            '</button>' +
+            message +
+        '</div>').appendTo(messageBox);
+}
 
 webui.git = function(cmd, arg1, arg2) {
     // cmd = git command line arguments
@@ -75,31 +92,20 @@ webui.git = function(cmd, arg1, arg2) {
                 // Return code is 0 but there is stderr output: this is a warning message
                 if (message.length > 0) {
                     console.log(message);
-                    var messageBox = $("#message-box");
-                    messageBox.empty();
-                    $(  '<div class="alert alert-warning alert-dismissible" role="alert">' +
-                            '<button type="button" class="close" data-dismiss="alert">' +
-                                '<span aria-hidden="true">&times;</span>' +
-                                '<span class="sr-only">Close</span>' +
-                            '</button>' +
-                            message +
-                        '</div>').appendTo(messageBox);
+                    webui.showWarning(message);
                 }
                 $("#error-modal .alert").text("");
             } else {
                 console.log(message);
-                $("#error-modal .alert").text(message);
-                $("#error-modal").modal('show');
+                webui.showError(message);
             }
         } else {
             console.log(data);
-            $("#error-modal .alert").text(data);
-            $("#error-modal").modal('show');
+            webui.showError(data);
         }
     }, "text")
     .fail(function(xhr, status, error) {
-        $("#error-modal .alert").text("Git webui server not running");
-        $("#error-modal").modal('show');
+        webui.showError("Git webui server not running");
     });
 };
 
@@ -385,13 +391,17 @@ webui.LogView = function(historyView) {
     self.updateGraph = function(startAt) {
         // Draw the graph
         var currentY = (startAt + 0.5) * self.lineHeight;
+        var maxLeft = 0;
+        if (startAt == 0) {
+            streamColor = 0;
+        }
         for (var i = startAt; i < content.children.length; ++i) {
             var entry = content.children[i].model;
             if (!entry) {
                 break;
             }
             var index = 0;
-            var left = streams.length;
+            entry.element.webuiLeft = streams.length;
 
             // Find streams to join
             var childCount = 0;
@@ -460,13 +470,20 @@ webui.LogView = function(historyView) {
             svgCircle.setAttribute("r", 4);
             svg.appendChild(svgCircle);
 
-            left = Math.max(left, streams.length);
-            entry.element.setAttribute("style", entry.element.getAttribute("style") + ";padding-left:" + (left + 1) * xOffset + "px");
-
+            entry.element.webuiLeft = Math.max(entry.element.webuiLeft, streams.length);
+            maxLeft = Math.max(maxLeft, entry.element.webuiLeft);
             // Debug log
             //console.log(entry.commit, entry.parents, $.extend(true, [], streams));
 
             currentY += self.lineHeight;
+        }
+        for (var i = startAt; i < content.children.length; ++i) {
+            var element = content.children[i];
+            if (element.model) {
+                var minLeft = Math.min(maxLeft, 3);
+                var left = element ? Math.max(minLeft, element.webuiLeft) : minLeft;
+                element.setAttribute("style", element.getAttribute("style") + ";padding-left:" + (left + 1) * xOffset + "px");
+            }
         }
         for (var i = 0; i < streams.length; ++i) {
             var stream = streams[i];
@@ -588,7 +605,7 @@ webui.LogView = function(historyView) {
     var currentSelection = null;
     var lineHeight = null;
     var streams = [];
-    var streamColor = 80;
+    var streamColor = 0;
 };
 
 /*
@@ -598,24 +615,43 @@ webui.DiffView = function(sideBySide, parent) {
 
     var self = this;
 
-    self.update = function(cmd, mode) {
+    self.update = function(cmd, diffOpts, file, mode) {
         gitApplyType = mode;
+        $(".diff-stage", self.element).attr("style", "display:none");
+        $(".diff-cancel", self.element).attr("style", "display:none");
+        $(".diff-unstage", self.element).attr("style", "display:none");
         if (cmd) {
-            self.cmd = cmd;
+            self.gitCmd = cmd;
+            self.gitDiffOpts = diffOpts;
+            if (file != self.gitFile) {
+                left.scrollTop = 0;
+                left.scrollLeft = 0;
+                right.scrollTop = 0;
+                right.scrollLeft = 0;
+                left.webuiPrevScrollTop = 0;
+                left.webuiPrevScrollLeft = 0;
+                right.webuiPrevScrollTop = 0;
+                right.webuiPrevScrollLeft = 0;
+            }
+            self.gitFile = file;
         }
-        if (self.cmd.length) {
-            var fullCmd = self.cmd.slice();
-            var opts = "";
+        if (self.gitCmd) {
+            var fullCmd = self.gitCmd;
             if (self.complete) {
-                opts = " --unified=999999999";
+                fullCmd += " --unified=999999999";
             } else {
-                opts = " --unified=" + self.context.toString();
+                fullCmd += " --unified=" + self.context.toString();
             }
             if (self.ignoreWhitespace) {
-                opts += " --ignore-all-space --ignore-blank-lines";
+                fullCmd += " --ignore-all-space --ignore-blank-lines";
             }
-            fullCmd.splice(1, 0, opts);
-            webui.git(fullCmd.join(" "), function(diff) {
+            if (self.gitDiffOpts) {
+                fullCmd += " " + self.gitDiffOpts.join(" ")
+            }
+            if (self.gitFile) {
+                fullCmd += " -- " + self.gitFile;
+            }
+            webui.git(fullCmd, function(diff) {
                 self.refresh(diff);
             });
         } else {
@@ -652,8 +688,7 @@ webui.DiffView = function(sideBySide, parent) {
         var context = { inHeader: true,
                         addedLines: [],
                         removedLines: [],
-                        diffHeader: '',
-                        diffHunk: [] };
+                      };
         for (var i = 0; i < diffLines.length; ++i) {
             var line = diffLines[i];
             var c = line[0];
@@ -661,20 +696,13 @@ webui.DiffView = function(sideBySide, parent) {
                 context.addedLines.push(line);
                 if (context.inHeader) {
                     context.diffHeader += line + '\n';
-                } else {
-                    context.diffHunk.push(line);
                 }
             } else if (c == '-') {
                 context.removedLines.push(line);
                 if (context.inHeader) {
                     context.diffHeader += line + '\n';
-                } else {
-                    context.diffHunk.push(line);
                 }
             } else {
-                if (c == ' ') {
-                    context.diffHunk.push(line);
-                }
                 context = self.flushAddedRemovedLines(view, operation, context);
                 context.addedLines = [];
                 context.removedLines = [];
@@ -685,7 +713,7 @@ webui.DiffView = function(sideBySide, parent) {
             }
         }
         self.flushAddedRemovedLines(view, operation, context);
-        view.parentElement.scrollTop = view.parentElement.prevScrollTop;
+        view.parentElement.scrollTop = view.parentElement.webuiPrevScrollTop;
     }
 
     self.flushAddedRemovedLines = function(view, operation, context) {
@@ -714,35 +742,12 @@ webui.DiffView = function(sideBySide, parent) {
         pre.appendChild(document.createTextNode(line));
         if (c == '+') {
             $(pre).addClass("diff-line-add");
-            if (gitApplyType != undefined) {
-                $(pre).click(function(event) {
-                    if (event.ctrlKey) {
-                        self.applyLinePatch(event.target, true, gitApplyType != "stage");
-                    }
-                });
-            }
         } else if (c == '-') {
             $(pre).addClass("diff-line-del");
-            if (gitApplyType != undefined) {
-                $(pre).click(function(event) {
-                    if (event.ctrlKey) {
-                        self.applyLinePatch(event.target, true, gitApplyType != "stage");
-                    }
-                });
-            }
         } else if (c == '@') {
             $(pre).addClass("diff-line-offset");
-            pre.diffHeader = context.diffHeader;
+            pre.webuiActive = false;
             context.inHeader = false;
-            if (gitApplyType != undefined) {
-                $(pre).click(function(event) {
-                    if (event.ctrlKey) {
-                        self.applyHunkPatch(event.target, true, gitApplyType != "stage");
-                    }
-                });
-            }
-            pre.diffHunk = [];
-            context.diffHunk = pre.diffHunk;
         } else if (c == 'd') {
             context.inHeader = true;
         }
@@ -750,6 +755,85 @@ webui.DiffView = function(sideBySide, parent) {
             $(pre).addClass("diff-line-header");
         }
         return context;
+    }
+
+    self.createSelectionPatch = function (reverse) {
+        var patch = "";
+        // First create the header
+        for (var l = 0; l < leftLines.childElementCount; ++l) {
+            var line = leftLines.children[l].textContent;
+            if (line[0] == "@") {
+                break;
+            } else {
+                patch += line + "\n";
+            }
+        }
+        patch += rightLines.children[l - 1].textContent + "\n";
+        // Then build the patch itself
+        var refLineNo = 0;
+        var patchOffset = 0;
+        var hunkAddedLines = [];
+        var hunkRemovedLines = [];
+        for (; l < leftLines.childElementCount; ++l) {
+            var leftElt = leftLines.children[l];
+            var leftLine = leftElt.textContent;
+            var leftCmd = leftLine[0];
+
+            if (leftCmd == "@" || (leftCmd == " " && !$(leftElt).hasClass("diff-line-phantom"))) {
+                if (hunkAddedLines.length != 0 || hunkRemovedLines.length != 0) {
+                    patch += self.flushSelectionPatch(hunkAddedLines, hunkRemovedLines, refLineNo, patchOffset);
+                    refLineNo += hunkRemovedLines.length
+                    patchOffset += hunkAddedLines.length - hunkRemovedLines.length;
+                    var hunkAddedLines = [];
+                    var hunkRemovedLines = [];
+                }
+                if (leftCmd == "@") {
+                    var splittedContext = leftLine.split(" ");
+                    if (!reverse) {
+                        refLineNo = Math.abs(splittedContext[1].split(",")[0]);
+                    } else {
+                        refLineNo = Math.abs(splittedContext[2].split(",")[0]);
+                    }
+                } else {
+                    ++refLineNo;
+                }
+            } else if (leftCmd == "-" || $(leftElt).hasClass("diff-line-phantom")) {
+                if (leftCmd == "-") {
+                    if ($(leftElt).hasClass("active")) {
+                        if (!reverse) {
+                            hunkRemovedLines.push(leftLine);
+                        } else {
+                            hunkAddedLines.push(self.reverseLine(leftLine));
+                        }
+                    } else if (!reverse) {
+                        ++refLineNo;
+                    }
+                }
+                var rightElt = rightLines.children[l];
+                if (!$(rightElt).hasClass("diff-line-phantom")) {
+                    if ($(rightElt).hasClass("active")) {
+                        if (!reverse) {
+                            hunkAddedLines.push(rightElt.textContent);
+                        } else {
+                            hunkRemovedLines.push(self.reverseLine(rightElt.textContent));
+                        }
+                    } else if (reverse) {
+                        ++refLineNo;
+                    }
+                }
+            }
+        }
+        if (hunkAddedLines.length != 0 || hunkRemovedLines.length != 0) {
+            patch += self.flushSelectionPatch(hunkAddedLines, hunkRemovedLines, refLineNo, patchOffset);
+        }
+        return patch;
+    }
+
+    self.flushSelectionPatch = function(hunkAddedLines, hunkRemovedLines, refLineNo, patchOffset) {
+        var patch = "@@ -" + refLineNo + "," + hunkRemovedLines.length +" +" + (refLineNo + patchOffset) + "," + hunkAddedLines.length + " @@\n";
+        hunkRemovedLines.forEach(function (line) { patch += line + "\n" });
+        hunkAddedLines.forEach(function (line) { patch += line + "\n" });
+        return patch;
     }
 
     self.reverseLine = function(line) {
@@ -765,101 +849,6 @@ webui.DiffView = function(sideBySide, parent) {
         }
     }
 
-    self.applyLinePatch = function(element, cached, reverse) {
-        // Find the context line
-        var context = element.previousElementSibling;
-        var offset = 0;
-        while (context) {
-            var c = context.textContent[0];
-            if (c == " " || c == "-") {
-                offset += 1;
-            } else if (c == "@") {
-                break;
-            }
-            context = context.previousElementSibling;
-        }
-        var diffHeader = context.diffHeader;
-        context = context.textContent;
-        var lineno = Math.abs(context.split(" ")[1].split(",")[0]) + offset;
-        var diffLine = element.textContent;
-        if (reverse) {
-            diffLine = self.reverseLine(diffLine);
-        }
-        if (diffLine[0] == "+") {
-            var prevLineCount = 0;
-            var newLineCount = 1;
-        } else if (diffLine[0] == "-") {
-            var prevLineCount = 1;
-            var newLineCount = 0;
-        }
-        var patch = diffHeader + "@@ -" + lineno + "," + prevLineCount +" +" + lineno + "," + newLineCount + " @@\n" + diffLine + "\n";
-        var cmd = "apply --unidiff-zero";
-        if (cached) {
-            cmd += " --cached";
-        }
-        webui.git(cmd, patch, function (data) {
-            parent.update();
-        });
-    }
-
-    self.applyHunkPatch = function(element, cached, reverse) {
-        // Find the current operation
-        var operation = null;
-        for (var elt = element.nextElementSibling; elt && operation == null; elt = elt.nextElementSibling) {
-            var c = elt.textContent[0];
-            if (c == '+' || c == '-') {
-                operation = c;
-                break;
-            }
-        }
-
-        // Parse diff context line
-        var splittedContext = element.textContent.split(" ");
-        var lineNo = Math.abs(splittedContext[reverse ? 2 : 1].split(",")[0]);
-
-        var patchContent = "";
-        var diffLinesCount = 0;
-        var contextLinesCount = 0;
-        for (var i = 0; i < element.diffHunk.length; ++i) {
-            var line = element.diffHunk[i];
-            var c = line[0];
-            if (c == operation) {
-                if (reverse) {
-                    line = self.reverseLine(line);
-                }
-                ++diffLinesCount
-            } else if ((operation == '+' && !reverse) || (operation == '-' && reverse)) {
-                line = ' ' + line.substr(1);
-                ++contextLinesCount;
-            } else if (c == ' ') {
-                ++contextLinesCount;
-            } else if (c == '@') {
-                break;
-            } else {
-                line = null;
-            }
-            if (line != null) {
-                patchContent += line + "\n";
-            }
-        }
-
-        var patch = element.diffHeader;
-        if ((operation == '+' || reverse) && !(operation == '+' && reverse)) {
-            patch += "@@ -" + lineNo + "," + contextLinesCount +" +" + lineNo + "," + (contextLinesCount + diffLinesCount) + " @@\n";
-        } else {
-            patch += "@@ -" + lineNo + "," + (contextLinesCount + diffLinesCount) + " +" + lineNo + "," + contextLinesCount + " @@\n";
-        }
-        patch += patchContent;
-
-        var cmd = "apply";
-        if (cached) {
-            cmd += " --cached";
-        }
-        webui.git(cmd, patch, function (data) {
-            parent.update();
-        });
-    }
-
     self.diffViewScrolled = function(event) {
         if (event.target == left) {
             var current = left;
@@ -868,14 +857,14 @@ webui.DiffView = function(sideBySide, parent) {
             var current = right;
             var other = left;
         }
-        if (current.prevScrollTop != current.scrollTop) {
+        if (current.webuiPrevScrollTop != current.scrollTop) {
             // Vertical scrolling
             other.scrollTop = current.scrollTop;
-            current.prevScrollTop = current.scrollTop;
-        } else {
+            current.webuiPrevScrollTop = current.scrollTop;
+        } else if (current.webuiPrevScrollLeft != current.scrollLeft) {
             // Horizontal scrolling
             other.scrollLeft = current.scrollLeft;
-            current.prevScrollLeft = current.scrollLeft;
+            current.webuiPrevScrollLeft = current.scrollLeft;
         }
     }
 
@@ -901,6 +890,70 @@ webui.DiffView = function(sideBySide, parent) {
         self.update();
     }
 
+    self.handleClick = function(event) {
+        var lineElt = event.target;
+        while (lineElt && !$(lineElt).hasClass("diff-view-line")) {
+            lineElt = lineElt.parentElement;
+        }
+        if (!lineElt) {
+            return;
+        }
+        var diffLine = lineElt.textContent;
+        var cmd = diffLine[0];
+        if (cmd == "+" || cmd == "-") {
+            $(lineElt).toggleClass("active");
+        } else if (cmd == "@") {
+            lineElt.webuiActive = !lineElt.webuiActive;
+            for (var elt = lineElt.nextElementSibling; elt; elt = elt.nextElementSibling) {
+                cmd = elt.textContent[0];
+                if (cmd == "+" || cmd == "-") {
+                    $(elt).toggleClass("active", lineElt.webuiActive);
+                } else if (cmd == "@") {
+                    break;
+                }
+            }
+        }
+
+        var isActive = false
+        var lineContainers = [leftLines, rightLines];
+        for (var i = 0; i < lineContainers.length; ++i) {
+            var lineContainer = lineContainers[i];
+            for (var j = 0; j < lineContainer.childElementCount; ++j) {
+                var elt = lineContainer.children[j];
+                if ($(elt).hasClass("active")) {
+                    isActive = true;
+                    break;
+                }
+            }
+        }
+        if (isActive) {
+            if (gitApplyType == "stage") {
+                $(".diff-stage", self.element).removeAttr("style");
+                $(".diff-cancel", self.element).removeAttr("style");
+                $(".diff-unstage", self.element).attr("style", "display:none");
+            } else {
+                $(".diff-stage", self.element).attr("style", "display:none");
+                $(".diff-cancel", self.element).attr("style", "display:none");
+                $(".diff-unstage", self.element).removeAttr("style");
+            }
+        } else {
+            $(".diff-stage", self.element).attr("style", "display:none");
+            $(".diff-cancel", self.element).attr("style", "display:none");
+            $(".diff-unstage", self.element).attr("style", "display:none");
+        }
+    }
+
+    self.applySelection = function(reverse, cached) {
+        var patch = self.createSelectionPatch(reverse);
+        var cmd = "apply --unidiff-zero";
+        if (cached) {
+            cmd += " --cached";
+        }
+        webui.git(cmd, patch, function (data) {
+            parent.update();
+        });
+    }
+
     self.element = $(   '<div class="diff-view-container panel panel-default">' +
                             '<div class="panel-heading btn-toolbar" role="toolbar">' +
                                 '<button type="button" class="btn btn-sm btn-default diff-ignore-whitespace" data-toggle="button">Ignore Whitespace</button>' +
@@ -909,6 +962,11 @@ webui.DiffView = function(sideBySide, parent) {
                                     '<span></span>&nbsp;' +
                                     '<button type="button" class="btn btn-default diff-context-remove">-</button>' +
                                     '<button type="button" class="btn btn-default diff-context-add">+</button>' +
+                                '</div>' +
+                                '<div class="btn-group btn-group-sm diff-selection-buttons">' +
+                                    '<button type="button" class="btn btn-default diff-stage" style="display:none">Stage</button>' +
+                                    '<button type="button" class="btn btn-default diff-cancel" style="display:none">Cancel</button>' +
+                                    '<button type="button" class="btn btn-default diff-unstage" style="display:none">Unstage</button>' +
                                 '</div>' +
                             '</div>' +
                             '<div class="panel-body"></div>' +
@@ -919,14 +977,16 @@ webui.DiffView = function(sideBySide, parent) {
         panelBody.appendChild(left);
         var leftLines = left.firstChild;
         $(left).scroll(self.diffViewScrolled);
-        left.prevScrollTop = left.scrollTop;
-        left.prevScrollLeft = left.scrollLeft;
+        left.webuiPrevScrollTop = left.scrollTop;
+        left.webuiPrevScrollLeft = left.scrollLeft;
         var right = $('<div class="diff-view"><div class="diff-view-lines"></div></div>')[0];
         panelBody.appendChild(right);
         var rightLines = right.firstChild;
         $(right).scroll(self.diffViewScrolled);
-        right.prevScrollTop = right.scrollTop;
-        right.prevScrollLeft = right.scrollLeft;
+        right.webuiPrevScrollTop = right.scrollTop;
+        right.webuiPrevScrollLeft = right.scrollLeft;
+        $(left).click(self.handleClick);
+        $(right).click(self.handleClick);
     } else {
         var single = $('<div class="diff-view"><div class="diff-view-lines"></div></div>')[0];
         panelBody.appendChild(single);
@@ -937,6 +997,11 @@ webui.DiffView = function(sideBySide, parent) {
     $(".diff-context-add", self.element).click(self.addContext);
     $(".diff-context-all", self.element).click(self.allContext);
     $(".diff-ignore-whitespace", self.element).click(self.toggleIgnoreWhitespace);
+
+    $(".diff-stage", self.element).click(function() { self.applySelection(false, true); });
+    $(".diff-cancel", self.element).click(function() { self.applySelection(true, false); });
+    $(".diff-unstage", self.element).click(function() { self.applySelection(true, true); });
+
     self.context = 3;
     self.complete = false;
     self.ignoreWhitespace = false;
@@ -1111,7 +1176,7 @@ webui.CommitView = function(historyView) {
         currentCommit = entry.commit;
         self.showDiff();
         buttonBox.select(0);
-        diffView.update(["show", entry.commit]);
+        diffView.update("show", [entry.commit]);
         treeView.update(entry.tree);
     };
 
@@ -1174,10 +1239,12 @@ webui.WorkspaceView = function(mainView) {
 
     self.update = function(mode) {
         self.show();
-        self.diffView.update([], mode);
         self.workingCopyView.update();
         self.stagingAreaView.update();
         self.commitMessageView.update();
+        if (self.workingCopyView.getSelectedItemsCount() + self.stagingAreaView.getSelectedItemsCount() == 0) {
+            self.diffView.update(undefined, undefined, undefined, mode);
+        }
     };
 
     self.element = $(   '<div id="workspace-view">' +
@@ -1276,13 +1343,11 @@ webui.ChangedFilesView = function(workspaceView, type, label) {
     };
 
     self.refreshDiff = function(element) {
-        var gitCmd = [ "diff" ];
+        var gitOpts = [];
         if (type == "staging-area") {
-            gitCmd.push("--cached");
+            gitOpts.push("--cached");
         }
-        gitCmd.push("--");
-        gitCmd.push(element.model);
-        workspaceView.diffView.update(gitCmd, type == "working-copy" ? "stage" : "unstage");
+        workspaceView.diffView.update("diff", gitOpts, element.model, type == "working-copy" ? "stage" : "unstage");
     };
 
     self.unselect = function() {
@@ -1338,6 +1403,10 @@ webui.ChangedFilesView = function(workspaceView, type, label) {
         }
     }
 
+    self.getSelectedItemsCount = function() {
+        return $(".active", fileList).length;
+    }
+
     self.element = $(   '<div id="' + type + '-view" class="panel panel-default">' +
                             '<div class="panel-heading">' +
                                 '<h5>'+ label + '</h5>' +
@@ -1382,10 +1451,10 @@ webui.CommitMessageView = function(workspaceView) {
     };
 
     self.onCommit = function() {
-        if (workspaceView.stagingAreaView.filesCount == 0) {
-            console.log("No files staged for commit");
+        if (workspaceView.stagingAreaView.filesCount == 0 && !amend.hasClass("active")) {
+            webui.showError("No files staged for commit");
         } else if (textArea.value.length == 0) {
-            console.log("Enter a commit message first");
+            webui.showError("Enter a commit message first");
         } else {
             var cmd = "commit ";
             if (amend.hasClass("active")) {
