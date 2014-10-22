@@ -1451,7 +1451,7 @@ webui.CommitMessageView = function(workspaceView) {
     };
 
     self.onCommit = function() {
-        if (workspaceView.stagingAreaView.filesCount == 0) {
+        if (workspaceView.stagingAreaView.filesCount == 0 && !amend.hasClass("active")) {
             webui.showError("No files staged for commit");
         } else if (textArea.value.length == 0) {
             webui.showError("Enter a commit message first");
