@@ -150,8 +150,10 @@ body {
             content: url(/img/daemon.svg);
         }
 
-        #sidebar-branches h4:before {
-            content: url(/img/branch.svg);
+        #sidebar-local-branches, #sidebar-remote-branches {
+            h4:before {
+                content: url(/img/branch.svg);
+            }
         }
 
         #sidebar-tags h4:before {
@@ -171,6 +173,9 @@ body {
         li {
             cursor: pointer;
             padding: @padding-base-vertical 0 @padding-base-vertical 1em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .active {
