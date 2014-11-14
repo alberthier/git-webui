@@ -91,7 +91,8 @@ body {
 #sidebar #sidebar-content #sidebar-remote h4:before {
   content: url(/img/daemon.svg);
 }
-#sidebar #sidebar-content #sidebar-branches h4:before {
+#sidebar #sidebar-content #sidebar-local-branches h4:before,
+#sidebar #sidebar-content #sidebar-remote-branches h4:before {
   content: url(/img/branch.svg);
 }
 #sidebar #sidebar-content #sidebar-tags h4:before {
@@ -108,6 +109,9 @@ body {
 #sidebar #sidebar-content li {
   cursor: pointer;
   padding: 6px 0 6px 1em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 #sidebar #sidebar-content .active {
   background-color: #428bca;

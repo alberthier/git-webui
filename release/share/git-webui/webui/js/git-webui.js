@@ -192,7 +192,7 @@ webui.SideBarView = function(mainView) {
         self.mainView.historyView.update(refName);
     };
 
-    self.addPopup = function(section, title, id, refs, isBranch) {
+    self.addPopup = function(section, title, id, refs) {
         var popup = $(  '<div class="modal fade" id="' + id + '" role="dialog">' +
                             '<div class="modal-dialog modal-sm">' +
                                 '<div class="modal-content">' +
@@ -209,7 +209,7 @@ webui.SideBarView = function(mainView) {
         refs.forEach(function(ref) {
             var link = $('<a class="list-group-item sidebar-ref">')[0];
             link.section = section;
-            if (isBranch) {
+            if (id == "local-branches-popup") {
                 link.refName = ref.substr(2);
                 if (ref[0] == "*") {
                     $(link).addClass("branch-current");
@@ -227,13 +227,23 @@ webui.SideBarView = function(mainView) {
         return popup;
     };
 
-    self.fetchSection = function(section, title, id, gitCommand, isBranch) {
+    self.fetchSection = function(section, title, id, gitCommand) {
         webui.git(gitCommand, function(data) {
             var refs = webui.splitLines(data);
+            if (id == "remote-branches") {
+                refs = refs.map(function(ref) {
+                    var end = ref.lastIndexOf(" -> ");
+                    if (end == -1) {
+                        return ref.substr(2);
+                    } else {
+                        return ref.substring(2, end);
+                    }
+                });
+            }
             if (refs.length > 0) {
                 var ul = $("<ul>").appendTo(section)[0];
                 refs = refs.sort(function(a, b) {
-                    if (!isBranch) {
+                    if (id != "local-branches") {
                         return -a.localeCompare(b);
                     } else if (a[0] == "*") {
                         return -1;
@@ -244,11 +254,11 @@ webui.SideBarView = function(mainView) {
                     }
                 });
 
-                var maxRefsCount = 15;
+                var maxRefsCount = 5;
                 for (var i = 0; i < refs.length && i < maxRefsCount; ++i) {
                     var ref = refs[i];
                     var li = $('<li class="sidebar-ref">').appendTo(ul)[0];
-                    if (isBranch) {
+                    if (id == "local-branches") {
                         li.refName = ref.substr(2);
                         if (ref[0] == "*") {
                             $(li).addClass("branch-current");
@@ -262,6 +272,7 @@ webui.SideBarView = function(mainView) {
                     } else {
                         li.refName = ref;
                     }
+                    $(li).attr("title", li.refName);
                     $(li).text(li.refName);
                     $(li).click(function (event) {
                         self.selectRef(event.target.refName);
@@ -270,7 +281,7 @@ webui.SideBarView = function(mainView) {
 
                 if (refs.length > maxRefsCount) {
                     var li = $('<li class="sidebar-more">More ...</li>').appendTo(ul);
-                    var popup = self.addPopup(section, title, id + "-popup", refs, isBranch);
+                    var popup = self.addPopup(section, title, id + "-popup", refs);
                     li.click(function() {
                         $(popup).modal();
                     });
@@ -291,8 +302,11 @@ webui.SideBarView = function(mainView) {
                                 '<section id="sidebar-remote">' +
                                     '<h4>Remote access</h4>' +
                                 '</section>' +
-                                '<section id="sidebar-branches">' +
-                                    '<h4>Branches</h4>' +
+                                '<section id="sidebar-local-branches">' +
+                                    '<h4>Local Branches</h4>' +
+                                '</section>' +
+                                '<section id="sidebar-remote-branches">' +
+                                    '<h4>Remote Branches</h4>' +
                                 '</section>' +
                                 '<section id="sidebar-tags">' +
                                     '<h4>Tags</h4>' +
@@ -318,8 +332,9 @@ webui.SideBarView = function(mainView) {
         self.mainView.remoteView.update();
     });
 
-    self.fetchSection($("#sidebar-branches", self.element)[0], "Branches", "branches", "branch", true);
-    self.fetchSection($("#sidebar-tags", self.element)[0], "Tags", "tags", "tag", false);
+    self.fetchSection($("#sidebar-local-branches", self.element)[0], "Local Branches", "local-branches", "branch");
+    self.fetchSection($("#sidebar-remote-branches", self.element)[0], "Remote Branches", "remote-branches", "branch --remotes");
+    self.fetchSection($("#sidebar-tags", self.element)[0], "Tags", "tags", "tag");
 };
 
 /*

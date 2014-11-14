@@ -135,7 +135,7 @@ class WebUiRequestHandler(CGIHTTPRequestHandler):
                 stdin = b""
             cmd = shlex.split("git " + codecs.decode(args, "utf-8"))
             action = cmd[1]
-            if not self.is_view_only() or args in ["branch", "tag"] or action in ["show", "status", "log", "ls-tree"]:
+            if not self.is_view_only() or args in ["branch", "branch --remotes", "tag"] or action in ["show", "status", "log", "ls-tree"]:
                 self.process(cmd, stdin, True)
             else:
                 self.send_error(403)
