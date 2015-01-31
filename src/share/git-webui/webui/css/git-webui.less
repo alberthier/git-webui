@@ -479,18 +479,23 @@ body {
     }
 }
 
-#workspace-view {
+#commit-explorer-navigator-view {
+    > * {
+        width: 50%;
+    }
+}
+#workspace-view, #commit-explorer-view {
     .display-flex();
     .flex-direction(column);
     .flex(1);
 
-    #workspace-diff-view {
+    #workspace-diff-view, #commit-explorer-diff-view {
         .display-flex();
         .flex(2);
         overflow: auto;
     }
 
-    #workspace-editor {
+    #workspace-editor, #commit-explorer-navigator-view {
         .no-select();
 
         .flex(1);

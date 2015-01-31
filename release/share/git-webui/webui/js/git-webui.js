@@ -675,6 +675,7 @@ webui.DiffView = function(sideBySide, parent) {
     };
 
     self.refresh = function(diff) {
+        self.currentDiff = diff;
         self.diffHeader = "";
         $("span", self.element).text('Context: ' + self.context);
         if (sideBySide) {
@@ -768,6 +769,7 @@ webui.DiffView = function(sideBySide, parent) {
         }
         if (context.inHeader) {
             $(pre).addClass("diff-line-header");
+            if (c == 'd') $(pre).addClass("diff-section-start");
         }
         return context;
     }
@@ -970,8 +972,11 @@ webui.DiffView = function(sideBySide, parent) {
     }
 
     self.switchToExploreView = function() {
+        if (! self.currentDiff) {
+            return;
+        }
         var mainView = parent.historyView.mainView;
-        var commitExplorerView = new webui.CommitExplorerView(mainView);
+        var commitExplorerView = new webui.CommitExplorerView(mainView, self.currentDiff);
         commitExplorerView.show();
     };
 
@@ -1186,27 +1191,129 @@ webui.TreeView = function(commitView) {
 }
 
 /*
- * == HistoryView =============================================================
+ * == CommitExplorerView =============================================================
  */
-webui.CommitExplorerView = function(mainView) {
+webui.CommitExplorerView = function(mainView, diff) {
 
     var self = this;
+    var diffLines = diff.split("\n");
+    var diffHeaderLines = [];
+    var diffSections = [];
+    var currentSection, line, c, lineMatch;
+
+    self.buildDiffSections = function(diff) {
+        var visitorState = 'header';
+
+        for (var i = 0; i < diffLines.length; i++) {
+            line = diffLines[i];
+            c = line[0];
+
+            switch(visitorState) {
+            case 'header':
+                if (c == 'd') {
+                    visitorState = 'sectionHeader';
+                    i -= 1;
+                } else {
+                    diffHeaderLines.push(line)
+                }
+                break;
+            case 'sectionHeader':
+                lineMatch = line.match(/^diff --git a\/(.*) b\/(.*)$/)
+                currentSection = {
+                    leftName: lineMatch[1],
+                    rightName: lineMatch[2],
+                    lines: []
+                };
+                diffSections.push(currentSection);
+                visitorState = 'sectionContent';
+                break;
+            case 'sectionContent':
+                if (c == 'd') {
+                    visitorState = 'sectionHeader';
+                    i -= 1;
+                } else {
+                    currentSection.lines.push(line);
+                }
+            }
+        }
+    }
 
     self.show = function() {
         mainView.switchTo(self.element);
     };
 
-    self.update = function(node) {
-        self.show();
-        // TODO Update components
-    };
-
     self.element = $(    '<div id="commit-explorer-view">'+
-                             '<div id="commit-explorer-diff-view">Hello world</div>'+
+                             '<div id="commit-explorer-diff-view"></div>'+
                              '<div id="commit-explorer-navigator-view"></div>'+
                          '</div>')[0];
+
+    var commitExplorerDiffView = $('#commit-explorer-diff-view', self.element)[0];
+    var commitExplorerNavigatorView = $('#commit-explorer-navigator-view', self.element)[0];
+
+    self.buildDiffSections(diff);
+
+    self.diffView = new webui.DiffView(true, self);
+    self.fileListView = new webui.FileListView(self, diffSections);
+    self.commitHeaderView = new webui.CommitHeaderView(self, diffHeaderLines.join("\n"));
+
+    self.diffView.refresh(diffSections[0].lines.join("\n"));
+
+    commitExplorerDiffView.appendChild(self.diffView.element);
+    commitExplorerNavigatorView.appendChild(self.fileListView.element);
+    commitExplorerNavigatorView.appendChild(self.commitHeaderView.element);
+
 }
 
+webui.FileListView = function(commitExplorerView, files){
+    var self = this;
+    self.element = $(   '<div class="file-list-view panel panel-default">' +
+                            '<div class="panel-heading">' +
+                                '<h5> Files </h5>' +
+                                '<div class="btn-group btn-group-sm"></div>' +
+                            '</div>' +
+                            '<div class="file-list-container list-group">' +
+                            '</div>' +
+                         '</div>')[0];
+    var fileList = $(".list-group", self.element)[0];    
+    var selectedIndex = 0;
+
+    self.buildBody = function() {
+        var listGroupBody = '';
+        for (var i = 0; i < files.length; i++) {
+            var cls = 'list-group-item'
+            if (selectedIndex == i) cls += ' active';
+            listGroupBody +=
+                '<div class="'+cls+'" data-idx="'+ i +'">' +
+                    '<a class="left-item">' + files[i].leftName + '</a>' +
+                    '<a class="right-item">' + files[i].rightName + '</a>' +
+                '</div>';
+        }
+        listGroup.append(listGroupBody);
+    }
+
+    $(self.element).on('click', '.list-group-item a', function(e){
+        var idx = Number($(e.target).data('idx'));
+        selectedIndex = idx;
+        self.buildBody();
+    });
+
+    var listGroup = $('.list-group', self.element);
+    self.buildBody();
+    
+}
+
+/*
+ * == CommitHeaderView ==============================================================
+ */
+webui.CommitHeaderView = function(commitExplorerView, header) {
+    var self = this;
+    self.element = $('<div class="panel panel-default">' +
+                         '<div class="panel-heading">' +
+                             '<h5> Commit Header </h5>' +
+                         '</div>' +
+                         '<div class="panel-body">' + header.split("\n").join("<br>") + '</div>' +
+                     '</div>')[0];
+}
 
 /*
  * == CommitView ==============================================================
