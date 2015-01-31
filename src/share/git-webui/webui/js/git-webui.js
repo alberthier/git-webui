@@ -1242,6 +1242,10 @@ webui.CommitExplorerView = function(mainView, diff) {
         mainView.switchTo(self.element);
     };
 
+    self.displayDiffForSection = function(idx) {
+        self.diffView.refresh(diffSections[idx].lines.join("\n"));
+    }
+
     self.element = $(    '<div id="commit-explorer-view">'+
                              '<div id="commit-explorer-diff-view"></div>'+
                              '<div id="commit-explorer-navigator-view"></div>'+
@@ -1256,7 +1260,7 @@ webui.CommitExplorerView = function(mainView, diff) {
     self.fileListView = new webui.FileListView(self, diffSections);
     self.commitHeaderView = new webui.CommitHeaderView(self, diffHeaderLines.join("\n"));
 
-    self.diffView.refresh(diffSections[0].lines.join("\n"));
+    self.displayDiffForSection(0);
 
     commitExplorerDiffView.appendChild(self.diffView.element);
     commitExplorerNavigatorView.appendChild(self.fileListView.element);
@@ -1288,13 +1292,14 @@ webui.FileListView = function(commitExplorerView, files){
                     '<a class="right-item">' + files[i].rightName + '</a>' +
                 '</div>';
         }
-        listGroup.append(listGroupBody);
+        listGroup.html(listGroupBody);
     }
 
     $(self.element).on('click', '.list-group-item a', function(e){
-        var idx = Number($(e.target).data('idx'));
+        var idx = Number($(e.target).parent().data('idx'));
         selectedIndex = idx;
         self.buildBody();
+        commitExplorerView.displayDiffForSection(idx);
     });
 
     var listGroup = $('.list-group', self.element);
@@ -1309,7 +1314,7 @@ webui.CommitHeaderView = function(commitExplorerView, header) {
     var self = this;
     self.element = $('<div class="panel panel-default">' +
                          '<div class="panel-heading">' +
-                             '<h5> Commit Header </h5>' +
+                             '<h5> Commit Details </h5>' +
                          '</div>' +
                          '<div class="panel-body">' + header.split("\n").join("<br>") + '</div>' +
                      '</div>')[0];

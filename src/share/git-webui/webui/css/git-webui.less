@@ -315,6 +315,10 @@ body {
     }
 }
 
+.file-list-view {
+    overflow: auto;
+}
+
 .diff-view-container {
     .display-flex();
     .flex(1);
@@ -483,7 +487,16 @@ body {
     > * {
         width: 50%;
     }
+
+    a {
+        text-decoration: none;
+        cursor: pointer;
+    }
+    .active a {
+        color: white;
+    }
 }
+
 #workspace-view, #commit-explorer-view {
     .display-flex();
     .flex-direction(column);
