@@ -317,6 +317,20 @@ body {
 
 .file-list-view {
     overflow: auto;
+    .list-group-item {
+        padding: 0;
+        height: 30px;
+        > * {
+            width: 50%;
+            overflow: auto;
+            float: left;
+            padding-left: 10px;
+            line-height: 30px;
+        }
+        .left-item {
+            border-right: 1px solid silver;
+        }
+    }
 }
 
 .diff-view-container {

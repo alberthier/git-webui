@@ -231,6 +231,20 @@ body {
 .file-list-view {
   overflow: auto;
 }
+.file-list-view .list-group-item {
+  padding: 0;
+  height: 30px;
+}
+.file-list-view .list-group-item > * {
+  width: 50%;
+  overflow: auto;
+  float: left;
+  padding-left: 10px;
+  line-height: 30px;
+}
+.file-list-view .list-group-item .left-item {
+  border-right: 1px solid silver;
+}
 .diff-view-container {
   display: flex;
   display: -webkit-flex;
