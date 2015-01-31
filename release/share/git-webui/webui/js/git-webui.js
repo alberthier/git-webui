@@ -969,6 +969,12 @@ webui.DiffView = function(sideBySide, parent) {
         });
     }
 
+    self.switchToExploreView = function() {
+        var mainView = parent.historyView.mainView;
+        var commitExplorerView = new webui.CommitExplorerView(mainView);
+        commitExplorerView.show();
+    };
+
     self.element = $(   '<div class="diff-view-container panel panel-default">' +
                             '<div class="panel-heading btn-toolbar" role="toolbar">' +
                                 '<button type="button" class="btn btn-sm btn-default diff-ignore-whitespace" data-toggle="button">Ignore Whitespace</button>' +
@@ -983,6 +989,7 @@ webui.DiffView = function(sideBySide, parent) {
                                     '<button type="button" class="btn btn-default diff-cancel" style="display:none">Cancel</button>' +
                                     '<button type="button" class="btn btn-default diff-unstage" style="display:none">Unstage</button>' +
                                 '</div>' +
+                                (sideBySide ? '' : '<button type="button"  class="btn btn-sm btn-default diff-explore" data-toggle="button">Explore</button>') +
                             '</div>' +
                             '<div class="panel-body"></div>' +
                         '</div>')[0];
@@ -1016,6 +1023,8 @@ webui.DiffView = function(sideBySide, parent) {
     $(".diff-stage", self.element).click(function() { self.applySelection(false, true); });
     $(".diff-cancel", self.element).click(function() { self.applySelection(true, false); });
     $(".diff-unstage", self.element).click(function() { self.applySelection(true, true); });
+
+    $(".diff-explore", self.element).click(function() { self.switchToExploreView(); });
 
     self.context = 3;
     self.complete = false;
@@ -1177,6 +1186,29 @@ webui.TreeView = function(commitView) {
 }
 
 /*
+ * == HistoryView =============================================================
+ */
+webui.CommitExplorerView = function(mainView) {
+
+    var self = this;
+
+    self.show = function() {
+        mainView.switchTo(self.element);
+    };
+
+    self.update = function(node) {
+        self.show();
+        // TODO Update components
+    };
+
+    self.element = $(    '<div id="commit-explorer-view">'+
+                             '<div id="commit-explorer-diff-view">Hello world</div>'+
+                             '<div id="commit-explorer-navigator-view"></div>'+
+                         '</div>')[0];
+}
+
+
+/*
  * == CommitView ==============================================================
  */
 webui.CommitView = function(historyView) {
@@ -1187,6 +1219,7 @@ webui.CommitView = function(historyView) {
         if (currentCommit == entry.commit) {
             // We already display the right data. No need to update.
             return;
+
         }
         currentCommit = entry.commit;
         self.showDiff();
@@ -1239,6 +1272,7 @@ webui.HistoryView = function(mainView) {
     self.element.appendChild(self.logView.element);
     self.commitView = new webui.CommitView(self);
     self.element.appendChild(self.commitView.element);
+    self.mainView = mainView;
 };
 
 /*
