@@ -980,24 +980,27 @@ webui.DiffView = function(sideBySide, parent) {
         commitExplorerView.show();
     };
 
-    self.element = $(   '<div class="diff-view-container panel panel-default">' +
-                            '<div class="panel-heading btn-toolbar" role="toolbar">' +
-                                '<button type="button" class="btn btn-sm btn-default diff-ignore-whitespace" data-toggle="button">Ignore Whitespace</button>' +
-                                '<button type="button" class="btn btn-sm btn-default diff-context-all" data-toggle="button">Complete file</button>' +
-                                '<div class="btn-group btn-group-sm">' +
-                                    '<span></span>&nbsp;' +
-                                    '<button type="button" class="btn btn-default diff-context-remove">-</button>' +
-                                    '<button type="button" class="btn btn-default diff-context-add">+</button>' +
-                                '</div>' +
-                                '<div class="btn-group btn-group-sm diff-selection-buttons">' +
-                                    '<button type="button" class="btn btn-default diff-stage" style="display:none">Stage</button>' +
-                                    '<button type="button" class="btn btn-default diff-cancel" style="display:none">Cancel</button>' +
-                                    '<button type="button" class="btn btn-default diff-unstage" style="display:none">Unstage</button>' +
-                                '</div>' +
-                                (sideBySide ? '' : '<button type="button"  class="btn btn-sm btn-default diff-explore" data-toggle="button">Explore</button>') +
-                            '</div>' +
-                            '<div class="panel-body"></div>' +
-                        '</div>')[0];
+    var html = '<div class="diff-view-container panel panel-default">';
+    if (! (parent instanceof webui.CommitExplorerView)) {
+        html += 
+            '<div class="panel-heading btn-toolbar" role="toolbar">' +
+                '<button type="button" class="btn btn-sm btn-default diff-ignore-whitespace" data-toggle="button">Ignore Whitespace</button>' +
+                '<button type="button" class="btn btn-sm btn-default diff-context-all" data-toggle="button">Complete file</button>' +
+                '<div class="btn-group btn-group-sm">' +
+                    '<span></span>&nbsp;' +
+                    '<button type="button" class="btn btn-default diff-context-remove">-</button>' +
+                    '<button type="button" class="btn btn-default diff-context-add">+</button>' +
+                '</div>' +
+                '<div class="btn-group btn-group-sm diff-selection-buttons">' +
+                    '<button type="button" class="btn btn-default diff-stage" style="display:none">Stage</button>' +
+                    '<button type="button" class="btn btn-default diff-cancel" style="display:none">Cancel</button>' +
+                    '<button type="button" class="btn btn-default diff-unstage" style="display:none">Unstage</button>' +
+                '</div>' +
+                (sideBySide ? '' : '<button type="button"  class="btn btn-sm btn-default diff-explore" data-toggle="button">Explore</button>') +
+            '</div>';
+    }
+    html += '<div class="panel-body"></div></div>'
+    self.element = $(html)[0];
     var panelBody = $(".panel-body", self.element)[0];
     if (sideBySide) {
         var left = $('<div class="diff-view"><div class="diff-view-lines"></div></div>')[0];
@@ -1314,7 +1317,7 @@ webui.CommitHeaderView = function(commitExplorerView, header) {
     var self = this;
     self.element = $('<div class="panel panel-default">' +
                          '<div class="panel-heading">' +
-                             '<h5> Commit Header </h5>' +
+                             '<h5> Commit Details </h5>' +
                          '</div>' +
                          '<div class="panel-body">' + header.split("\n").join("<br>") + '</div>' +
                      '</div>')[0];
