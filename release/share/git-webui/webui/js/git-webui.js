@@ -169,8 +169,6 @@ webui.SideBarView = function(mainView) {
         if (selected.length > 0) {
             if (selected[0].refName != refName) {
                 selected.toggleClass("active");
-            } else {
-                return;
             }
         }
         var refElements = $(".sidebar-ref", self.element);
@@ -626,7 +624,7 @@ webui.LogView = function(historyView) {
 /*
  * == DiffView ================================================================
  */
-webui.DiffView = function(sideBySide, parent) {
+webui.DiffView = function(sideBySide, hunkSelectionAllowed, parent) {
 
     var self = this;
 
@@ -982,7 +980,7 @@ webui.DiffView = function(sideBySide, parent) {
 
     var html = '<div class="diff-view-container panel panel-default">';
     if (! (parent instanceof webui.CommitExplorerView)) {
-        html += 
+        html +=
             '<div class="panel-heading btn-toolbar" role="toolbar">' +
                 '<button type="button" class="btn btn-sm btn-default diff-ignore-whitespace" data-toggle="button">Ignore Whitespace</button>' +
                 '<button type="button" class="btn btn-sm btn-default diff-context-all" data-toggle="button">Complete file</button>' +
@@ -996,7 +994,7 @@ webui.DiffView = function(sideBySide, parent) {
                     '<button type="button" class="btn btn-default diff-cancel" style="display:none">Cancel</button>' +
                     '<button type="button" class="btn btn-default diff-unstage" style="display:none">Unstage</button>' +
                 '</div>' +
-                (sideBySide ? '' : '<button type="button"  class="btn btn-sm btn-default diff-explore" data-toggle="button">Explore</button>') +
+                (sideBySide ? '' : '<button type="button"  class="btn btn-sm btn-default diff-explore">Explore</button>') +
             '</div>';
     }
     html += '<div class="panel-body"></div></div>'
@@ -1015,8 +1013,10 @@ webui.DiffView = function(sideBySide, parent) {
         $(right).scroll(self.diffViewScrolled);
         right.webuiPrevScrollTop = right.scrollTop;
         right.webuiPrevScrollLeft = right.scrollLeft;
-        $(left).click(self.handleClick);
-        $(right).click(self.handleClick);
+        if (hunkSelectionAllowed) {
+            $(left).click(self.handleClick);
+            $(right).click(self.handleClick);
+        }
     } else {
         var single = $('<div class="diff-view"><div class="diff-view-lines"></div></div>')[0];
         panelBody.appendChild(single);
@@ -1247,7 +1247,7 @@ webui.CommitExplorerView = function(mainView, diff) {
 
     self.displayDiffForSection = function(idx) {
         self.diffView.refresh(diffSections[idx].lines.join("\n"));
-    }
+    };
 
     self.element = $(    '<div id="commit-explorer-view">'+
                              '<div id="commit-explorer-diff-view"></div>'+
@@ -1259,7 +1259,7 @@ webui.CommitExplorerView = function(mainView, diff) {
 
     self.buildDiffSections(diff);
 
-    self.diffView = new webui.DiffView(true, self);
+    self.diffView = new webui.DiffView(true, false, self);
     self.fileListView = new webui.FileListView(self, diffSections);
     self.commitHeaderView = new webui.CommitHeaderView(self, diffHeaderLines.join("\n"));
 
@@ -1273,41 +1273,64 @@ webui.CommitExplorerView = function(mainView, diff) {
 
 webui.FileListView = function(commitExplorerView, files){
     var self = this;
+
+    self.fileSelected = function(event) {
+        var index = 0;
+        var sibling = event.target.previousElementSibling;
+        while (sibling) {
+            sibling = sibling.previousElementSibling;
+            ++index;
+        }
+        $(".active", rightContainer).removeClass("active");
+        $(".active", leftContainer).removeClass("active");
+        $(rightContainer.children[index]).toggleClass("active");
+        $(leftContainer.children[index]).toggleClass("active");
+        commitExplorerView.displayDiffForSection(index);
+    };
+
+    self.buildLine = function(label, parent) {
+        var element = $('<a class="list-group-item">' + label + '</a>')[0];
+        $(element).click(self.fileSelected)
+        parent.appendChild(element);
+    }
+
+    self.viewScrolled = function(event) {
+        if (event.target == rightScrollView) {
+            var current = rightScrollView;
+            var other = leftScrollView;
+        } else {
+            var current = leftScrollView;
+            var other = rightScrollView;
+        }
+        other.scrollTop = current.scrollTop;
+    }
+
     self.element = $(   '<div class="file-list-view panel panel-default">' +
                             '<div class="panel-heading">' +
                                 '<h5> Files </h5>' +
-                                '<div class="btn-group btn-group-sm"></div>' +
                             '</div>' +
-                            '<div class="file-list-container list-group">' +
+                            '<div class="file-list-container">' +
+                                '<div class="file-list-left-container">' +
+                                    '<div class="list-group"></div>' +
+                                '</div>' +
+                                '<div class="file-list-right-container">' +
+                                    '<div class="list-group"></div>' +
+                                '</div>' +
                             '</div>' +
                          '</div>')[0];
-    var fileList = $(".list-group", self.element)[0];    
-    var selectedIndex = 0;
 
-    self.buildBody = function() {
-        var listGroupBody = '';
-        for (var i = 0; i < files.length; i++) {
-            var cls = 'list-group-item'
-            if (selectedIndex == i) cls += ' active';
-            listGroupBody +=
-                '<div class="'+cls+'" data-idx="'+ i +'">' +
-                    '<a class="left-item">' + files[i].leftName + '</a>' +
-                    '<a class="right-item">' + files[i].rightName + '</a>' +
-                '</div>';
-        }
-        listGroup.html(listGroupBody);
+    var rightScrollView = $(".file-list-right-container", self.element)[0];
+    var rightContainer =  $(".list-group", rightScrollView)[0];
+    var leftScrollView = $(".file-list-left-container", self.element)[0];
+    var leftContainer =  $(".list-group", leftScrollView)[0];
+
+    for (var i = 0; i < files.length; ++i) {
+        var lineData = files[i];
+        self.buildLine(lineData.rightName, rightContainer);
+        self.buildLine(lineData.leftName, leftContainer);
     }
-
-    $(self.element).on('click', '.list-group-item a', function(e){
-        var idx = Number($(e.target).parent().data('idx'));
-        selectedIndex = idx;
-        self.buildBody();
-        commitExplorerView.displayDiffForSection(idx);
-    });
-
-    var listGroup = $('.list-group', self.element);
-    self.buildBody();
-    
+    $(rightScrollView).scroll(self.viewScrolled);
+    $(leftScrollView).scroll(self.viewScrolled);
 }
 
 /*
@@ -1362,7 +1385,7 @@ webui.CommitView = function(historyView) {
     commitViewHeader.appendChild(buttonBox.element);
     var commitViewContent = $('<div id="commit-view-content">')[0];
     self.element.appendChild(commitViewContent);
-    var diffView = new webui.DiffView(false, self);
+    var diffView = new webui.DiffView(false, false, self);
     var treeView = new webui.TreeView(self);
 };
 
@@ -1416,7 +1439,7 @@ webui.WorkspaceView = function(mainView) {
                             '<div id="workspace-editor"></div>' +
                         '</div>')[0];
     var workspaceDiffView = $("#workspace-diff-view", self.element)[0];
-    self.diffView = new webui.DiffView(true, self);
+    self.diffView = new webui.DiffView(true, true, self);
     workspaceDiffView.appendChild(self.diffView.element);
     var workspaceEditor = $("#workspace-editor", self.element)[0];
     self.workingCopyView = new webui.ChangedFilesView(self, "working-copy", "Working Copy");

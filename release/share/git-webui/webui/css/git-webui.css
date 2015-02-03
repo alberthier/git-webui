@@ -21,6 +21,8 @@ body {
 body {
   display: flex;
   display: -webkit-flex;
+  min-height: 0;
+  min-width: 0;
   flex-direction: column;
   -webkit-flex-direction: column;
   margin: 0;
@@ -40,12 +42,16 @@ body {
 #global-container {
   display: flex;
   display: -webkit-flex;
+  min-height: 0;
+  min-width: 0;
   flex: 1;
   -webkit-flex: 1;
 }
 #sidebar {
   display: flex;
   display: -webkit-flex;
+  min-height: 0;
+  min-width: 0;
   flex-direction: column;
   -webkit-flex-direction: column;
   width: 14em;
@@ -122,6 +128,8 @@ body {
 #main-view {
   display: flex;
   display: -webkit-flex;
+  min-height: 0;
+  min-width: 0;
   flex: 1;
   -webkit-flex: 1;
 }
@@ -137,6 +145,8 @@ body {
 #history-view {
   display: flex;
   display: -webkit-flex;
+  min-height: 0;
+  min-width: 0;
   flex: 1;
   -webkit-flex: 1;
 }
@@ -180,6 +190,8 @@ body {
 #log-view .log-entry header {
   display: flex;
   display: -webkit-flex;
+  min-height: 0;
+  min-width: 0;
   align-items: baseline;
   -webkit-align-items: baseline;
 }
@@ -211,6 +223,8 @@ body {
 #commit-view {
   display: flex;
   display: -webkit-flex;
+  min-height: 0;
+  min-width: 0;
   flex-direction: column;
   -webkit-flex-direction: column;
   flex: 1;
@@ -223,31 +237,61 @@ body {
 #commit-view #commit-view-content {
   display: flex;
   display: -webkit-flex;
+  min-height: 0;
+  min-width: 0;
   flex: 1;
   -webkit-flex: 1;
   flex-direction: column;
   -webkit-flex-direction: column;
 }
 .file-list-view {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  flex: 1;
+  -webkit-flex: 1;
+}
+.file-list-view .file-list-container {
+  display: flex;
+  display: -webkit-flex;
+  min-height: 0;
+  min-width: 0;
+  flex: 1;
+  -webkit-flex: 1;
   overflow: auto;
 }
-.file-list-view .list-group-item {
-  padding: 0;
-  height: 30px;
+.file-list-view .file-list-container .file-list-left-container {
+  border: solid #dddddd;
+  border-width: 0 1px 0 0;
 }
-.file-list-view .list-group-item > * {
-  width: 50%;
+.file-list-view .file-list-container .file-list-right-container,
+.file-list-view .file-list-container .file-list-left-container {
+  flex: 1;
+  -webkit-flex: 1;
   overflow: auto;
-  float: left;
-  padding-left: 10px;
-  line-height: 30px;
 }
-.file-list-view .list-group-item .left-item {
-  border-right: 1px solid silver;
+.file-list-view .file-list-container .list-group {
+  display: table;
+  margin: 0;
+  width: 100%;
+}
+.file-list-view .file-list-container .list-group .list-group-item:first-child {
+  border-top: 0;
+}
+.file-list-view .file-list-container .list-group .list-group-item {
+  padding: 5px 10px;
+  border-left: 0;
+  border-right: 0;
+  white-space: nowrap;
 }
 .diff-view-container {
   display: flex;
   display: -webkit-flex;
+  min-height: 0;
+  min-width: 0;
   flex: 1;
   -webkit-flex: 1;
   flex-direction: column;
@@ -260,10 +304,14 @@ body {
   padding: 5px 16px;
   display: flex;
   display: -webkit-flex;
+  min-height: 0;
+  min-width: 0;
 }
 .diff-view-container .panel-heading .btn-group {
   display: flex;
   display: -webkit-flex;
+  min-height: 0;
+  min-width: 0;
   align-items: baseline;
   -webkit-align-items: baseline;
 }
@@ -272,13 +320,19 @@ body {
 }
 .diff-view-container .panel-heading .diff-selection-buttons {
   display: flex;
+  display: -webkit-flex;
+  min-height: 0;
+  min-width: 0;
   flex: 1;
+  -webkit-flex: 1;
   align-items: flex-end;
   justify-content: flex-end;
 }
 .diff-view-container .panel-body {
   display: flex;
   display: -webkit-flex;
+  min-height: 0;
+  min-width: 0;
   flex: 1;
   -webkit-flex: 1;
   padding: 0;
@@ -344,6 +398,8 @@ body {
   -webkit-flex-direction: column;
   display: flex;
   display: -webkit-flex;
+  min-height: 0;
+  min-width: 0;
 }
 #tree-view .breadcrumb {
   padding: 10px 16px;
@@ -359,6 +415,8 @@ body {
 #tree-view #tree-view-blob-content {
   display: flex;
   display: -webkit-flex;
+  min-height: 0;
+  min-width: 0;
   flex-direction: column;
   -webkit-flex-direction: column;
   flex: 1;
@@ -373,6 +431,8 @@ body {
 #tree-view .list-group-item {
   display: flex;
   display: -webkit-flex;
+  min-height: 0;
+  min-width: 0;
   cursor: pointer;
   border: 0;
   padding: 5px 10px;
@@ -397,20 +457,12 @@ body {
 #tree-view .tree-item-symlink {
   font-style: italic;
 }
-#commit-explorer-navigator-view > * {
-  width: 50%;
-}
-#commit-explorer-navigator-view a {
-  text-decoration: none;
-  cursor: pointer;
-}
-#commit-explorer-navigator-view .active a {
-  color: white;
-}
 #workspace-view,
 #commit-explorer-view {
   display: flex;
   display: -webkit-flex;
+  min-height: 0;
+  min-width: 0;
   flex-direction: column;
   -webkit-flex-direction: column;
   flex: 1;
@@ -422,6 +474,8 @@ body {
 #commit-explorer-view #commit-explorer-diff-view {
   display: flex;
   display: -webkit-flex;
+  min-height: 0;
+  min-width: 0;
   flex: 2;
   -webkit-flex: 2;
   overflow: auto;
@@ -430,16 +484,12 @@ body {
 #commit-explorer-view #workspace-editor,
 #workspace-view #commit-explorer-navigator-view,
 #commit-explorer-view #commit-explorer-navigator-view {
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
   flex: 1;
   -webkit-flex: 1;
   display: flex;
   display: -webkit-flex;
+  min-height: 0;
+  min-width: 0;
   align-items: stretch;
   -webkit-align-items: stretch;
   border: solid #dddddd;
@@ -454,6 +504,12 @@ body {
 #commit-explorer-view #workspace-editor #staging-area-view,
 #workspace-view #commit-explorer-navigator-view #staging-area-view,
 #commit-explorer-view #commit-explorer-navigator-view #staging-area-view {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
   flex: 2;
   -webkit-flex: 2;
 }
@@ -527,8 +583,12 @@ body {
 #commit-explorer-view #workspace-editor .panel,
 #workspace-view #commit-explorer-navigator-view .panel,
 #commit-explorer-view #commit-explorer-navigator-view .panel {
+  flex: 1;
+  -webkit-flex: 1;
   display: flex;
   display: -webkit-flex;
+  min-height: 0;
+  min-width: 0;
   flex-direction: column;
   -webkit-flex-direction: column;
   margin: 0;
@@ -540,9 +600,17 @@ body {
 #commit-explorer-view #workspace-editor .panel .panel-heading,
 #workspace-view #commit-explorer-navigator-view .panel .panel-heading,
 #commit-explorer-view #commit-explorer-navigator-view .panel .panel-heading {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
   padding: 5px 10px;
   display: flex;
   display: -webkit-flex;
+  min-height: 0;
+  min-width: 0;
   align-items: center;
   -webkit-align-items: center;
 }
@@ -561,10 +629,12 @@ body {
   border-width: 0;
 }
 #workspace-view .diff-line-add,
-#commit-explorer-view .diff-line-add,
 #workspace-view .diff-line-del,
-#commit-explorer-view .diff-line-del,
-#workspace-view .diff-line-offset,
-#commit-explorer-view .diff-line-offset {
+#workspace-view .diff-line-offset {
   cursor: pointer;
+}
+#commit-explorer-view #commit-explorer-navigator-view .panel .panel-body {
+  flex: 1;
+  -webkit-flex: 1;
+  overflow: auto;
 }
