@@ -228,6 +228,23 @@ body {
   flex-direction: column;
   -webkit-flex-direction: column;
 }
+.file-list-view {
+  overflow: auto;
+}
+.file-list-view .list-group-item {
+  padding: 0;
+  height: 30px;
+}
+.file-list-view .list-group-item > * {
+  width: 50%;
+  overflow: auto;
+  float: left;
+  padding-left: 10px;
+  line-height: 30px;
+}
+.file-list-view .list-group-item .left-item {
+  border-right: 1px solid silver;
+}
 .diff-view-container {
   display: flex;
   display: -webkit-flex;
@@ -380,7 +397,18 @@ body {
 #tree-view .tree-item-symlink {
   font-style: italic;
 }
-#workspace-view {
+#commit-explorer-navigator-view > * {
+  width: 50%;
+}
+#commit-explorer-navigator-view a {
+  text-decoration: none;
+  cursor: pointer;
+}
+#commit-explorer-navigator-view .active a {
+  color: white;
+}
+#workspace-view,
+#commit-explorer-view {
   display: flex;
   display: -webkit-flex;
   flex-direction: column;
@@ -388,14 +416,20 @@ body {
   flex: 1;
   -webkit-flex: 1;
 }
-#workspace-view #workspace-diff-view {
+#workspace-view #workspace-diff-view,
+#commit-explorer-view #workspace-diff-view,
+#workspace-view #commit-explorer-diff-view,
+#commit-explorer-view #commit-explorer-diff-view {
   display: flex;
   display: -webkit-flex;
   flex: 2;
   -webkit-flex: 2;
   overflow: auto;
 }
-#workspace-view #workspace-editor {
+#workspace-view #workspace-editor,
+#commit-explorer-view #workspace-editor,
+#workspace-view #commit-explorer-navigator-view,
+#commit-explorer-view #commit-explorer-navigator-view {
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   -khtml-user-select: none;
@@ -413,38 +447,74 @@ body {
   cursor: default;
 }
 #workspace-view #workspace-editor #working-copy-view,
-#workspace-view #workspace-editor #staging-area-view {
+#commit-explorer-view #workspace-editor #working-copy-view,
+#workspace-view #commit-explorer-navigator-view #working-copy-view,
+#commit-explorer-view #commit-explorer-navigator-view #working-copy-view,
+#workspace-view #workspace-editor #staging-area-view,
+#commit-explorer-view #workspace-editor #staging-area-view,
+#workspace-view #commit-explorer-navigator-view #staging-area-view,
+#commit-explorer-view #commit-explorer-navigator-view #staging-area-view {
   flex: 2;
   -webkit-flex: 2;
 }
 #workspace-view #workspace-editor #working-copy-view .file-list-container,
-#workspace-view #workspace-editor #staging-area-view .file-list-container {
+#commit-explorer-view #workspace-editor #working-copy-view .file-list-container,
+#workspace-view #commit-explorer-navigator-view #working-copy-view .file-list-container,
+#commit-explorer-view #commit-explorer-navigator-view #working-copy-view .file-list-container,
+#workspace-view #workspace-editor #staging-area-view .file-list-container,
+#commit-explorer-view #workspace-editor #staging-area-view .file-list-container,
+#workspace-view #commit-explorer-navigator-view #staging-area-view .file-list-container,
+#commit-explorer-view #commit-explorer-navigator-view #staging-area-view .file-list-container {
   flex: 1;
   -webkit-flex: 1;
   overflow: auto;
 }
 #workspace-view #workspace-editor #working-copy-view .file-list-container .list-group,
-#workspace-view #workspace-editor #staging-area-view .file-list-container .list-group {
+#commit-explorer-view #workspace-editor #working-copy-view .file-list-container .list-group,
+#workspace-view #commit-explorer-navigator-view #working-copy-view .file-list-container .list-group,
+#commit-explorer-view #commit-explorer-navigator-view #working-copy-view .file-list-container .list-group,
+#workspace-view #workspace-editor #staging-area-view .file-list-container .list-group,
+#commit-explorer-view #workspace-editor #staging-area-view .file-list-container .list-group,
+#workspace-view #commit-explorer-navigator-view #staging-area-view .file-list-container .list-group,
+#commit-explorer-view #commit-explorer-navigator-view #staging-area-view .file-list-container .list-group {
   display: table;
   margin: 0;
   width: 100%;
 }
 #workspace-view #workspace-editor #working-copy-view .file-list-container .list-group .list-group-item:first-child,
-#workspace-view #workspace-editor #staging-area-view .file-list-container .list-group .list-group-item:first-child {
+#commit-explorer-view #workspace-editor #working-copy-view .file-list-container .list-group .list-group-item:first-child,
+#workspace-view #commit-explorer-navigator-view #working-copy-view .file-list-container .list-group .list-group-item:first-child,
+#commit-explorer-view #commit-explorer-navigator-view #working-copy-view .file-list-container .list-group .list-group-item:first-child,
+#workspace-view #workspace-editor #staging-area-view .file-list-container .list-group .list-group-item:first-child,
+#commit-explorer-view #workspace-editor #staging-area-view .file-list-container .list-group .list-group-item:first-child,
+#workspace-view #commit-explorer-navigator-view #staging-area-view .file-list-container .list-group .list-group-item:first-child,
+#commit-explorer-view #commit-explorer-navigator-view #staging-area-view .file-list-container .list-group .list-group-item:first-child {
   border-top: 0;
 }
 #workspace-view #workspace-editor #working-copy-view .file-list-container .list-group .list-group-item,
-#workspace-view #workspace-editor #staging-area-view .file-list-container .list-group .list-group-item {
+#commit-explorer-view #workspace-editor #working-copy-view .file-list-container .list-group .list-group-item,
+#workspace-view #commit-explorer-navigator-view #working-copy-view .file-list-container .list-group .list-group-item,
+#commit-explorer-view #commit-explorer-navigator-view #working-copy-view .file-list-container .list-group .list-group-item,
+#workspace-view #workspace-editor #staging-area-view .file-list-container .list-group .list-group-item,
+#commit-explorer-view #workspace-editor #staging-area-view .file-list-container .list-group .list-group-item,
+#workspace-view #commit-explorer-navigator-view #staging-area-view .file-list-container .list-group .list-group-item,
+#commit-explorer-view #commit-explorer-navigator-view #staging-area-view .file-list-container .list-group .list-group-item {
   padding: 5px 10px;
   border-left: 0;
   border-right: 0;
   white-space: nowrap;
 }
-#workspace-view #workspace-editor #commit-message-view {
+#workspace-view #workspace-editor #commit-message-view,
+#commit-explorer-view #workspace-editor #commit-message-view,
+#workspace-view #commit-explorer-navigator-view #commit-message-view,
+#commit-explorer-view #commit-explorer-navigator-view #commit-message-view {
   flex: 3;
   -webkit-flex: 3;
 }
-#workspace-view #workspace-editor #commit-message-view textarea {
+#workspace-view #workspace-editor #commit-message-view textarea,
+#commit-explorer-view #workspace-editor #commit-message-view textarea,
+#workspace-view #commit-explorer-navigator-view #commit-message-view textarea,
+#commit-explorer-view #commit-explorer-navigator-view #commit-message-view textarea {
   flex: 1;
   -webkit-flex: 1;
   resize: none;
@@ -453,7 +523,10 @@ body {
   outline: none;
   padding: 0.3em;
 }
-#workspace-view #workspace-editor .panel {
+#workspace-view #workspace-editor .panel,
+#commit-explorer-view #workspace-editor .panel,
+#workspace-view #commit-explorer-navigator-view .panel,
+#commit-explorer-view #commit-explorer-navigator-view .panel {
   display: flex;
   display: -webkit-flex;
   flex-direction: column;
@@ -463,23 +536,35 @@ body {
   border-style: solid;
   border-color: #dddddd;
 }
-#workspace-view #workspace-editor .panel .panel-heading {
+#workspace-view #workspace-editor .panel .panel-heading,
+#commit-explorer-view #workspace-editor .panel .panel-heading,
+#workspace-view #commit-explorer-navigator-view .panel .panel-heading,
+#commit-explorer-view #commit-explorer-navigator-view .panel .panel-heading {
   padding: 5px 10px;
   display: flex;
   display: -webkit-flex;
   align-items: center;
   -webkit-align-items: center;
 }
-#workspace-view #workspace-editor .panel .panel-heading h5 {
+#workspace-view #workspace-editor .panel .panel-heading h5,
+#commit-explorer-view #workspace-editor .panel .panel-heading h5,
+#workspace-view #commit-explorer-navigator-view .panel .panel-heading h5,
+#commit-explorer-view #commit-explorer-navigator-view .panel .panel-heading h5 {
   flex: 1;
   -webkit-flex: 1;
   margin: 0;
 }
-#workspace-view #workspace-editor .panel:last-child {
+#workspace-view #workspace-editor .panel:last-child,
+#commit-explorer-view #workspace-editor .panel:last-child,
+#workspace-view #commit-explorer-navigator-view .panel:last-child,
+#commit-explorer-view #commit-explorer-navigator-view .panel:last-child {
   border-width: 0;
 }
 #workspace-view .diff-line-add,
+#commit-explorer-view .diff-line-add,
 #workspace-view .diff-line-del,
-#workspace-view .diff-line-offset {
+#commit-explorer-view .diff-line-del,
+#workspace-view .diff-line-offset,
+#commit-explorer-view .diff-line-offset {
   cursor: pointer;
 }

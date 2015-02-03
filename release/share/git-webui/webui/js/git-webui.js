@@ -675,6 +675,7 @@ webui.DiffView = function(sideBySide, parent) {
     };
 
     self.refresh = function(diff) {
+        self.currentDiff = diff;
         self.diffHeader = "";
         $("span", self.element).text('Context: ' + self.context);
         if (sideBySide) {
@@ -768,6 +769,7 @@ webui.DiffView = function(sideBySide, parent) {
         }
         if (context.inHeader) {
             $(pre).addClass("diff-line-header");
+            if (c == 'd') $(pre).addClass("diff-section-start");
         }
         return context;
     }
@@ -969,23 +971,36 @@ webui.DiffView = function(sideBySide, parent) {
         });
     }
 
-    self.element = $(   '<div class="diff-view-container panel panel-default">' +
-                            '<div class="panel-heading btn-toolbar" role="toolbar">' +
-                                '<button type="button" class="btn btn-sm btn-default diff-ignore-whitespace" data-toggle="button">Ignore Whitespace</button>' +
-                                '<button type="button" class="btn btn-sm btn-default diff-context-all" data-toggle="button">Complete file</button>' +
-                                '<div class="btn-group btn-group-sm">' +
-                                    '<span></span>&nbsp;' +
-                                    '<button type="button" class="btn btn-default diff-context-remove">-</button>' +
-                                    '<button type="button" class="btn btn-default diff-context-add">+</button>' +
-                                '</div>' +
-                                '<div class="btn-group btn-group-sm diff-selection-buttons">' +
-                                    '<button type="button" class="btn btn-default diff-stage" style="display:none">Stage</button>' +
-                                    '<button type="button" class="btn btn-default diff-cancel" style="display:none">Cancel</button>' +
-                                    '<button type="button" class="btn btn-default diff-unstage" style="display:none">Unstage</button>' +
-                                '</div>' +
-                            '</div>' +
-                            '<div class="panel-body"></div>' +
-                        '</div>')[0];
+    self.switchToExploreView = function() {
+        if (! self.currentDiff) {
+            return;
+        }
+        var mainView = parent.historyView.mainView;
+        var commitExplorerView = new webui.CommitExplorerView(mainView, self.currentDiff);
+        commitExplorerView.show();
+    };
+
+    var html = '<div class="diff-view-container panel panel-default">';
+    if (! (parent instanceof webui.CommitExplorerView)) {
+        html += 
+            '<div class="panel-heading btn-toolbar" role="toolbar">' +
+                '<button type="button" class="btn btn-sm btn-default diff-ignore-whitespace" data-toggle="button">Ignore Whitespace</button>' +
+                '<button type="button" class="btn btn-sm btn-default diff-context-all" data-toggle="button">Complete file</button>' +
+                '<div class="btn-group btn-group-sm">' +
+                    '<span></span>&nbsp;' +
+                    '<button type="button" class="btn btn-default diff-context-remove">-</button>' +
+                    '<button type="button" class="btn btn-default diff-context-add">+</button>' +
+                '</div>' +
+                '<div class="btn-group btn-group-sm diff-selection-buttons">' +
+                    '<button type="button" class="btn btn-default diff-stage" style="display:none">Stage</button>' +
+                    '<button type="button" class="btn btn-default diff-cancel" style="display:none">Cancel</button>' +
+                    '<button type="button" class="btn btn-default diff-unstage" style="display:none">Unstage</button>' +
+                '</div>' +
+                (sideBySide ? '' : '<button type="button"  class="btn btn-sm btn-default diff-explore" data-toggle="button">Explore</button>') +
+            '</div>';
+    }
+    html += '<div class="panel-body"></div></div>'
+    self.element = $(html)[0];
     var panelBody = $(".panel-body", self.element)[0];
     if (sideBySide) {
         var left = $('<div class="diff-view"><div class="diff-view-lines"></div></div>')[0];
@@ -1016,6 +1031,8 @@ webui.DiffView = function(sideBySide, parent) {
     $(".diff-stage", self.element).click(function() { self.applySelection(false, true); });
     $(".diff-cancel", self.element).click(function() { self.applySelection(true, false); });
     $(".diff-unstage", self.element).click(function() { self.applySelection(true, true); });
+
+    $(".diff-explore", self.element).click(function() { self.switchToExploreView(); });
 
     self.context = 3;
     self.complete = false;
@@ -1177,6 +1194,136 @@ webui.TreeView = function(commitView) {
 }
 
 /*
+ * == CommitExplorerView =============================================================
+ */
+webui.CommitExplorerView = function(mainView, diff) {
+
+    var self = this;
+    var diffLines = diff.split("\n");
+    var diffHeaderLines = [];
+    var diffSections = [];
+    var currentSection, line, c, lineMatch;
+
+    self.buildDiffSections = function(diff) {
+        var visitorState = 'header';
+
+        for (var i = 0; i < diffLines.length; i++) {
+            line = diffLines[i];
+            c = line[0];
+
+            switch(visitorState) {
+            case 'header':
+                if (c == 'd') {
+                    visitorState = 'sectionHeader';
+                    i -= 1;
+                } else {
+                    diffHeaderLines.push(line)
+                }
+                break;
+            case 'sectionHeader':
+                lineMatch = line.match(/^diff --git a\/(.*) b\/(.*)$/)
+                currentSection = {
+                    leftName: lineMatch[1],
+                    rightName: lineMatch[2],
+                    lines: []
+                };
+                diffSections.push(currentSection);
+                visitorState = 'sectionContent';
+                break;
+            case 'sectionContent':
+                if (c == 'd') {
+                    visitorState = 'sectionHeader';
+                    i -= 1;
+                } else {
+                    currentSection.lines.push(line);
+                }
+            }
+        }
+    }
+
+    self.show = function() {
+        mainView.switchTo(self.element);
+    };
+
+    self.displayDiffForSection = function(idx) {
+        self.diffView.refresh(diffSections[idx].lines.join("\n"));
+    }
+
+    self.element = $(    '<div id="commit-explorer-view">'+
+                             '<div id="commit-explorer-diff-view"></div>'+
+                             '<div id="commit-explorer-navigator-view"></div>'+
+                         '</div>')[0];
+
+    var commitExplorerDiffView = $('#commit-explorer-diff-view', self.element)[0];
+    var commitExplorerNavigatorView = $('#commit-explorer-navigator-view', self.element)[0];
+
+    self.buildDiffSections(diff);
+
+    self.diffView = new webui.DiffView(true, self);
+    self.fileListView = new webui.FileListView(self, diffSections);
+    self.commitHeaderView = new webui.CommitHeaderView(self, diffHeaderLines.join("\n"));
+
+    self.displayDiffForSection(0);
+
+    commitExplorerDiffView.appendChild(self.diffView.element);
+    commitExplorerNavigatorView.appendChild(self.fileListView.element);
+    commitExplorerNavigatorView.appendChild(self.commitHeaderView.element);
+
+}
+
+webui.FileListView = function(commitExplorerView, files){
+    var self = this;
+    self.element = $(   '<div class="file-list-view panel panel-default">' +
+                            '<div class="panel-heading">' +
+                                '<h5> Files </h5>' +
+                                '<div class="btn-group btn-group-sm"></div>' +
+                            '</div>' +
+                            '<div class="file-list-container list-group">' +
+                            '</div>' +
+                         '</div>')[0];
+    var fileList = $(".list-group", self.element)[0];    
+    var selectedIndex = 0;
+
+    self.buildBody = function() {
+        var listGroupBody = '';
+        for (var i = 0; i < files.length; i++) {
+            var cls = 'list-group-item'
+            if (selectedIndex == i) cls += ' active';
+            listGroupBody +=
+                '<div class="'+cls+'" data-idx="'+ i +'">' +
+                    '<a class="left-item">' + files[i].leftName + '</a>' +
+                    '<a class="right-item">' + files[i].rightName + '</a>' +
+                '</div>';
+        }
+        listGroup.html(listGroupBody);
+    }
+
+    $(self.element).on('click', '.list-group-item a', function(e){
+        var idx = Number($(e.target).parent().data('idx'));
+        selectedIndex = idx;
+        self.buildBody();
+        commitExplorerView.displayDiffForSection(idx);
+    });
+
+    var listGroup = $('.list-group', self.element);
+    self.buildBody();
+    
+}
+
+/*
+ * == CommitHeaderView ==============================================================
+ */
+webui.CommitHeaderView = function(commitExplorerView, header) {
+    var self = this;
+    self.element = $('<div class="panel panel-default">' +
+                         '<div class="panel-heading">' +
+                             '<h5> Commit Details </h5>' +
+                         '</div>' +
+                         '<div class="panel-body">' + header.split("\n").join("<br>") + '</div>' +
+                     '</div>')[0];
+}
+
+/*
  * == CommitView ==============================================================
  */
 webui.CommitView = function(historyView) {
@@ -1187,6 +1334,7 @@ webui.CommitView = function(historyView) {
         if (currentCommit == entry.commit) {
             // We already display the right data. No need to update.
             return;
+
         }
         currentCommit = entry.commit;
         self.showDiff();
@@ -1239,6 +1387,7 @@ webui.HistoryView = function(mainView) {
     self.element.appendChild(self.logView.element);
     self.commitView = new webui.CommitView(self);
     self.element.appendChild(self.commitView.element);
+    self.mainView = mainView;
 };
 
 /*
