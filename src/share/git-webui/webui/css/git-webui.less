@@ -316,19 +316,38 @@ body {
 }
 
 .file-list-view {
-    overflow: auto;
-    .list-group-item {
-        padding: 0;
-        height: 30px;
-        > * {
-            width: 50%;
-            overflow: auto;
-            float: left;
-            padding-left: 10px;
-            line-height: 30px;
+    .no-select();
+    .flex(1);
+
+    .file-list-container {
+        .display-flex();
+        .flex(1);
+        overflow: auto;
+
+        .file-list-left-container {
+            border: solid @separator-line;
+            border-width: 0 1px 0 0;
         }
-        .left-item {
-            border-right: 1px solid silver;
+        .file-list-right-container, .file-list-left-container {
+            .flex(1);
+            overflow: auto;
+        }
+
+        .list-group {
+            display: table;
+            margin: 0;
+            width: 100%;
+
+            .list-group-item:first-child {
+                border-top: 0;
+            }
+
+            .list-group-item {
+                padding: @padding-small-vertical @padding-small-horizontal;
+                border-left: 0;
+                border-right: 0;
+                white-space: nowrap;
+            }
         }
     }
 }
@@ -497,20 +516,6 @@ body {
     }
 }
 
-#commit-explorer-navigator-view {
-    > * {
-        width: 50%;
-    }
-
-    a {
-        text-decoration: none;
-        cursor: pointer;
-    }
-    .active a {
-        color: white;
-    }
-}
-
 #workspace-view, #commit-explorer-view {
     .display-flex();
     .flex-direction(column);
@@ -523,8 +528,6 @@ body {
     }
 
     #workspace-editor, #commit-explorer-navigator-view {
-        .no-select();
-
         .flex(1);
         .display-flex();
         .align-items(stretch);
@@ -533,6 +536,7 @@ body {
         cursor: default;
 
         #working-copy-view, #staging-area-view {
+            .no-select();
             .flex(2);
 
             .file-list-container {
@@ -572,6 +576,7 @@ body {
         }
 
         .panel {
+            .flex(1);
             .display-flex();
             .flex-direction(column);
             margin: 0;
@@ -580,6 +585,7 @@ body {
             border-color: @separator-line;
 
             .panel-heading {
+                .no-select();
                 padding: @padding-small-vertical @padding-small-horizontal;
                 .display-flex();
                 .align-items(center);
@@ -595,8 +601,21 @@ body {
             border-width: 0;
         }
     }
+}
 
+#workspace-view {
     .diff-line-add, .diff-line-del, .diff-line-offset {
         cursor: pointer;
+    }
+}
+
+#commit-explorer-view {
+    #commit-explorer-navigator-view {
+        .panel {
+            .panel-body {
+                .flex(1);
+                overflow: auto;
+            }
+        }
     }
 }
