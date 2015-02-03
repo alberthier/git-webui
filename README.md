@@ -145,6 +145,8 @@ git config --global --remove-section webui
 ## Contributing
 
 You can clone the source code of [git-webui on GitHub](https://github.com/alberthier/git-webui)
+After executing `grunt` git-webui is available in the `dist` folder.
+Please don't commit any content to the `release` folder. This is for end-users release versions, not for work-in-progress versions
 
 ## Packaging
 
