@@ -38,6 +38,8 @@
 .display-flex() {
     display: flex;
     display: -webkit-flex;
+    min-height: 0;
+    min-width: 0;
 }
 
 .align-items(@value) {
@@ -374,8 +376,8 @@ body {
         }
 
         .diff-selection-buttons {
-            display: flex;
-            flex: 1;
+            .display-flex();
+            .flex(1);
             align-items: flex-end;
             justify-content: flex-end;
         }
