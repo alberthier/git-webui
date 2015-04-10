@@ -39,8 +39,7 @@ else:
 
 IS_WINDOWS = platform.system() == "Windows"
 
-
-
+allowed_hosts =  [] # "127.0.0.1", "localhost"]
 
 def which(cmd, path):
     if IS_WINDOWS:
@@ -145,8 +144,7 @@ class WebUiRequestHandler(CGIHTTPRequestHandler):
 
     def is_view_only(self):
         host = self.headers.get("Host", "").split(":")[0]
-        return host not in ["127.0.0.1", "localhost"]
-
+        return host not in allowed_hosts
 
     def is_cgi(self):
         """
@@ -240,6 +238,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description = "Simple HTTP server for git webui")
     parser.add_argument("--port", type = int, help = "server port")
     parser.add_argument("--repo-root", help = "repository root path. By default goes up a dir until a '.git' directory is found")
+    parser.add_argument("--allow-hosts", help = "what other host(s) are allowed to have write access")
     args = parser.parse_args()
 
     if args.repo_root is None:
@@ -251,6 +250,10 @@ if __name__ == '__main__':
                 break
             else:
                 args.repo_root = new_root
+
+    if args.allow_hosts is not None:
+        allowed_hosts += args.allow_hosts.split(',')
+
 
     if args.repo_root is None or '.git' not in os.listdir(args.repo_root):
         sys.stderr.write("No git repository found\n")
