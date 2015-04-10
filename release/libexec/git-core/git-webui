@@ -39,7 +39,7 @@ else:
 
 IS_WINDOWS = platform.system() == "Windows"
 
-allowed_hosts =  [] # "127.0.0.1", "localhost"]
+allowed_hosts =  ["127.0.0.1", "localhost"]
 
 def which(cmd, path):
     if IS_WINDOWS:
@@ -239,6 +239,8 @@ if __name__ == '__main__':
     parser.add_argument("--port", type = int, help = "server port")
     parser.add_argument("--repo-root", help = "repository root path. By default goes up a dir until a '.git' directory is found")
     parser.add_argument("--allow-hosts", help = "what other host(s) are allowed to have write access")
+    parser.add_argument("--no-browser", action='store_true', help = "do not start web browser")
+ 
     args = parser.parse_args()
 
     if args.repo_root is None:
@@ -276,7 +278,8 @@ if __name__ == '__main__':
 
     url = "http://localhost:{}".format(port)
     print("Serving at {}".format(url))
-    webbrowser.open(url)
+    if not args.no_browser:
+        webbrowser.open(url)
 
     try:
         httpd.serve_forever()
