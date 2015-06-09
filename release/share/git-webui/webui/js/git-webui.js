@@ -255,6 +255,15 @@ webui.SideBarView = function(mainView) {
                 var maxRefsCount = 5;
                 for (var i = 0; i < refs.length && i < maxRefsCount; ++i) {
                     var ref = refs[i];
+                    if (ref[2] == '(' && ref[ref.length - 1] == ')') {
+                        // This is a '(detached from XXXXXX)'
+                        var newref = ref.substring(ref.lastIndexOf(' ') + 1, ref.length - 1)
+                        if (ref[0] == '*') {
+                            ref = '* ' + newref;
+                        } else {
+                            ref = '  ' + newref;
+                        }
+                    }
                     var li = $('<li class="sidebar-ref">').appendTo(ul)[0];
                     if (id == "local-branches") {
                         li.refName = ref.substr(2);
