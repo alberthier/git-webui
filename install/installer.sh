@@ -35,7 +35,7 @@ fi
 cd $HOME
 rm -rf .git-webui > /dev/null 2>&1
 echo "Cloning git-webui repository"
-git clone https://github.com/alberthier/git-webui.git .git-webui
+git clone --depth 1 https://github.com/alberthier/git-webui.git .git-webui
 echo "Enabling auto update"
 git config --global --replace-all webui.autoupdate true
 echo "Installing 'webui' alias"
