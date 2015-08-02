@@ -692,6 +692,13 @@ webui.DiffView = function(sideBySide, hunkSelectionAllowed, parent) {
         } else {
             self.updateSimpleView(singleLines, diff);
         }
+
+        var diffLines = diff.split("\n").length;
+        if (diffLines <= 100) {
+            $.each($('.diff-view-line.diff-line-body'), function (i, $e) { hljs.highlightBlock($e) });
+        } else {
+            // show message
+        }
     }
 
     self.updateSimpleView = function(view, diff) {
@@ -763,20 +770,34 @@ webui.DiffView = function(sideBySide, hunkSelectionAllowed, parent) {
         var c = line[0];
         var pre = $('<pre class="diff-view-line">').appendTo(view)[0];
         pre.appendChild(document.createTextNode(line));
+        /** We take the extension for the file name at the '---' and '+++' sections.
+        The latter ('+++') takes prevalence if the extension changes. If the files
+        have no extension then hljs will try to determine the best highlighting to apply, via highlightAuto method.
+        */
+        var getExtension = function(line, context) {
+            if (!context.extension) {
+                context.extension = line.split('.').pop();;
+            }
+        }
         if (c == '+') {
             $(pre).addClass("diff-line-add");
+            getExtension(line, context);
         } else if (c == '-') {
             $(pre).addClass("diff-line-del");
+            getExtension(line, context);
         } else if (c == '@') {
             $(pre).addClass("diff-line-offset");
             pre.webuiActive = false;
             context.inHeader = false;
         } else if (c == 'd') {
             context.inHeader = true;
+            context.extension = null;
         }
         if (context.inHeader) {
             $(pre).addClass("diff-line-header");
             if (c == 'd') $(pre).addClass("diff-section-start");
+        } else {
+            $(pre).addClass("diff-line-body " + context.extension);
         }
         return context;
     }
