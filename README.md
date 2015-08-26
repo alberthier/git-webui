@@ -159,6 +159,10 @@ Installing git-webui globally on the system is nothing else than
 cp -rf release/* /usr
 ```
 
+## Limitations
+
+- If you have no web brower installed at all (headless server), you should start git webui with the `--no-browser` option. Otherwise git-webui may freeze searching for a browser.
+
 ## Author
 
 [Éric ALBER](mailto:eric.alber@gmail.com) ([@eric_alber](https://twitter.com/eric_alber))
