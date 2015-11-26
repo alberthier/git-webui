@@ -1,6 +1,6 @@
 {
   "name": "git-webui",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "A web user interface for git",
   "main": "index.js",
   "scripts": {
