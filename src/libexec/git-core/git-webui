@@ -247,13 +247,29 @@ def _read_config_boolean(name, default=False):
 
 
 
+def _get_setting_string(args, name, default=None):
+    if vars(args)[name] is not None:
+        return vars(args)[name]
+    return _read_config_string(name, default)
+
+
+
+
+def _get_setting_boolean(args, name, default=False):
+    if vars(args)[name] is not None:
+        return vars(args)[name]
+    return _read_config_boolean(name, default)
+
+
+
+
 if __name__ == '__main__':
     auto_update()
     parser = argparse.ArgumentParser(description = "Simple HTTP server for git webui")
     parser.add_argument("--port", type = int, help = "server port")
     parser.add_argument("--repo-root", help = "repository root path. By default goes up a dir until a '.git' directory is found")
     parser.add_argument("--allow-hosts", help = "what other host(s) are allowed to have write access")
-    parser.add_argument("--no-browser", action='store_true', help = "do not start web browser")
+    parser.add_argument("--no-browser", dest = "nobrowser", action = 'store_const', const = True, help = "do not start web browser")
     parser.add_argument("--host", help = "the host webui listens on (default is all)")
 
     args = parser.parse_args()
@@ -268,6 +284,9 @@ if __name__ == '__main__':
             else:
                 args.repo_root = new_root
 
+    writeaccess = _read_config_string("writeaccess")
+    if writeaccess is not None:
+        allowed_hosts = writeaccess.split(',') if writeaccess else []
     if args.allow_hosts is not None:
         allowed_hosts += args.allow_hosts.split(',')
 
@@ -277,8 +296,9 @@ if __name__ == '__main__':
         sys.exit(1)
     WebUiRequestHandler.initialize(args.repo_root)
 
-    port = args.port if args.port is not None else 8000
-    host = args.host if args.host else ""
+    args.port = _get_setting_string(args, 'port', None)
+    port = int(args.port) if args.port is not None else 8000
+    host = _get_setting_string(args, 'host', "")
     httpd = None
     while httpd is None:
         try:
@@ -292,9 +312,10 @@ if __name__ == '__main__':
                 port += 1
 
 
-    url = "http://localhost:{}".format(port)
+    url = "http://{}:{}".format(host if host else "localhost", port)
     print("Serving at {}".format(url))
-    if not args.no_browser:
+    nobrowser = _get_setting_boolean(args, "nobrowser", True);
+    if not nobrowser:
         webbrowser.open(url)
 
     try:
