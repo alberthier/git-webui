@@ -27,12 +27,13 @@ import sys
 import webbrowser
 
 if sys.version > '3':
-    from http.server import CGIHTTPRequestHandler, HTTPServer
-    from urllib.parse import unquote
+    from http.server import SimpleHTTPRequestHandler, HTTPServer
+    from urllib.parse import unquote, urlparse
 else:
-    from CGIHTTPServer import CGIHTTPRequestHandler
+    from SimpleHTTPServer import SimpleHTTPRequestHandler
     from BaseHTTPServer import HTTPServer
     from urllib import unquote
+    from urlparse import urlparse
 
 
 
@@ -41,19 +42,10 @@ IS_WINDOWS = platform.system() == "Windows"
 
 allowed_hosts =  ["127.0.0.1", "localhost"]
 
-def which(cmd, path):
-    if IS_WINDOWS:
-        cmd += ".exe"
-    for d in path:
-        f = os.path.join(d, cmd)
-        if os.path.exists(f) and os.access(f, os.F_OK | os.X_OK):
-            return f
-    return None
 
 
 
-
-class WebUiRequestHandler(CGIHTTPRequestHandler):
+class WebUiRequestHandler(SimpleHTTPRequestHandler):
 
     cgi_directories = []
 
@@ -67,18 +59,6 @@ class WebUiRequestHandler(CGIHTTPRequestHandler):
         web_root = os.path.join(web_root, "share", "git-webui", "webui")
         WebUiRequestHandler.WEB_ROOT = web_root
         WebUiRequestHandler.REPO_ROOT = repo_root
-
-        path = os.environ.get("PATH", os.defpath).split(os.pathsep)
-        git_http_backend = which("git-http-backend", path)
-        if git_http_backend is None:
-            git_prefix = os.path.dirname(os.path.dirname(which("git", path)))
-            candidates = [ os.path.join(git_prefix, "libexec", "git-core"),
-                           os.path.join(git_prefix, "lib", "git-core") ]
-            git_http_backend = which("git-http-backend", candidates)
-        if git_http_backend is not None:
-            WebUiRequestHandler.GIT_HTTP_BACKEND_DIR = os.path.dirname(git_http_backend)
-        os.environ["GIT_PROJECT_ROOT"] = repo_root + "/.git"
-        os.environ["GIT_HTTP_EXPORT_ALL"] = ""
 
 
     def translate_path(self, path):
@@ -107,7 +87,7 @@ class WebUiRequestHandler(CGIHTTPRequestHandler):
     def do_GET(self):
         if self.path.startswith("/git/cat-file/"):
             obj = self.path[14:]
-            self.process(["git", "cat-file", "-p", obj], b"", False)
+            self.process(["git", "cat-file", "-p", obj], b"", True, False)
         elif self.path == "/dirname":
             wc = os.path.split(WebUiRequestHandler.REPO_ROOT)[1]
             self.send_text(200, codecs.encode(wc, "utf-8"))
@@ -116,8 +96,10 @@ class WebUiRequestHandler(CGIHTTPRequestHandler):
         elif self.path == "/viewonly":
             vo = "1" if self.is_view_only() else "0"
             self.send_text(200, codecs.encode(vo, "utf-8"))
+        elif self.is_git_request():
+            self.process_http_backend()
         else:
-            CGIHTTPRequestHandler.do_GET(self)
+            SimpleHTTPRequestHandler.do_GET(self)
 
 
     def do_POST(self):
@@ -135,42 +117,58 @@ class WebUiRequestHandler(CGIHTTPRequestHandler):
             cmd = shlex.split("git " + codecs.decode(args, "utf-8"))
             action = cmd[1]
             if not self.is_view_only() or args in ["branch", "branch --remotes", "tag"] or action in ["show", "status", "log", "ls-tree"]:
-                self.process(cmd, stdin, True)
+                self.process(cmd, stdin, True, True)
             else:
                 self.send_error(403)
+        elif self.is_git_request():
+            self.process_http_backend();
         else:
-            CGIHTTPRequestHandler.do_POST(self)
+            SimpleHTTPRequestHandler.do_POST(self)
 
 
     def is_view_only(self):
         host = self.headers.get("Host", "").split(":")[0]
         return host not in allowed_hosts
 
-    def is_cgi(self):
-        """
-        This overrides CGIHTTPRequestHandler.is_cgi to consider any request having 'git/*' as User-Agent as a CGI request
-        """
-        if self.is_git_request():
-            git_http_backend = "git-http-backend"
-            if IS_WINDOWS:
-                git_http_backend += ".exe"
-            self.cgi_info = WebUiRequestHandler.GIT_HTTP_BACKEND_DIR, git_http_backend + self.path
-            return True
-        return False
+
+    def process_http_backend(self):
+        parsed_path = urlparse(self.path)
+
+        env = {}
+        env["GIT_PROJECT_ROOT"] = WebUiRequestHandler.REPO_ROOT + "/.git"
+        env["GIT_HTTP_EXPORT_ALL"] = ""
+        env["REQUEST_METHOD"] = self.command
+        env["REMOTE_ADDR"] = self.client_address[0]
+        env["PATH_INFO"] = parsed_path.path
+        env["QUERY_STRING"] = parsed_path.query
+        if 'Content-Type' in self.headers:
+            env['CONTENT_TYPE'] = self.headers['Content-Type']
+        if 'Content-Length' in self.headers:
+            contentLength = self.headers['Content-Length']
+            env['CONTENT_LENGTH'] = contentLength
+            inputData = self.rfile.read(int(contentLength))
+        else:
+            env['CONTENT_LENGTH'] = '0'
+            inputData = b""
+
+        self.wfile.write(b"HTTP/1.0 200 OK\r\n")
+        self.wfile.flush()
+        self.process(['git', 'http-backend'], inputData, False, False, env)
 
 
     def is_git_request(self):
         return self.headers.get("User-Agent", "").startswith("git/")
 
 
-    def process(self, cmd, stdin, addstatus):
-        self.send_response(200)
-        self.end_headers()
+    def process(self, cmd, stdin, add_headers, add_footers, env = None):
+        if add_headers:
+            self.send_response(200)
+            self.end_headers()
         # Convention : send first all git output, then stderr.
         # Finially we add footers: a blank line followed by key / value pairs as in HTTP headers
         if IS_WINDOWS:
             # On windows we cannot pipe the process output directly to the socket.
-            git = subprocess.Popen(cmd, stdin = subprocess.PIPE, stdout = subprocess.PIPE, stderr = subprocess.PIPE, cwd = WebUiRequestHandler.REPO_ROOT)
+            git = subprocess.Popen(cmd, stdin = subprocess.PIPE, stdout = subprocess.PIPE, stderr = subprocess.PIPE, cwd = WebUiRequestHandler.REPO_ROOT, env = env)
             git.stdin.write(stdin)
             git.stdin.close()
             bufferlen = 64 * 1024
@@ -182,13 +180,15 @@ class WebUiRequestHandler(CGIHTTPRequestHandler):
             stderr = git.stderr.read()
             git.wait()
         else:
-            git = subprocess.Popen(cmd, stdin = subprocess.PIPE, stdout = self.wfile, stderr = subprocess.PIPE, cwd = WebUiRequestHandler.REPO_ROOT)
+            git = subprocess.Popen(cmd, stdin = subprocess.PIPE, stdout = self.wfile, stderr = subprocess.PIPE, cwd = WebUiRequestHandler.REPO_ROOT, env = env)
             stdout, stderr = git.communicate(stdin)
-        if addstatus:
+        if add_footers:
             self.wfile.write(stderr)
             self.wfile.write(b"\r\n")
             self.wfile.write(codecs.encode("\r\nGit-Stderr-Length: " + str(len(stderr)), "utf-8"))
             self.wfile.write(codecs.encode("\r\nGit-Return-Code: " + str(git.returncode), "utf-8"))
+        elif git.returncode != 0:
+            print(stderr)
 
 
     def send_text(self, http_status, text):
@@ -257,7 +257,6 @@ if __name__ == '__main__':
     if args.allow_hosts is not None:
         allowed_hosts += args.allow_hosts.split(',')
 
-
     if args.repo_root is None or '.git' not in os.listdir(args.repo_root):
         sys.stderr.write("No git repository found\n")
         sys.exit(1)
@@ -276,7 +275,6 @@ if __name__ == '__main__':
             else:
                 sys.stderr.write("Port {} is already in use, trying another one\n".format(port))
                 port += 1
-
 
     url = "http://localhost:{}".format(port)
     print("Serving at {}".format(url))
