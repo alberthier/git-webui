@@ -51,6 +51,20 @@ webui.showWarning = function(message) {
         '</div>').appendTo(messageBox);
 }
 
+webui.post = function(url, postData, callback) {
+    $.post(url, postData, function(data, status, xhr) {
+        if (xhr.status == 200) {
+          callback(data);
+        } else {
+            console.log(data);
+            webui.showError(data);
+        }
+    }, "text")
+    .fail(function(xhr, status, error) {
+        webui.showError("Git webui server not running");
+    });
+};
+
 webui.git = function(cmd, arg1, arg2) {
     // cmd = git command line arguments
     // other arguments = optional stdin content and a callback function:
@@ -64,48 +78,40 @@ webui.git = function(cmd, arg1, arg2) {
         cmd += "\n" + arg1;
         var callback = arg2;
     }
-    $.post("git", cmd, function(data, status, xhr) {
-        if (xhr.status == 200) {
-            // Convention : last lines are footer meta data like headers. An empty line marks the start if the footers
-            var footers = {};
-            var fIndex = data.length;
-            while (true) {
-                var oldFIndex = fIndex;
-                var fIndex = data.lastIndexOf("\r\n", fIndex - 1);
-                var line = data.substring(fIndex + 2, oldFIndex);
-                if (line.length > 0) {
-                    var footer = line.split(": ");
-                    footers[footer[0]] = footer[1];
-                } else {
-                    break;
-                }
-            }
+    webui.post("git", cmd, function(data) {
+      // Convention : last lines are footer meta data like headers. An empty line marks the start if the footers
+      var footers = {};
+      var fIndex = data.length;
+      while (true) {
+          var oldFIndex = fIndex;
+          var fIndex = data.lastIndexOf("\r\n", fIndex - 1);
+          var line = data.substring(fIndex + 2, oldFIndex);
+          if (line.length > 0) {
+              var footer = line.split(": ");
+              footers[footer[0]] = footer[1];
+          } else {
+              break;
+          }
+      }
 
-            var messageStartIndex = fIndex - parseInt(footers["Git-Stderr-Length"]);
-            var message = data.substring(messageStartIndex, fIndex);
-            var output = data.substring(0, messageStartIndex);
-            var rcode = parseInt(footers["Git-Return-Code"]);
-            if (rcode == 0) {
-                if (callback) {
-                    callback(output);
-                }
-                // Return code is 0 but there is stderr output: this is a warning message
-                if (message.length > 0) {
-                    console.log(message);
-                    webui.showWarning(message);
-                }
-                $("#error-modal .alert").text("");
-            } else {
-                console.log(message);
-                webui.showError(message);
-            }
-        } else {
-            console.log(data);
-            webui.showError(data);
-        }
-    }, "text")
-    .fail(function(xhr, status, error) {
-        webui.showError("Git webui server not running");
+      var messageStartIndex = fIndex - parseInt(footers["Git-Stderr-Length"]);
+      var message = data.substring(messageStartIndex, fIndex);
+      var output = data.substring(0, messageStartIndex);
+      var rcode = parseInt(footers["Git-Return-Code"]);
+      if (rcode == 0) {
+          if (callback) {
+              callback(output);
+          }
+          // Return code is 0 but there is stderr output: this is a warning message
+          if (message.length > 0) {
+              console.log(message);
+              webui.showWarning(message);
+          }
+          $("#error-modal .alert").text("");
+      } else {
+          console.log(message);
+          webui.showError(message);
+      }
     });
 };
 
@@ -299,6 +305,9 @@ webui.SideBarView = function(mainView) {
         });
     };
 
+    self.fetchBookmark = function(section) {
+    }
+
     self.mainView = mainView;
     self.element = $(   '<div id="sidebar">' +
                             '<a href="#" data-toggle="modal" data-target="#help-modal"><img id="sidebar-logo" src="/img/git-logo.png"></a>' +
@@ -308,6 +317,9 @@ webui.SideBarView = function(mainView) {
                                 '</section>' +
                                 '<section id="sidebar-remote">' +
                                     '<h4>Remote access</h4>' +
+                                '</section>' +
+                                '<section id="sidebar-bookmark">' +
+                                    '<h4>Bookmark</h4>' +
                                 '</section>' +
                                 '<section id="sidebar-local-branches">' +
                                     '<h4>Local Branches</h4>' +
@@ -339,9 +351,49 @@ webui.SideBarView = function(mainView) {
         self.mainView.remoteView.update();
     });
 
+    var bookmarkElement = $("#sidebar-bookmark h4", self.element);
+    bookmarkElement.click(function(event) {
+      var popup = $(  '<div class="modal fade" id="bookmark-popup" role="dialog">' +
+                          '<div class="modal-dialog modal-sm">' +
+                              '<div class="modal-content">' +
+                                '<div class="modal-header">' +
+                                    '<h4 class="modal-title">Add bookmark</h4>' +
+                                '</div>' +
+                                '<div class="modal-body">' +
+                                  '<input autofocus type="text" class="form-control" placeholder="Name">' +
+                                '</div>' +
+                                '<div class="modal-footer">' +
+                                  '<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>' +
+                                  '<button type="submit" class="btn btn-primary">OK</button>' +
+                                '</div>' +
+                              '</div>' +
+                          '</div>' +
+                      '</div>')[0];
+      self.element.appendChild(popup);
+      var input = $("input", popup);
+      input.val(webui.repo);
+      input[0].setSelectionRange(0, webui.repo.length);
+      $(popup).on('shown.bs.modal', function () {
+        popup.focus();
+      })
+      $(popup).on('hidden.bs.modal', function() {
+        $(popup).remove();
+      })
+      $(".btn-primary", popup).click(function(event) {
+        $(popup).modal('hide');
+        webui.post('addbookmark', input.val(), function() {
+          webui.git('config --global --list', function(data) {
+            console.log(data);
+          })
+        });
+      });
+      $(popup).modal();
+    });
+
     self.fetchSection($("#sidebar-local-branches", self.element)[0], "Local Branches", "local-branches", "branch");
     self.fetchSection($("#sidebar-remote-branches", self.element)[0], "Remote Branches", "remote-branches", "branch --remotes");
     self.fetchSection($("#sidebar-tags", self.element)[0], "Tags", "tags", "tag");
+    self.fetchBookmark($("#sidebar-bookmark", self.element)[0]);
 };
 
 /*

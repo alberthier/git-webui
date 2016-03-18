@@ -51,7 +51,6 @@ class WebUiRequestHandler(SimpleHTTPRequestHandler):
 
     WEB_ROOT = None
     REPO_ROOT = None
-    GIT_HTTP_BACKEND_DIR = None
 
     @classmethod
     def initialize(cls, repo_root):
@@ -120,6 +119,13 @@ class WebUiRequestHandler(SimpleHTTPRequestHandler):
                 self.process(cmd, stdin, True, True)
             else:
                 self.send_error(403)
+        elif self.path == "/addbookmark" and not self.is_view_only():
+            content_length = int(self.headers["Content-Length"])
+            content = self.rfile.read(content_length)
+            cmd = ['git', 'config', '--global', '--add', 'webui-bookmark.' + content + '.path', WebUiRequestHandler.REPO_ROOT ]
+            git = subprocess.Popen(cmd, stdin = subprocess.PIPE, stdout = subprocess.PIPE, stderr = subprocess.PIPE, cwd = WebUiRequestHandler.REPO_ROOT)
+            git.wait()
+            self.send_text(200, codecs.encode(str(git.returncode), "utf-8"))
         elif self.is_git_request():
             self.process_http_backend();
         else:
