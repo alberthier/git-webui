@@ -47,11 +47,8 @@ allowed_hosts =  ["127.0.0.1", "localhost"]
 
 class WebUiRequestHandler(SimpleHTTPRequestHandler):
 
-    cgi_directories = []
-
     WEB_ROOT = None
     REPO_ROOT = None
-    GIT_HTTP_BACKEND_DIR = None
 
     @classmethod
     def initialize(cls, repo_root):
@@ -214,7 +211,7 @@ def auto_update():
     delta = datetime.datetime.now() - datetime.datetime.fromtimestamp(fetch_head_mtime)
     if delta > datetime.timedelta(14):
         # Check if update is allowed
-        allow_autoupdate = _read_config_boolean("autoupdate")
+        allow_autoupdate = read_config_boolean("autoupdate")
         if not allow_autoupdate:
             return
 
@@ -227,7 +224,7 @@ def auto_update():
 
 
 
-def _read_config_string(name, default=None):
+def read_config_string(name, default=None):
     git = subprocess.Popen(["git", "config", "--get", "webui.{}".format(name)], stdout = subprocess.PIPE, stderr = subprocess.PIPE)
     out =  codecs.decode(git.communicate()[0], "utf-8")
     if git.returncode != 0:
@@ -238,8 +235,8 @@ def _read_config_string(name, default=None):
 
 
 
-def _read_config_boolean(name, default=False):
-    r = _read_config_string(name)
+def read_config_boolean(name, default=False):
+    r = read_config_string(name)
     if r == None:
         return bool(default)
     return str(r).lower() == "true"
@@ -247,18 +244,18 @@ def _read_config_boolean(name, default=False):
 
 
 
-def _get_setting_string(args, name, default=None):
+def get_setting_string(args, name, default=None):
     if vars(args)[name] is not None:
         return vars(args)[name]
-    return _read_config_string(name, default)
+    return read_config_string(name, default)
 
 
 
 
-def _get_setting_boolean(args, name, default=False):
+def get_setting_boolean(args, name, default=False):
     if vars(args)[name] is not None:
         return vars(args)[name]
-    return _read_config_boolean(name, default)
+    return read_config_boolean(name, default)
 
 
 
@@ -284,7 +281,7 @@ if __name__ == '__main__':
             else:
                 args.repo_root = new_root
 
-    writeaccess = _read_config_string("writeaccess")
+    writeaccess = read_config_string("writeaccess")
     if writeaccess is not None:
         allowed_hosts = writeaccess.split(',') if writeaccess else []
     if args.allow_hosts is not None:
@@ -295,9 +292,9 @@ if __name__ == '__main__':
         sys.exit(1)
     WebUiRequestHandler.initialize(args.repo_root)
 
-    args.port = _get_setting_string(args, 'port', None)
+    args.port = get_setting_string(args, 'port', None)
     port = int(args.port) if args.port is not None else 8000
-    host = _get_setting_string(args, 'host', "")
+    host = get_setting_string(args, 'host', "")
     httpd = None
     while httpd is None:
         try:
@@ -312,7 +309,7 @@ if __name__ == '__main__':
 
     url = "http://{}:{}".format(host if host else "localhost", port)
     print("Serving at {}".format(url))
-    nobrowser = _get_setting_boolean(args, "nobrowser", True);
+    nobrowser = get_setting_boolean(args, "nobrowser", True);
     if not nobrowser:
         webbrowser.open(url)
 
