@@ -366,7 +366,7 @@ webui.LogView = function(historyView) {
             content.removeChild(content.lastElementChild);
         }
         var startAt = content.childElementCount;
-        webui.git("log --date-order --pretty=raw --decorate=full --max-count=" + (maxCount + 1) + " " + self.nextRef, function(data) {
+        webui.git("log --date-order --pretty=raw --decorate=full --max-count=" + (maxCount + 1) + " " + self.nextRef + " --", function(data) {
             var start = 0;
             var count = 0;
             self.nextRef = undefined;
