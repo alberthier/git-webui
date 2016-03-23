@@ -309,7 +309,7 @@ if __name__ == '__main__':
 
     url = "http://{}:{}".format(host if host else "localhost", port)
     print("Serving at {}".format(url))
-    nobrowser = get_setting_boolean(args, "nobrowser", True);
+    nobrowser = get_setting_boolean(args, "nobrowser");
     if not nobrowser:
         webbrowser.open(url)
 
