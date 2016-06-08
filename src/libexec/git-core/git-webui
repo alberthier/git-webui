@@ -43,21 +43,21 @@ IS_WINDOWS = platform.system() == "Windows"
 allowed_hosts =  ["127.0.0.1", "localhost"]
 
 
-class HTTPServerIPng(HTTPServer):
-    def __init__(
-            self,  server_address,  RequestHandlerClass,
-            bind_and_activate=True):
-        if not isinstance(server_address,tuple) or len(server_address) < 2:
+
+
+class WebUiHttpServer(HTTPServer):
+    def __init__(self, server_address, RequestHandlerClass, bind_and_activate = True):
+        if not isinstance(server_address, tuple) or len(server_address) < 2:
             raise TypeError("server_address must be a tuple (address,port)")
-        
-        address_info = socket.getaddrinfo(server_address[0],
-                                          server_address[1],
-                                          0, 0, socket.IPPROTO_TCP)[0]
-        
-        self.address_family = address_info[0]
-        HTTPServer.__init__(self,address_info[4], 
-                                            RequestHandlerClass, 
-                                            bind_and_activate)
+        host = server_address[0]
+        port = server_address[1]
+        if host is None or host == "":
+            HTTPServer.__init__(self, server_address, RequestHandlerClass, bind_and_activate)
+        else:
+            address_info = socket.getaddrinfo(host, port, 0, 0, socket.IPPROTO_TCP)[0]
+            self.address_family = address_info[0]
+            HTTPServer.__init__(self, address_info[4], RequestHandlerClass, bind_and_activate)
+
 
 
 
@@ -314,7 +314,7 @@ if __name__ == '__main__':
     httpd = None
     while httpd is None:
         try:
-            httpd = HTTPServerIPng((host, port), WebUiRequestHandler)
+            httpd = WebUiHttpServer((host, port), WebUiRequestHandler)
         except socket.error as e:
             if args.port is not None:
                 sys.stderr.write("Port {} is already in use, try another one\n".format(port))
