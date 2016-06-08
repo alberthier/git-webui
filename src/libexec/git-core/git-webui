@@ -310,7 +310,7 @@ if __name__ == '__main__':
 
     args.port = get_setting_string(args, 'port', None)
     port = int(args.port) if args.port is not None else 8000
-    host = get_setting_string(args, 'host', "")
+    host = get_setting_string(args, 'host', "localhost")
     httpd = None
     while httpd is None:
         try:
