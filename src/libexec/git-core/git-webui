@@ -68,7 +68,7 @@ class WebUiRequestHandler(SimpleHTTPRequestHandler):
 
     @classmethod
     def initialize(cls, repo_root):
-        web_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(sys.argv[0]))))
+        web_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(sys.argv[0]))))
         web_root = os.path.join(web_root, "share", "git-webui", "webui")
         WebUiRequestHandler.WEB_ROOT = web_root
         WebUiRequestHandler.REPO_ROOT = repo_root
