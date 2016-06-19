@@ -1711,9 +1711,13 @@ webui.RemoteView = function(mainView) {
 };
 
 webui.DirlistView = function (mainView) {
+    
     var globalContainer = $('<div id="dirlist-container">').appendTo('body');
+
+     globalContainer.append('<div class="repos-header">Collection of GIT repositories</div>')
+
     $.each(mainView.repos, function (i, repo) {
-        globalContainer.append('<div class="repo-item"><a href="/'+repo+'/">'+repo+'</a></div>')
+        globalContainer.append('<div class="repo-item"><a href="/'+repo+'/">'+repo+'</a></div>');
     })
 }
 

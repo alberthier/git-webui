@@ -105,7 +105,7 @@ class WebUiRequestHandler(SimpleHTTPRequestHandler):
 
     def prenavigate(self, path):
         # navitage to git repo
-        dirs = path.split('/')
+        dirs = filter(lambda pe: pe, path.split('/'))
         subdir = []
         self.isrepo = False
         while dirs != None:
