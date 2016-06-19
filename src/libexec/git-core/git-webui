@@ -18,6 +18,7 @@ import argparse
 import codecs
 import datetime
 import os
+import glob
 import platform
 import posixpath
 import shlex
@@ -64,17 +65,23 @@ class HTTPServerIPng(HTTPServer):
 class WebUiRequestHandler(SimpleHTTPRequestHandler):
 
     WEB_ROOT = None
-    REPO_ROOT = None
+    BASE_ROOT = None
+
+    def __init__(self, request, client_address, server):
+        self.repo_root = WebUiRequestHandler.BASE_ROOT
+        self.isrepo = os.path.exists(self.repo_root + '.git')
+        SimpleHTTPRequestHandler.__init__(self, request, client_address, server)
 
     @classmethod
     def initialize(cls, repo_root):
         web_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(sys.argv[0]))))
         web_root = os.path.join(web_root, "share", "git-webui", "webui")
         WebUiRequestHandler.WEB_ROOT = web_root
-        WebUiRequestHandler.REPO_ROOT = repo_root
+        WebUiRequestHandler.BASE_ROOT = repo_root
 
 
     def translate_path(self, path):
+        path = self.prenavigate(path)
         if self.is_git_request():
             return path
 
@@ -96,19 +103,42 @@ class WebUiRequestHandler(SimpleHTTPRequestHandler):
             path += '/'
         return path
 
+    def prenavigate(self, path):
+        # navitage to git repo
+        dirs = path.split('/')
+        subdir = []
+        self.isrepo = False
+        while dirs != None:
+            if os.path.exists(os.path.join(WebUiRequestHandler.BASE_ROOT, *(subdir + ['.git']))):
+                self.repo_root = os.path.join(WebUiRequestHandler.BASE_ROOT, *subdir)
+                path = '/' + '/'.join(dirs)
+                self.isrepo = True
+                break
+            if len(dirs) == 0:
+                dirs = None
+            else:
+                subdir.append(dirs.pop(0))
+        return path
 
     def do_GET(self):
+        self.path = self.prenavigate(self.path)
+        print self.path, self.repo_root
         if self.path.startswith("/git/cat-file/"):
             obj = self.path[14:]
             self.process(["git", "cat-file", "-p", obj], b"", True, False)
         elif self.path == "/dirname":
-            wc = os.path.split(WebUiRequestHandler.REPO_ROOT)[1]
+            wc = os.path.split(self.repo_root)[1]
             self.send_text(200, codecs.encode(wc, "utf-8"))
         elif self.path == "/hostname":
             self.send_text(200, codecs.encode(socket.gethostname(), "utf-8"))
         elif self.path == "/viewonly":
             vo = "1" if self.is_view_only() else "0"
             self.send_text(200, codecs.encode(vo, "utf-8"))
+        elif self.path == "/isrepo":
+            isrepo = "1" if self.isrepo else "0"
+            self.send_text(200, codecs.encode(isrepo, "utf-8"))
+        elif self.path == "/dirlist":
+            self.send_git_dirlist()
         elif self.is_git_request():
             self.process_http_backend()
         else:
@@ -116,6 +146,7 @@ class WebUiRequestHandler(SimpleHTTPRequestHandler):
 
 
     def do_POST(self):
+        self.path = self.prenavigate(self.path)
         if self.path == "/git":
             content_length = int(self.headers["Content-Length"])
             content = self.rfile.read(content_length)
@@ -148,7 +179,7 @@ class WebUiRequestHandler(SimpleHTTPRequestHandler):
         parsed_path = urlparse(self.path)
 
         env = {}
-        env["GIT_PROJECT_ROOT"] = WebUiRequestHandler.REPO_ROOT + "/.git"
+        env["GIT_PROJECT_ROOT"] = self.repo_root + "/.git"
         env["GIT_HTTP_EXPORT_ALL"] = ""
         env["REQUEST_METHOD"] = self.command
         env["REMOTE_ADDR"] = self.client_address[0]
@@ -181,7 +212,7 @@ class WebUiRequestHandler(SimpleHTTPRequestHandler):
         # Finially we add footers: a blank line followed by key / value pairs as in HTTP headers
         if IS_WINDOWS:
             # On windows we cannot pipe the process output directly to the socket.
-            git = subprocess.Popen(cmd, stdin = subprocess.PIPE, stdout = subprocess.PIPE, stderr = subprocess.PIPE, cwd = WebUiRequestHandler.REPO_ROOT, env = env)
+            git = subprocess.Popen(cmd, stdin = subprocess.PIPE, stdout = subprocess.PIPE, stderr = subprocess.PIPE, cwd = self.repo_root, env = env)
             git.stdin.write(stdin)
             git.stdin.close()
             bufferlen = 64 * 1024
@@ -193,7 +224,7 @@ class WebUiRequestHandler(SimpleHTTPRequestHandler):
             stderr = git.stderr.read()
             git.wait()
         else:
-            git = subprocess.Popen(cmd, stdin = subprocess.PIPE, stdout = self.wfile, stderr = subprocess.PIPE, cwd = WebUiRequestHandler.REPO_ROOT, env = env)
+            git = subprocess.Popen(cmd, stdin = subprocess.PIPE, stdout = self.wfile, stderr = subprocess.PIPE, cwd = self.repo_root, env = env)
             stdout, stderr = git.communicate(stdin)
         if add_footers:
             self.wfile.write(stderr)
@@ -211,7 +242,18 @@ class WebUiRequestHandler(SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(text)
 
-
+    def send_git_dirlist(self):
+        dirlist = []
+        for dir_raw in glob.glob(os.path.join(WebUiRequestHandler.BASE_ROOT, '*')):
+            reldir = os.path.relpath(dir_raw, WebUiRequestHandler.BASE_ROOT)
+            if os.path.exists(os.path.join(WebUiRequestHandler.BASE_ROOT, reldir, '.git')):
+                dirlist.append(reldir)
+        dirlist = '\n'.join(dirlist)
+        self.send_response(200)
+        self.send_header("Content-Type", "text/plain")
+        self.send_header("Content-Length", len(dirlist))
+        self.end_headers()
+        self.wfile.write(dirlist)
 
 
 def auto_update():
@@ -303,10 +345,10 @@ if __name__ == '__main__':
     if args.allow_hosts is not None:
         allowed_hosts += args.allow_hosts.split(',')
 
-    if args.repo_root is None or '.git' not in os.listdir(args.repo_root):
-        sys.stderr.write("No git repository found\n")
-        sys.exit(1)
-    WebUiRequestHandler.initialize(args.repo_root)
+    #if args.repo_root is None or '.git' not in os.listdir(args.repo_root):
+    #    sys.stderr.write("No git repository found\n")
+    #    sys.exit(1)
+    WebUiRequestHandler.initialize(args.repo_root or os.getcwd())
 
     args.port = get_setting_string(args, 'port', None)
     port = int(args.port) if args.port is not None else 8000
