@@ -1,3 +1,7 @@
+## About this fork
+
+This fork adds ability to run webui in directory with your local git repositories.
+
 # Git WebUI
 
 This git extension is a standalone web based user interface for git repositories.
