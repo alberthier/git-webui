@@ -161,7 +161,7 @@ cp -rf release/* /usr
 
 ## Limitations
 
-- If you have no web brower installed at all (headless server), you should start git webui with the `--no-browser` option. Otherwise git-webui may freeze searching for a browser.
+- If you have no web browser installed at all (headless server), you should start git webui with the `--no-browser` option. Otherwise git-webui may freeze searching for a browser.
 
 ## Author
 
