@@ -30,6 +30,8 @@ if sys.version > '3':
     from http.server import SimpleHTTPRequestHandler, HTTPServer
     from urllib.parse import unquote, urlparse
 else:
+    reload(sys)
+    sys.setdefaultencoding("utf-8")
     from SimpleHTTPServer import SimpleHTTPRequestHandler
     from BaseHTTPServer import HTTPServer
     from urllib import unquote
