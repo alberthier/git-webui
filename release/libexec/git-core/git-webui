@@ -221,11 +221,11 @@ def auto_update():
         return
     fetch_head = os.path.join(dot_git, "FETCH_HEAD")
     if not os.path.exists(fetch_head):
-        fetch_head_mtime = 0.0
+        needs_update = True
     else:
         fetch_head_mtime = os.stat(fetch_head).st_mtime
-    delta = datetime.datetime.now() - datetime.datetime.fromtimestamp(fetch_head_mtime)
-    if delta > datetime.timedelta(14):
+        needs_update = datetime.datetime.now() - datetime.datetime.fromtimestamp(fetch_head_mtime) > datetime.timedelta(14)
+    if needs_update:
         # Check if update is allowed
         allow_autoupdate = read_config_boolean("autoupdate")
         if not allow_autoupdate:
@@ -235,7 +235,7 @@ def auto_update():
         # Update the repository
         subprocess.call(["git", "pull"], cwd = repo_root)
         # Replace the current process with the updated one
-        os.execl(sys.executable, sys.executable, *sys.argv)
+        os.execl(sys.executable, os.path.split(sys.executable)[1], *sys.argv)
 
 
 
