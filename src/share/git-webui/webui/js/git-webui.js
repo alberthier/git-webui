@@ -884,11 +884,11 @@ webui.DiffView = function(sideBySide, hunkSelectionAllowed, parent) {
         if (current.webuiPrevScrollTop != current.scrollTop) {
             // Vertical scrolling
             other.scrollTop = current.scrollTop;
-            current.webuiPrevScrollTop = current.scrollTop;
+            other.webuiPrevScrollTop = current.webuiPrevScrollTop = current.scrollTop;
         } else if (current.webuiPrevScrollLeft != current.scrollLeft) {
             // Horizontal scrolling
             other.scrollLeft = current.scrollLeft;
-            current.webuiPrevScrollLeft = current.scrollLeft;
+            other.webuiPrevScrollLeft = current.webuiPrevScrollLeft = current.scrollLeft;
         }
     }
 
