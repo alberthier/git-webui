@@ -2,7 +2,7 @@
 
 # Copyright 2015 Eric ALBER
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
+# Licensed under the Apache License, Version 2.0 (the "License")
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -100,7 +100,7 @@ class WebUiRequestHandler(SimpleHTTPRequestHandler):
     def do_GET(self):
         if self.path.startswith("/git/cat-file/"):
             obj = self.path[14:]
-            self.process(["git", "cat-file", "-p", obj], b"", True, False)
+            self.process(["git", "-c", "color.ui=false", "cat-file", "-p", obj], b"", True, False)
         elif self.path == "/dirname":
             wc = os.path.split(WebUiRequestHandler.REPO_ROOT)[1]
             self.send_text(200, codecs.encode(wc, "utf-8"))
@@ -127,14 +127,14 @@ class WebUiRequestHandler(SimpleHTTPRequestHandler):
             else:
                 args = content
                 stdin = b""
-            cmd = shlex.split("git " + codecs.decode(args, "utf-8"))
+            cmd = shlex.split("git -c color.ui=true " + codecs.decode(args, "utf-8"))
             action = cmd[1]
             if not self.is_view_only() or args in ["branch", "branch --remotes", "tag"] or action in ["show", "status", "log", "ls-tree"]:
                 self.process(cmd, stdin, True, True)
             else:
                 self.send_error(403)
         elif self.is_git_request():
-            self.process_http_backend();
+            self.process_http_backend()
         else:
             SimpleHTTPRequestHandler.do_POST(self)
 
@@ -166,7 +166,7 @@ class WebUiRequestHandler(SimpleHTTPRequestHandler):
 
         self.wfile.write(b"HTTP/1.0 200 OK\r\n")
         self.wfile.flush()
-        self.process(['git', 'http-backend'], inputData, False, False, env)
+        self.process(['git', "-c", "color.ui=false", 'http-backend'], inputData, False, False, env)
 
 
     def is_git_request(self):
@@ -233,7 +233,7 @@ def auto_update():
 
         print("Checking for update...")
         # Update the repository
-        subprocess.call(["git", "pull"], cwd = repo_root)
+        subprocess.call(["git", "-c", "color.ui=false", "pull"], cwd = repo_root)
         # Replace the current process with the updated one
         os.execl(sys.executable, os.path.split(sys.executable)[1], *sys.argv)
 
@@ -241,7 +241,7 @@ def auto_update():
 
 
 def read_config_string(name, default=None):
-    git = subprocess.Popen(["git", "config", "--get", "webui.{}".format(name)], stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+    git = subprocess.Popen(["git", "-c", "color.ui=false", "config", "--get", "webui.{}".format(name)], stdout = subprocess.PIPE, stderr = subprocess.PIPE)
     out =  codecs.decode(git.communicate()[0], "utf-8")
     if git.returncode != 0:
         # The key doesn't exist
@@ -325,7 +325,7 @@ if __name__ == '__main__':
 
     url = "http://{}:{}".format(host if host else "localhost", port)
     print("Serving at {}".format(url))
-    nobrowser = get_setting_boolean(args, "nobrowser");
+    nobrowser = get_setting_boolean(args, "nobrowser")
     if not nobrowser:
         webbrowser.open(url)
 
