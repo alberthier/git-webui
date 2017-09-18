@@ -23,12 +23,12 @@ The following command will install git-webui in `$HOME/.git-webui` and add a
 You need to install [Python](https://www.python.org/downloads/) first.
 
 Using curl (Mac OS X & Windows):
-```
+```sh
 curl https://raw.githubusercontent.com/alberthier/git-webui/master/install/installer.sh | bash
 ```
 
 Using wget (Linux):
-```
+```sh
 wget -O - https://raw.githubusercontent.com/alberthier/git-webui/master/install/installer.sh | bash
 ```
 
@@ -40,13 +40,13 @@ You can deactivate auto-update by removing the `autoupdate = true` line from the
 
 Simply clone the repository and install the alias
 
-```
+```sh
 git clone https://github.com/alberthier/git-webui.git
 git config --global alias.webui \!$PWD/git-webui/release/libexec/git-core/git-webui
 ```
 
 If you want to allow auto-update:
-```
+```sh
 git config --global webui.autoupdate true
 ```
 
@@ -55,7 +55,7 @@ git config --global webui.autoupdate true
 ### Starting
 
 First cd to any of your project versioned with git
-```
+```sh
 cd <my-local-git-clone>
 git webui
 ```
@@ -82,12 +82,12 @@ they may access to the web interface (without 'Workspace'), clone or pull from y
 All this through the same url:
 
 Clone:
-```
+```sh
 $ git clone http://<ip_of_the_computer_running_webui>:8000/ repo_name
 ```
 
 Pull:
-```
+```sh
 $ git pull http://<ip_of_the_computer_running_webui>:8000/
 ```
 
@@ -125,18 +125,18 @@ You can select code in more fine grained way:
 ### Automatic
 
 Using curl (Mac OS X & Windows):
-```
+```sh
 curl https://raw.githubusercontent.com/alberthier/git-webui/master/install/uninstaller.sh | bash
 ```
 
 Using wget (Linux):
-```
+```sh
 wget -O - https://raw.githubusercontent.com/alberthier/git-webui/master/install/uninstaller.sh | bash
 ```
 
 ### Manual
 
-```
+```sh
 rm -rf <git-webui-clone-path>
 git config --global --unset-all alias.webui
 git config --global --remove-section webui
@@ -155,7 +155,7 @@ Please don't commit any content to the `release` folder. This is for end-users r
 If you want to build a DEB, RPM or Homebrew package for git-webui, you only need the content of the `release` folder.
 
 Installing git-webui globally on the system is nothing else than
-```
+```sh
 cp -rf release/* /usr
 ```
 
