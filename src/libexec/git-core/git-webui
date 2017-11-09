@@ -127,7 +127,9 @@ class WebUiRequestHandler(SimpleHTTPRequestHandler):
             else:
                 args = content
                 stdin = b""
-            cmd = shlex.split("git -c color.ui=true " + codecs.decode(args, "utf-8"))
+            if sys.version > '3':
+                args = codecs.decode(args, "utf-8"))
+            cmd = shlex.split("git -c color.ui=true " + args)
             action = cmd[3]
             if not self.is_view_only() or args in ["branch", "branch --remotes", "tag"] or action in ["show", "status", "log", "ls-tree"]:
                 self.process(cmd, stdin, True, True)
