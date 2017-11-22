@@ -1710,6 +1710,17 @@ webui.RemoteView = function(mainView) {
     $(".git-pull", self.element).text("git pull http://" + webui.hostname + ":" + document.location.port + "/");
 };
 
+webui.DirlistView = function (mainView) {
+    
+    var globalContainer = $('<div id="dirlist-container">').appendTo('body');
+
+     globalContainer.append('<div class="repos-header">Collection of GIT repositories</div>')
+
+    $.each(mainView.repos, function (i, repo) {
+        globalContainer.append('<div class="repo-item"><a href="/'+repo+'/">'+repo+'</a></div>');
+    })
+}
+
 /*
  *  == Initialization =========================================================
  */
@@ -1722,33 +1733,44 @@ function MainUi() {
         self.mainView.appendChild(element);
     }
 
-    $.get("/dirname", function (data) {
-        webui.repo = data;
-        var title = $("title")[0];
-        title.textContent = "Git - " + webui.repo;
-        $.get("/viewonly", function (data) {
-            webui.viewonly = data == "1";
-            $.get("/hostname", function (data) {
-                webui.hostname = data
+    $.get('isrepo', function (data) {
 
-                var body = $("body")[0];
-                $('<div id="message-box">').appendTo(body);
-                var globalContainer = $('<div id="global-container">').appendTo(body)[0];
+        if (data == "1") {
+            $.get("/dirname", function (data) {
+                webui.repo = data;
+                var title = $("title")[0];
+                title.textContent = "Git - " + webui.repo;
+                $.get("/viewonly", function (data) {
+                    webui.viewonly = data == "1";
+                    $.get("/hostname", function (data) {
+                        webui.hostname = data
 
-                self.sideBarView = new webui.SideBarView(self);
-                globalContainer.appendChild(self.sideBarView.element);
+                        var body = $("body")[0];
+                        $('<div id="message-box">').appendTo(body);
+                        var globalContainer = $('<div id="global-container">').appendTo(body)[0];
 
-                self.mainView = $('<div id="main-view">')[0];
-                globalContainer.appendChild(self.mainView);
+                        self.sideBarView = new webui.SideBarView(self);
+                        globalContainer.appendChild(self.sideBarView.element);
 
-                self.historyView = new webui.HistoryView(self);
-                self.remoteView = new webui.RemoteView(self);
-                if (!webui.viewonly) {
-                    self.workspaceView = new webui.WorkspaceView(self);
-                }
+                        self.mainView = $('<div id="main-view">')[0];
+                        globalContainer.appendChild(self.mainView);
+
+                        self.historyView = new webui.HistoryView(self);
+                        self.remoteView = new webui.RemoteView(self);
+                        if (!webui.viewonly) {
+                            self.workspaceView = new webui.WorkspaceView(self);
+                        }
+                    });
+                });
             });
-        });
-    });
+        } else {
+            $.get("/dirlist", function (data) {
+                self.repos = data.split('\n');
+                self.dirlistView = new webui.DirlistView(self);
+            })
+        }
+
+    })
 }
 
 $(document).ready(function () {
