@@ -252,6 +252,16 @@ webui.SideBarView = function(mainView) {
                     }
                 });
 
+                if (id == "local-branches") {
+                  var li = $('<li class="sidebar-ref">').appendTo(ul)[0];
+                  li.refName = "--all"
+                  $(li).attr("title", li.refName);
+                  $(li).text("(all)");
+                  $(li).click(function (event) {
+                      self.selectRef(event.target.refName);
+                  });
+                }
+
                 var maxRefsCount = 5;
                 for (var i = 0; i < refs.length && i < maxRefsCount; ++i) {
                     var ref = refs[i];
