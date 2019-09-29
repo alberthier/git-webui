@@ -142,7 +142,7 @@ class WebUiRequestHandler(SimpleHTTPRequestHandler):
 
 
     def is_view_only(self):
-        host = self.headers.get("Host", "").split(":")[0]
+        host = self.client_address[0]
         return host not in allowed_hosts
 
 
