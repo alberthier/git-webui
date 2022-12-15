@@ -309,6 +309,9 @@ webui.SideBarView = function(mainView) {
                                 '<section id="sidebar-remote">' +
                                     '<h4>Remote access</h4>' +
                                 '</section>' +
+                                '<section id="sidebar-sync">' +
+                                    '<h4>Remote sync</h4>' +
+                                '</section>' +
                                 '<section id="sidebar-local-branches">' +
                                     '<h4>Local Branches</h4>' +
                                 '</section>' +
@@ -323,12 +326,19 @@ webui.SideBarView = function(mainView) {
 
     if (webui.viewonly) {
         $("#sidebar-workspace", self.element).remove();
+        $("#sidebar-sync", self.element).remove();
     } else {
         var workspaceElement = $("#sidebar-workspace h4", self.element);
         workspaceElement.click(function (event) {
             $("*", self.element).removeClass("active");
             workspaceElement.addClass("active");
             self.mainView.workspaceView.update("stage");
+        });
+        var syncElement = $("#sidebar-sync h4", self.element);
+        syncElement.click(function (event) {
+            $("*", self.element).removeClass("active");
+            syncElement.addClass("active");
+            self.mainView.syncView.update();
         });
     }
 
@@ -1711,6 +1721,49 @@ webui.RemoteView = function(mainView) {
 };
 
 /*
+ * == SyncView =======================================================
+ */
+webui.SyncView = function(mainView) {
+
+    var self = this;
+
+    self.show = function() {
+        mainView.switchTo(self.element);
+    };
+
+    self.update = function() {
+        self.show();
+    };
+
+    self.onPush = function() {
+        webui.git("push");
+        self.update();
+    }
+
+    self.onFetch = function() {
+        webui.git("fetch");
+        self.update();
+    }
+
+    self.onPull = function() {
+        webui.git("pull");
+        self.update();
+    }
+
+    self.element = $(   '<div class="jumbotron">' +
+                            '<h1>Sync between local and remote</h1>' +
+                            '<div>' +
+                                '<button type="button" class="btn btn-sm btn-default sync-pull"><img src="img/pull.svg" />Pull</button>' +
+                                '<button type="button" class="btn btn-sm btn-default sync-push"><img src="img/pull.svg" style="transform: scaleY(-1);" />Push</button>' +
+                                '<button type="button" class="btn btn-sm btn-default sync-fetch"><img src="img/folder-download-symbolic.svg" />Fetch</button>' +
+                            '</div>' +
+                        '</div>')[0];
+    $(".sync-pull", self.element).click(self.onPull);
+    $(".sync-push", self.element).click(self.onPush);
+    $(".sync-fetch", self.element).click(self.onFetch);
+};
+
+/*
  *  == Initialization =========================================================
  */
 function MainUi() {
@@ -1744,6 +1797,7 @@ function MainUi() {
                 self.historyView = new webui.HistoryView(self);
                 self.remoteView = new webui.RemoteView(self);
                 if (!webui.viewonly) {
+                    self.syncView = new webui.SyncView(self);
                     self.workspaceView = new webui.WorkspaceView(self);
                 }
             });
