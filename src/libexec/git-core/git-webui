@@ -142,6 +142,8 @@ class WebUiRequestHandler(SimpleHTTPRequestHandler):
 
 
     def is_view_only(self):
+        if "*" in allowed_hosts:
+            return False
         host = self.headers.get("Host", "").split(":")[0]
         return host not in allowed_hosts
 
@@ -283,7 +285,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description = "Simple HTTP server for git webui")
     parser.add_argument("--port", type = int, help = "server port")
     parser.add_argument("--repo-root", help = "repository root path. By default goes up a dir until a '.git' directory is found")
-    parser.add_argument("--allow-hosts", help = "what other host(s) are allowed to have write access")
+    parser.add_argument("--allow-hosts", help = "what other host(s) are allowed to have write access. Use '*' to allow acces from all hosts.")
     parser.add_argument("--no-browser", dest = "nobrowser", action = 'store_const', const = True, help = "do not start web browser")
     parser.add_argument("--host", help = "the host webui listens on (default is all)")
 
